@@ -1,0 +1,340 @@
+:root {
+  --spa-primary: #1e3d34;        /* Verde bosque profundo y elegante */
+  --spa-primary-light: #2c594c;
+  --spa-secondary: #c5a059;      /* Oro sutil / Champagne spa */
+  --spa-secondary-hover: #b38f4a;
+  --spa-accent: #6b8e23;         /* Oliva relajante */
+  --spa-bg-soft: #f7f9f7;        /* Crema/blanco botánico */
+  --spa-card-bg: rgba(255, 255, 255, 0.88);
+  --spa-text-dark: #1b2621;
+  --spa-text-muted: #5e6d66;
+  --spa-border: #e2e8e4;
+  --spa-radius: 18px;
+  --spa-shadow: 0 20px 45px rgba(25, 45, 38, 0.12);
+  --spa-shadow-glow: 0 0 25px rgba(197, 160, 89, 0.25);
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--spa-text-dark);
+  background-color: var(--spa-bg-soft);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pantalla de Login */
+.login-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow-x: hidden;
+  background: radial-gradient(circle at 10% 20%, rgba(30, 61, 52, 0.95), rgba(18, 38, 32, 0.98)),
+              radial-gradient(circle at 90% 80%, rgba(197, 160, 89, 0.2), transparent 40%);
+}
+
+/* Formas orgánicas decorativas de fondo */
+.bg-ambient-blob {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+.blob-1 {
+  background: var(--spa-secondary);
+  top: -100px;
+  right: -80px;
+  animation: floatSlow 18s ease-in-out infinite alternate;
+}
+.blob-2 {
+  background: #3c7d67;
+  bottom: -120px;
+  left: -100px;
+  animation: floatSlow 22s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes floatSlow {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 40px) scale(1.08); }
+  100% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* Contenedor Login Tarjeta */
+.login-card-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 980px;
+  padding: 12px;
+}
+
+.login-card {
+  background: var(--spa-card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--spa-radius);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Columna Lateral Ilustrativa / Bienvenida */
+.login-brand-panel {
+  background: linear-gradient(145deg, #1e3d34 0%, #112620 100%);
+  color: #ffffff;
+  padding: 34px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-brand-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at top right, rgba(197, 160, 89, 0.35), transparent 60%);
+  pointer-events: none;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(197, 160, 89, 0.18);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  color: #e5c37d;
+  font-size: 0.75rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 30px;
+  width: fit-content;
+}
+
+.brand-title {
+  font-family: var(--font-serif);
+  font-size: 2.15rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-top: 10px;
+  color: #f7f9f7;
+}
+
+.brand-title span {
+  color: var(--spa-secondary);
+  font-style: italic;
+}
+
+.brand-lead {
+  color: #b7c7c0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+/* Carrusel Armónico de Servicios Spa */
+.spa-services-carousel {
+  margin-top: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.service-card-slide {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.service-icon-box {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  background: rgba(197, 160, 89, 0.18);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  color: #e5c37d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.service-info-title {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.service-info-desc {
+  color: #c0cfc8;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin-bottom: 0;
+}
+
+.spa-carousel-indicators {
+  position: static;
+  margin-top: 12px;
+  margin-bottom: 0;
+  gap: 6px;
+}
+
+.spa-carousel-indicators [data-bs-target] {
+  width: 22px;
+  height: 3px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.spa-carousel-indicators .active {
+  background-color: var(--spa-secondary);
+  width: 32px;
+}
+
+/* Formulario */
+.login-form-panel {
+  padding: 36px 38px;
+  background: #ffffff;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3b4d45;
+  letter-spacing: 0.2px;
+  margin-bottom: 5px;
+}
+
+.input-icon-wrapper {
+  position: relative;
+}
+
+.input-icon-wrapper i.prefix-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: #8b9b93;
+  font-size: 1.05rem;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.form-control-spa {
+  height: 45px;
+  padding-left: 42px;
+  padding-right: 42px;
+  border-radius: 10px;
+  border: 1.5px solid #d9e3dd;
+  background-color: #fafcfb;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+  color: #1e3d34;
+}
+
+.form-control-spa:focus {
+  border-color: var(--spa-primary);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(30, 61, 52, 0.12);
+}
+
+.form-control-spa:focus + i.prefix-icon,
+.input-icon-wrapper:focus-within i.prefix-icon {
+  color: var(--spa-primary);
+}
+
+.toggle-password-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #8b9b93;
+  cursor: pointer;
+  padding: 4px;
+}
+.toggle-password-btn:hover {
+  color: var(--spa-primary);
+}
+
+/* Botón Dorado Spa */
+.btn-spa-primary {
+  height: 46px;
+  background: linear-gradient(135deg, #1e3d34 0%, #2b5549 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 10px;
+  font-size: 0.94rem;
+  box-shadow: 0 6px 16px rgba(30, 61, 52, 0.22);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-spa-primary:hover {
+  background: linear-gradient(135deg, #152d27 0%, #1e3d34 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(30, 61, 52, 0.35);
+}
+
+.btn-spa-primary:active {
+  transform: translateY(1px);
+}
+
+/* Feedback Alert */
+.spa-alert {
+  border-radius: 10px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dashboard Minimal Navbar & Cards */
+.spa-navbar {
+  background: var(--spa-primary);
+  border-bottom: 2px solid var(--spa-secondary);
+}
+.spa-brand {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: #fff !important;
+}
+.spa-brand span {
+  color: var(--spa-secondary);
+  font-style: italic;
+}
