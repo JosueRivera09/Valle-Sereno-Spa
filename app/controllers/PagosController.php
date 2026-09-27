@@ -1,15 +1,12 @@
 <?php
 /**
- * Controlador de Dashboard
+ * Controlador de Caja & Pagos
  */
-
-class DashboardController {
+class PagosController {
     public function __construct() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
-        // Proteger ruta: Requiere sesión activa
         if (!isset($_SESSION['usuario_id'])) {
             header('Location: index.php?c=auth&a=login');
             exit;
@@ -17,9 +14,9 @@ class DashboardController {
     }
 
     public function index(): void {
-        $pageTitle = "Panel Principal - Valle Sereno Spa";
-        $activePage = 'dashboard';
-        $contentView = __DIR__ . '/../views/dashboard/index.php';
+        $pageTitle = "Caja & Registro de Pagos - Valle Sereno Spa";
+        $activePage = 'pagos';
+        $contentView = __DIR__ . '/../views/pagos/index.php';
 
         require_once __DIR__ . '/../views/layouts/main.php';
     }

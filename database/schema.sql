@@ -146,6 +146,19 @@ INSERT INTO categorias (nombre, descripcion) VALUES
 ('Terapeuticos', 'Servicios enfocados en rehabilitacion y dolor muscular'),
 ('Holísticos', 'Terapias integrales y bienestar energetico');
 
+-- Inserción de Empleados iniciales
+INSERT INTO empleados (id, nombre_completo, telefono, correo, cargo, especialidades, estado) VALUES
+(1, 'Valeria Sereno', '3001234567', 'admin@vallesereno.com', 'Directora General', 'Gestion y Direccion', 'activo'),
+(2, 'Camila Morales', '3009876543', 'recepcion@vallesereno.com', 'Jefa de Recepcion', 'Atencion al cliente y reservas', 'activo'),
+(3, 'Mateo Delgado', '3015554321', 'terapeuta@vallesereno.com', 'Terapeuta Principal', 'Masajes Holísticos, Aromaterapia', 'activo');
+
+-- Inserción de Usuarios iniciales (Contraseña universal: Admin123*)
+-- Hash generado con password_hash('Admin123*', PASSWORD_BCRYPT)
+INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado) VALUES
+(1, 1, 1, 'admin', '$2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre', 'activo'),
+(2, 2, 2, 'recepcion', '$2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre', 'activo'),
+(3, 3, 3, 'terapeuta', '$2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre', 'activo');
+
 /*
 ================================================================================
 CREDENCIALES DE ACCESO AL SISTEMA - SPA VALLE SERENO

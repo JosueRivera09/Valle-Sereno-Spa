@@ -4,8 +4,9 @@
 .env.*.local
 
 # IDEs y editores
-.vscode/
 .idea/
+!.vscode/launch.json
+!.vscode/tasks.json
 *.sublime-project
 *.sublime-workspace
 *.suo

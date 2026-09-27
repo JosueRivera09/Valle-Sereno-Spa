@@ -22,22 +22,37 @@ SpaValleSereno/
 ├── app/
 │   ├── controllers/         # [Capa Controlador]: Enrutamiento y flujo de peticiones
 │   │   ├── AuthController.php
-│   │   └── DashboardController.php
+│   │   ├── DashboardController.php
+│   │   ├── CitasController.php
+│   │   ├── ClientesController.php
+│   │   ├── ServiciosController.php
+│   │   ├── EmpleadosController.php
+│   │   ├── PagosController.php
+│   │   ├── ReportesController.php
+│   │   └── UsuariosController.php
 │   ├── models/              # [Capa de Datos]: Acceso a base de datos y entidades
 │   │   ├── Database.php     # Conexión PDO Singleton
 │   │   └── Usuario.php      # Consultas y persistencia de usuarios
 │   ├── services/            # [Capa de Negocio]: Reglas de negocio, validaciones y lógica
 │   │   └── AuthService.php
 │   └── views/               # [Capa de Presentación]: Interfaces de usuario
+│       ├── layouts/
+│       │   └── main.php     # Plantilla base con barra superior y barra lateral (Sidebar)
 │       ├── auth/
 │       │   └── login.php    # Login armónico con carrusel de servicios spa
-│       └── dashboard/
-│           └── index.php    # Panel de bienvenida según rol autenticado
+│       ├── dashboard/
+│       │   └── index.php    # Panel central con métricas e indicadores de spa
+│       ├── citas/           # Gestión de citas y agenda terapéutica
+│       ├── clientes/        # Directorio y expedientes de clientes
+│       ├── servicios/       # Catálogo de terapias, masajes y faciales
+│       ├── empleados/       # Personal terapéutico y disponibilidad
+│       ├── pagos/           # Caja y facturación de servicios
+│       ├── reportes/        # Analítica y balance para administrador
+│       └── usuarios/        # Control de accesos y roles del sistema
 ├── config/                  # Configuraciones globales y credenciales
 │   └── config.php
 ├── database/                # Scripts de base de datos
-│   ├── schema.sql           # Tablas, relaciones y datos iniciales
-│   └── seed_passwords.php   # Generador y actualizador de contraseñas Bcrypt
+│   └── schema.sql           # Tablas, relaciones, empleados y usuarios con Bcrypt
 ├── public/                  # Recursos estáticos
 │   └── css/
 │       └── spa-theme.css    # Hoja de estilos con diseño armónico
@@ -93,7 +108,7 @@ Todas las cuentas de prueba comparten la misma contraseña: **`Admin123*`**
 ## ✨ Características de la Pantalla de Login
 
 - **Diseño Armónico Spa:** Acabado *glassmorphism*, iluminación ambiental relajante, paleta verde bosque (`#1e3d34`) y toques en dorado champagne (`#c5a059`).
-- **Carrusel de Servicios:** Exhibición interactiva de experiencias del spa (Piedras Volcánicas, Aromaterapia, Circuito de Hidroterapia y Faciales Iluminadores).
+- **Carrusel de Servicios:** Exhibición interactiva de experiencias del 1spa (Piedras Volcánicas, Aromaterapia, Circuito de Hidroterapia y Faciales Iluminadores).
 - **Seguridad & UX:**
   - Contraseñas encriptadas mediante `password_hash()` con algoritmo `BCRYPT`.
   - Validación dinámica por Fetch/AJAX sin parpadeos de recarga.

@@ -144,25 +144,27 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
                         <?php endif; ?>
                     </div>
 
-                    <!-- Formulario con AJAX y soporte nativo -->
-                    <form id="loginForm" method="POST" action="index.php?c=auth&a=authenticate" novalidate>
+                    <!-- Formulario con validación limpia y sin autocompletado de prueba -->
+                    <form id="loginForm" method="POST" action="index.php?c=auth&a=authenticate" autocomplete="off" novalidate>
                         <!-- Campo Usuario o Correo -->
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <label for="email" class="form-label">Usuario o Correo Institucional</label>
                             <div class="input-icon-wrapper">
                                 <input type="text" 
                                        class="form-control form-control-spa" 
                                        id="email" 
                                        name="email" 
-                                       placeholder="Ej: admin o admin@vallesereno.com" 
+                                       placeholder="Ingrese su usuario o correo" 
                                        required 
-                                       autocomplete="username">
+                                       autocomplete="off"
+                                       spellcheck="false">
                                 <i class="bi bi-person-circle prefix-icon"></i>
                             </div>
+                            <div class="invalid-feedback d-block mt-1" id="emailError" style="display:none !important; font-size: 0.8rem;"></div>
                         </div>
 
                         <!-- Campo Contraseña -->
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label for="password" class="form-label mb-0">Contraseña</label>
                                 <a href="javascript:void(0)" onclick="mostrarAlertaSoporte()" class="text-decoration-none small" style="color: var(--spa-secondary); font-weight:500;">
@@ -174,20 +176,21 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
                                        class="form-control form-control-spa" 
                                        id="password" 
                                        name="password" 
-                                       placeholder="••••••••••••" 
+                                       placeholder="Ingrese su contraseña" 
                                        required 
-                                       autocomplete="current-password">
+                                       autocomplete="new-password">
                                 <i class="bi bi-lock prefix-icon"></i>
-                                <button type="button" class="toggle-password-btn" id="togglePasswordBtn" title="Mostrar/Ocultar contraseña">
+                                <button type="button" class="toggle-password-btn" id="togglePasswordBtn" title="Mostrar/Ocultar contraseña" tabindex="-1">
                                     <i class="bi bi-eye" id="togglePasswordIcon"></i>
                                 </button>
                             </div>
+                            <div class="invalid-feedback d-block mt-1" id="passwordError" style="display:none !important; font-size: 0.8rem;"></div>
                         </div>
 
                         <!-- Checkbox Recuérdame -->
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="rememberMe">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
                                 <label class="form-check-label text-muted small" for="rememberMe">
                                     Recordar este dispositivo
                                 </label>
@@ -216,12 +219,15 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script de interactividad -->
+    <!-- Script de interactividad y validación correcta -->
     <script>
         // Alternar visualización de contraseña
         const toggleBtn = document.getElementById('togglePasswordBtn');
         const passInput = document.getElementById('password');
+        const userInput = document.getElementById('email');
         const toggleIcon = document.getElementById('togglePasswordIcon');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
 
         toggleBtn.addEventListener('click', function() {
             const isPassword = passInput.getAttribute('type') === 'password';
@@ -229,7 +235,24 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
             toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
         });
 
-        // Intercepción con Fetch/AJAX para respuesta visual fluida sin recarga brusca
+        // Limpiar errores visuales al tipear
+        userInput.addEventListener('input', function() {
+            if (userInput.classList.contains('is-invalid')) {
+                userInput.classList.remove('is-invalid');
+                emailError.style.setProperty('display', 'none', 'important');
+                emailError.textContent = '';
+            }
+        });
+
+        passInput.addEventListener('input', function() {
+            if (passInput.classList.contains('is-invalid')) {
+                passInput.classList.remove('is-invalid');
+                passwordError.style.setProperty('display', 'none', 'important');
+                passwordError.textContent = '';
+            }
+        });
+
+        // Intercepción con Fetch/AJAX y validación estricta
         const loginForm = document.getElementById('loginForm');
         const alertBox = document.getElementById('loginAlertBox');
         const btnSubmit = document.getElementById('btnSubmit');
@@ -238,13 +261,43 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
         loginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
+            const emailVal = userInput.value.trim();
+            const passVal = passInput.value.trim();
+            let hasError = false;
 
-            if (!email || !password) {
-                showAlert('Por favor ingrese tanto el usuario como la contraseña.', 'danger');
+            // Validación de campo usuario/correo
+            if (!emailVal) {
+                userInput.classList.add('is-invalid');
+                emailError.textContent = 'Por favor ingrese su usuario o correo institucional.';
+                emailError.style.setProperty('display', 'block', 'important');
+                hasError = true;
+            } else if (emailVal.length < 3) {
+                userInput.classList.add('is-invalid');
+                emailError.textContent = 'El identificador debe tener al menos 3 caracteres.';
+                emailError.style.setProperty('display', 'block', 'important');
+                hasError = true;
+            }
+
+            // Validación de contraseña
+            if (!passVal) {
+                passInput.classList.add('is-invalid');
+                passwordError.textContent = 'Por favor ingrese su contraseña.';
+                passwordError.style.setProperty('display', 'block', 'important');
+                hasError = true;
+            }
+
+            if (hasError) {
+                showAlert('Por favor complete los campos requeridos correctamente.', 'danger');
+                if (!emailVal) {
+                    userInput.focus();
+                } else {
+                    passInput.focus();
+                }
                 return;
             }
+
+            // Ocultar alertas previas durante el envío
+            alertBox.style.display = 'none';
 
             // Estado de carga en el botón
             btnSubmit.disabled = true;
@@ -271,11 +324,14 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
                     }, 800);
                 } else {
                     showAlert(data.message || 'Error en las credenciales proporcionadas.', 'danger');
+                    passInput.value = '';
+                    passInput.classList.add('is-invalid');
+                    passInput.focus();
                     btnSubmit.disabled = false;
                     btnSubmitText.textContent = 'Ingresar al Sistema';
                 }
             } catch (err) {
-                // Fallback de envío tradicional si hay fallo de red AJAX
+                // Fallback tradicional en caso de fallo de red
                 loginForm.submit();
             }
         });
