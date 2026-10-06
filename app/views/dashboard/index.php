@@ -1,5 +1,6 @@
 <!-- Tarjetas de Estadísticas / KPIs -->
 <div class="row g-3 mb-4">
+
     <div class="col-sm-6 col-xl-3">
         <div class="spa-card p-3 h-100 d-flex align-items-center justify-content-between">
             <div>
@@ -142,8 +143,11 @@
                         </div>
                     </div>
                     <i class="bi bi-chevron-right text-muted"></i>
+                    
                 </a>
             </div>
         </div>
     </div>
 </div>
+  
+

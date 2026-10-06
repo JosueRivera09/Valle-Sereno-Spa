@@ -1,0 +1,171 @@
+/* ==========================================
+   VARIABLES Y TEMAS PRINCIPALES (SPA BASE)
+   ========================================== */
+:root {
+    --spa-primary: #2c3e50;
+    --spa-secondary: #e74c3c;
+    --spa-accent: #f1c40f;
+    --spa-bg-light: #f8f9fa;
+    --font-serif: 'Georgia', 'Times New Roman', serif;
+    --font-sans: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    
+    /* Transición global para animaciones */
+    --transition-fast: all 0.2s ease-in-out;
+}
+
+/* Base Body */
+body {
+    font-family: var(--font-sans);
+    color: #333;
+    background-color: #f4f6f9;
+}
+
+/* ==========================================
+   ENCABEZADO Y TITULARES
+   ========================================== */
+h1, h2, h3, h4, .spa-heading {
+    font-family: var(--font-serif);
+    color: var(--spa-primary);
+}
+
+/* ==========================================
+   TABLA DE CITAS Y CONTENEDORES
+   ========================================== */
+.card {
+    border: none;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #edf2f7;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.table tbody tr {
+    transition: var(--transition-fast);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(44, 62, 80, 0.02) !important;
+}
+
+.table td {
+    padding: 0.85rem 0.75rem;
+    vertical-align: middle;
+}
+
+/* ==========================================
+   ESTADOS Y BADGES (INSIGNIAS)
+   ========================================== */
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: 0.4em 0.8em;
+    letter-spacing: 0.3px;
+}
+
+/* Ajustes sutiles de color */
+.bg-success-subtle {
+    background-color: #d1e7dd !important;
+    color: #0f5132 !important;
+}
+
+.bg-danger-subtle {
+    background-color: #f8d7da !important;
+    color: #842029 !important;
+}
+
+.bg-warning-subtle {
+    background-color: #fff3cd !important;
+    color: #664d03 !important;
+}
+
+/* ==========================================
+   BOTONES Y ACCIONES
+   ========================================== */
+.btn-primary {
+    background-color: var(--spa-primary);
+    border-color: var(--spa-primary);
+    border-radius: 6px;
+    transition: var(--transition-fast);
+}
+
+.btn-primary:hover, 
+.btn-primary:focus {
+    background-color: #1a252f;
+    border-color: #1a252f;
+    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.25);
+}
+
+.btn-outline-success, 
+.btn-outline-danger {
+    border-radius: 6px;
+    transition: var(--transition-fast);
+}
+
+.btn-outline-success:hover {
+    background-color: #198754;
+    color: #fff;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* ==========================================
+   MODAL DE NUEVA CITA
+   ========================================== */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    border-bottom: 1px solid #f1f1f1;
+    background-color: #fdfdfd;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #f1f1f1;
+    background-color: #fdfdfd;
+    padding: 1rem 1.5rem;
+}
+
+.form-control, 
+.form-select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    transition: var(--transition-fast);
+}
+
+.form-control:focus, 
+.form-select:focus {
+    border-color: var(--spa-primary);
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.15);
+}
+
+/* ==========================================
+   ALERTAS
+   ========================================== */
+.alert {
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
