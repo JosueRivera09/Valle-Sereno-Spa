@@ -121,31 +121,77 @@
     </div>
 </div>
 
-<!-- Modal Resultado Filtrado -->
+<!-- Modal Resultado Filtrado & Exportación Fiscal -->
 <div class="modal fade" id="modalResultadoFiltro" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-file-earmark-text text-warning me-2"></i> Informe Consolidado por Rango
-                </h5>
+                <div>
+                    <h5 class="modal-title fw-bold mb-0" style="font-family: var(--font-serif);">
+                        <i class="bi bi-file-earmark-spreadsheet text-warning me-2"></i> Informe Consolidado Contable & Fiscal
+                    </h5>
+                    <small class="text-white-50" style="font-size: 0.78rem;">Valle Sereno Spa S.A. • RUC J031000029384</small>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
+                
+                <!-- Tarjetas resumen de métricas contables -->
+                <div class="row g-3 mb-4" id="contenedorResumenContable" style="display: none;">
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded-3 border text-center">
+                            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total Recaudado (C$)</small>
+                            <span class="fs-4 fw-bold text-success" id="lblTotalRecaudado">C$0.00</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded-3 border text-center">
+                            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total en Efectivo</small>
+                            <span class="fs-5 fw-bold text-dark" id="lblTotalEfectivo">C$0.00</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded-3 border text-center">
+                            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total Tarjeta (POS)</small>
+                            <span class="fs-5 fw-bold text-dark" id="lblTotalTarjeta">C$0.00</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded-3 border text-center">
+                            <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total Transferencia</small>
+                            <span class="fs-5 fw-bold text-dark" id="lblTotalTransferencia">C$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
-                            <tr style="font-size: 0.78rem; text-transform: uppercase;">
-                                <th>FECHA PAGO</th>
-                                <th>CLIENTE</th>
+                            <tr style="font-size: 0.78rem; text-transform: uppercase; color: #556b61;">
+                                <th>FECHA Y HORA</th>
+                                <th>CLIENTE / PACIENTE</th>
+                                <th>TERAPEUTA</th>
                                 <th>MÉTODO PAGO</th>
-                                <th class="text-end">MONTO</th>
+                                <th class="text-end">MONTO (C$)</th>
                             </tr>
                         </thead>
                         <tbody id="bodyFiltroReporte" style="font-size: 0.88rem;">
                             <!-- Dinámico JS -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light d-flex justify-content-between">
+                <div class="small text-muted">
+                    <i class="bi bi-shield-check text-success me-1"></i> Formato oficial apto para contabilidad y auditorías tributarias.
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-success btn-sm px-3" onclick="descargarExcel()">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel (.CSV)
+                    </button>
+                    <button type="button" class="btn btn-spa-primary btn-sm px-3" onclick="descargarPdf()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Descargar Documento PDF
+                    </button>
                 </div>
             </div>
         </div>
@@ -164,25 +210,47 @@ function filtrarReportes(e) {
     const inicio = document.getElementById('fecha_inicio').value;
     const fin = document.getElementById('fecha_fin').value;
     const body = document.getElementById('bodyFiltroReporte');
+    const containerResumen = document.getElementById('contenedorResumenContable');
 
-    body.innerHTML = '<tr><td colspan="4" class="text-center py-3"><div class="spinner-border text-success spinner-border-sm"></div> Generando informe de ventas...</td></tr>';
+    containerResumen.style.display = 'none';
+    body.innerHTML = '<tr><td colspan="5" class="text-center py-4"><div class="spinner-border text-success spinner-border-sm me-2"></div> Generando informe contable y tributario...</td></tr>';
     modalResultadoBs.show();
 
     fetch(`index.php?c=reportes&a=filtrar&inicio=${inicio}&fin=${fin}`)
     .then(r => r.json())
     .then(res => {
         if (res.success && res.data.length > 0) {
+            const resumen = res.resumen_contable || {};
+            document.getElementById('lblTotalRecaudado').innerText = `C$${parseFloat(resumen.total_recaudado || 0).toFixed(2)}`;
+            document.getElementById('lblTotalEfectivo').innerText = `C$${parseFloat(resumen.total_efectivo || 0).toFixed(2)}`;
+            document.getElementById('lblTotalTarjeta').innerText = `C$${parseFloat(resumen.total_tarjeta || 0).toFixed(2)}`;
+            document.getElementById('lblTotalTransferencia').innerText = `C$${parseFloat(resumen.total_transferencia || 0).toFixed(2)}`;
+            containerResumen.style.display = 'flex';
+
             body.innerHTML = res.data.map(item => `
                 <tr>
-                    <td><span class="fw-semibold">${item.fecha_pago}</span></td>
+                    <td><span class="fw-semibold text-dark">${item.fecha_pago}</span></td>
                     <td><div class="fw-bold text-dark">${item.cliente_nombre}</div></td>
+                    <td><small class="text-muted"><i class="bi bi-person me-1"></i>${item.terapeuta_nombre}</small></td>
                     <td><span class="badge bg-light text-dark border">${item.tipo_pago}</span></td>
-                    <td class="text-end fw-bold text-success">C$${parseFloat(item.monto).toFixed(2)}</td>
+                    <td class="text-end fw-bold text-success fs-6" style="font-family: var(--font-serif);">C$${parseFloat(item.monto).toFixed(2)}</td>
                 </tr>
             `).join('');
         } else {
-            body.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No existen transacciones liquidadas registradas en el periodo seleccionado.</td></tr>';
+            body.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No existen transacciones liquidadas registradas en el periodo seleccionado.</td></tr>';
         }
     });
+}
+
+function descargarExcel() {
+    const inicio = document.getElementById('fecha_inicio').value;
+    const fin = document.getElementById('fecha_fin').value;
+    window.location.href = `index.php?c=reportes&a=exportarExcel&inicio=${inicio}&fin=${fin}`;
+}
+
+function descargarPdf() {
+    const inicio = document.getElementById('fecha_inicio').value;
+    const fin = document.getElementById('fecha_fin').value;
+    window.open(`index.php?c=reportes&a=exportarPdf&inicio=${inicio}&fin=${fin}`, '_blank');
 }
 </script>

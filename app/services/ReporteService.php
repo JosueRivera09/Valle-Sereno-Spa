@@ -28,6 +28,34 @@ class ReporteService {
         }
 
         $data = $this->model->obtenerFiltroRangoFechas($inicio, $fin);
-        return ['success' => true, 'data' => $data];
+
+        // Cálculos contables consolidables
+        $totalGeneral = 0.0;
+        $totalEfectivo = 0.0;
+        $totalTarjeta = 0.0;
+        $totalTransferencia = 0.0;
+
+        foreach ($data as $item) {
+            $monto = (float)$item['monto'];
+            $totalGeneral += $monto;
+            if ($item['tipo_pago'] === 'Efectivo') $totalEfectivo += $monto;
+            elseif ($item['tipo_pago'] === 'Tarjeta') $totalTarjeta += $monto;
+            elseif ($item['tipo_pago'] === 'Transferencia') $totalTransferencia += $monto;
+        }
+
+        return [
+            'success' => true,
+            'data' => $data,
+            'resumen_contable' => [
+                'total_recaudado'    => $totalGeneral,
+                'total_efectivo'     => $totalEfectivo,
+                'total_tarjeta'      => $totalTarjeta,
+                'total_transferencia'=> $totalTransferencia,
+                'total_transacciones'=> count($data),
+                'moneda'             => 'NIO (C$ Córdobas)',
+                'ruc_empresa'        => 'J031000029384',
+                'razon_social'       => 'Valle Sereno Spa S.A.'
+            ]
+        ];
     }
 }

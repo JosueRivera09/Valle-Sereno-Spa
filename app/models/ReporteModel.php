@@ -47,10 +47,21 @@ class ReporteModel {
     }
 
     public function obtenerFiltroRangoFechas(string $fechaInicio, string $fechaFin): array {
-        $sql = "SELECT p.id, p.fecha_pago, p.tipo_pago, p.monto, cl.nombre_completo as cliente_nombre 
+        $sql = "SELECT 
+                    p.id AS pago_id, 
+                    p.id_cita, 
+                    p.fecha_pago, 
+                    p.tipo_pago, 
+                    p.monto, 
+                    p.estado AS estado_pago, 
+                    cl.nombre_completo AS cliente_nombre, 
+                    COALESCE(cl.telefono, 'N/D') AS cliente_telefono, 
+                    COALESCE(cl.correo, 'N/D') AS cliente_correo, 
+                    COALESCE(e.nombre_completo, 'Sin asignación') AS terapeuta_nombre
                 FROM pagos p 
                 JOIN citas c ON p.id_cita = c.id 
-                JOIN clientes cl ON c.id_cliente = cl.id 
+                LEFT JOIN clientes cl ON c.id_cliente = cl.id 
+                LEFT JOIN empleados e ON c.id_empleado = e.id
                 WHERE DATE(p.fecha_pago) BETWEEN :inicio AND :fin AND p.estado = 'Pagado'
                 ORDER BY p.fecha_pago DESC";
         $stmt = $this->db->prepare($sql);
