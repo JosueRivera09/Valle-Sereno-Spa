@@ -16,9 +16,10 @@ class CajaModel {
      */
     public function obtenerCajaAbierta(): ?array {
         $stmt = $this->db->prepare("
-            SELECT c.*, u.usuario, u.nombre_completo 
+            SELECT c.*, u.usuario, COALESCE(e.nombre_completo, u.usuario) AS nombre_completo 
             FROM caja_sesiones c 
             JOIN usuarios u ON c.id_usuario = u.id 
+            LEFT JOIN empleados e ON u.id_empleado = e.id
             WHERE c.estado = 'abierta' 
             ORDER BY c.fecha_apertura DESC 
             LIMIT 1
@@ -94,9 +95,10 @@ class CajaModel {
      */
     public function obtenerHistorialCajas(int $limit = 15): array {
         $stmt = $this->db->prepare("
-            SELECT c.*, u.usuario, u.nombre_completo 
+            SELECT c.*, u.usuario, COALESCE(e.nombre_completo, u.usuario) AS nombre_completo 
             FROM caja_sesiones c 
             JOIN usuarios u ON c.id_usuario = u.id 
+            LEFT JOIN empleados e ON u.id_empleado = e.id
             ORDER BY c.fecha_apertura DESC 
             LIMIT :lim
         ");
