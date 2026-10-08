@@ -168,9 +168,9 @@ INSERT INTO empleados (id, nombre_completo, telefono, correo, cargo, especialida
 -- Inserción de Usuarios iniciales (Contraseña universal: Admin123*)
 -- Hash generado con password_hash('Admin123*', PASSWORD_BCRYPT)
 INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado) VALUES
-(1, 1, 1, 'admin', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo'),
-(2, 2, 2, 'recepcion', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo'),
-(3, 3, 3, 'terapeuta', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo');
+(1, 1, 1, 'admin', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo'),
+(2, 2, 2, 'recepcion', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo'),
+(3, 3, 3, 'terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo');
 
 /*
 ================================================================================

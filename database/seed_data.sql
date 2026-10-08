@@ -71,10 +71,10 @@ ON DUPLICATE KEY UPDATE nombre_completo=VALUES(nombre_completo), telefono=VALUES
 -- Hash bcrypt: $2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre
 -- ----------------------------------------------------------------------------
 INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado, ultimo_acceso) VALUES
-(4, 3, 4, 'andrea.terapeuta', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo', '2026-09-28 16:30:00'),
-(5, 3, 5, 'david.terapeuta', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo', '2026-09-29 08:15:00'),
-(6, 3, 6, 'lucia.terapeuta', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo', '2026-09-29 09:00:00'),
-(7, 2, 7, 'mariana.recepcion', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo', '2026-09-29 11:20:00')
+(4, 3, 4, 'andrea.terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-28 16:30:00'),
+(5, 3, 5, 'david.terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-29 08:15:00'),
+(6, 3, 6, 'lucia.terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-29 09:00:00'),
+(7, 2, 7, 'mariana.recepcion', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-29 11:20:00')
 ON DUPLICATE KEY UPDATE usuario=VALUES(usuario), estado=VALUES(estado);
 
 -- ----------------------------------------------------------------------------
