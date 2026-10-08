@@ -148,6 +148,23 @@ CREATE TABLE IF NOT EXISTS empleado_servicios (
     CONSTRAINT fk_emp_serv_servicios FOREIGN KEY (id_servicio) REFERENCES servicios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- 12. Apertura, Arqueo y Cierre de Caja Diario
+CREATE TABLE IF NOT EXISTS caja_sesiones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    fecha_apertura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    monto_inicial DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    fecha_cierre DATETIME NULL,
+    monto_final_efectivo DECIMAL(10,2) NULL,
+    monto_esperado_efectivo DECIMAL(10,2) NULL,
+    diferencia_efectivo DECIMAL(10,2) NULL,
+    monto_tarjeta DECIMAL(10,2) NULL DEFAULT 0.00,
+    monto_transferencia DECIMAL(10,2) NULL DEFAULT 0.00,
+    observaciones TEXT NULL,
+    estado ENUM('abierta', 'cerrada') NOT NULL DEFAULT 'abierta',
+    CONSTRAINT fk_caja_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
 -- Datos iniciales
 INSERT INTO roles (nombre, descripcion) VALUES
 ('Administrador', 'Configuracion y control general'),

@@ -23,6 +23,10 @@ class PagoService {
         return $this->model->obtenerResumenCajaHoy();
     }
 
+    public function obtenerDetallePagoConTicket(int $idPago): ?array {
+        return $this->model->obtenerDetallePagoConTicket($idPago);
+    }
+
     public function procesarPago(array $data): array {
         $val = $this->validarPago($data);
         if (!$val['valido']) {

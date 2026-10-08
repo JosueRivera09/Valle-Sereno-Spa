@@ -71,6 +71,34 @@ class PagoModel {
         }
     }
 
+    public function obtenerDetallePagoConTicket(int $idPago): ?array {
+        $sql = "SELECT 
+                    p.id AS pago_id,
+                    p.fecha_pago,
+                    p.tipo_pago,
+                    p.monto,
+                    p.estado AS estado_pago,
+                    c.id AS cita_id,
+                    c.fecha AS cita_fecha,
+                    c.hora_inicio,
+                    c.hora_fin,
+                    c.observaciones,
+                    cl.nombre_completo AS cliente_nombre,
+                    COALESCE(cl.telefono, 'N/D') AS cliente_telefono,
+                    COALESCE(cl.correo, 'N/D') AS cliente_correo,
+                    COALESCE(e.nombre_completo, 'Sin asignación') AS terapeuta_nombre
+                FROM pagos p
+                JOIN citas c ON p.id_cita = c.id
+                JOIN clientes cl ON c.id_cliente = cl.id
+                LEFT JOIN empleados e ON c.id_empleado = e.id
+                WHERE p.id = :id
+                LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $idPago]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     public function obtenerResumenCajaHoy(): array {
         $sql = "SELECT tipo_pago, COUNT(*) as cantidad, SUM(monto) as total 
                 FROM pagos 
