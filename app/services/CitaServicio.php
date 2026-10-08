@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/../models/Database.php';
 
@@ -6,7 +5,7 @@ class CitaServicio {
     private PDO $db;
 
     public function __construct() {
-        $this->db = database::getConnection();
+        $this->db = Database::getConnection();
     }
 
     /**
@@ -37,6 +36,8 @@ class CitaServicio {
         $resultado = $stmt->fetch();
         return ($resultado['total'] > 0);
     }
+
+    /**
      * Obtiene los terapeutas que NO tienen cruce de horario para una fecha y rango dado.
      */
     public function obtenerTerapeutasDisponibles(string $fecha, string $horaInicio, string $horaFin): array {
