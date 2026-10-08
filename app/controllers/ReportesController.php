@@ -2,27 +2,33 @@
 /**
  * Controlador de Reportes & Métricas
  */
+require_once __DIR__ . '/../services/ReporteService.php';
+
 class ReportesController {
+    private ReporteService $service;
+
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        // Requiere sesión y rol Administrador
-        if (!isset($_SESSION['usuario_id'])) {
-            header('Location: index.php?c=auth&a=login');
-            exit;
-        }
-        if (($_SESSION['rol_nombre'] ?? '') !== 'Administrador') {
-            header('Location: index.php?c=dashboard&a=index');
-            exit;
-        }
+        AuthHelper::requireRole(['Administrador']);
+        $this->service = new ReporteService();
     }
 
     public function index(): void {
+        $ventasMes = $this->service->obtenerVentasMensuales();
+        $rankingTerapeutas = $this->service->obtenerRankingTerapeutas();
+
         $pageTitle = "Reportes & Analítica - Valle Sereno Spa";
         $activePage = 'reportes';
         $contentView = __DIR__ . '/../views/reportes/index.php';
 
         require_once __DIR__ . '/../views/layouts/main.php';
+    }
+
+    public function filtrar(): void {
+        header('Content-Type: application/json');
+        $inicio = $_GET['inicio'] ?? '';
+        $fin = $_GET['fin'] ?? '';
+
+        $res = $this->service->generarReporteRango($inicio, $fin);
+        echo json_encode($res);
     }
 }
