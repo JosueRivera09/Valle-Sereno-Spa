@@ -23,189 +23,200 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 </div>
 
 <!-- Métricas rápidas de seguridad -->
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 text-white" style="background: var(--spa-primary);">
+                <i class="bi bi-people-fill fs-3"></i>
+            </div>
             <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.8px;">Total Cuentas</small>
-                <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);"><?= count($usuarios) ?></h3>
+                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Total Cuentas</small>
+                <h4 class="fw-bold mb-0 text-dark"><?= count($usuarios) ?> Usuarios</h4>
                 <small class="text-muted" style="font-size: 0.75rem;">En el sistema</small>
             </div>
-            <div class="stat-icon" style="background: rgba(30, 61, 52, 0.1); color: var(--spa-primary);">
-                <i class="bi bi-people-fill"></i>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-success text-white">
+                <i class="bi bi-shield-check fs-3"></i>
+            </div>
+            <div>
+                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Cuentas Activas</small>
+                <h4 class="fw-bold mb-0 text-success">
+                    <?= count(array_filter($usuarios, fn($u) => $u['estado'] === 'activo')) ?> Habilitadas
+                </h4>
+                <small class="text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle me-1"></i>Acceso normal</small>
             </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.8px;">Activas</small>
-                <h3 class="fw-bold mb-0 text-success" style="font-family: var(--font-serif);">
-                    <?= count(array_filter($usuarios, fn($u) => $u['estado'] === 'activo')) ?>
-                </h3>
-                <small class="text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle"></i> Con acceso normal</small>
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <?php 
+                $bloqueadas = count(array_filter($usuarios, fn($u) => $u['estado'] === 'bloqueado'));
+                $inactivas = count(array_filter($usuarios, fn($u) => $u['estado'] === 'inactivo'));
+            ?>
+            <div class="rounded-3 p-3 text-white <?= $bloqueadas > 0 ? 'bg-danger' : 'bg-warning' ?>">
+                <i class="bi <?= $bloqueadas > 0 ? 'bi-shield-x' : 'bi-lock-fill' ?> fs-3"></i>
             </div>
-            <div class="stat-icon" style="background: #eef6f3; color: #3b735c;">
-                <i class="bi bi-shield-check"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
             <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.8px;">Bloqueadas / Inactivas</small>
-                <?php 
-                    $bloqueadas = count(array_filter($usuarios, fn($u) => $u['estado'] === 'bloqueado'));
-                    $inactivas = count(array_filter($usuarios, fn($u) => $u['estado'] === 'inactivo'));
-                ?>
-                <h3 class="fw-bold mb-0 <?= $bloqueadas > 0 ? 'text-danger' : 'text-dark' ?>" style="font-family: var(--font-serif);">
-                    <?= $bloqueadas + $inactivas ?>
-                </h3>
+                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Bloqueadas / Inactivas</small>
+                <h4 class="fw-bold mb-0 <?= $bloqueadas > 0 ? 'text-danger' : 'text-dark' ?>">
+                    <?= $bloqueadas + $inactivas ?> Cuentas
+                </h4>
                 <small class="<?= $bloqueadas > 0 ? 'text-danger fw-semibold' : 'text-muted' ?>" style="font-size: 0.75rem;">
-                    <?= $bloqueadas ?> por intentos &bull; <?= $inactivas ?> manual
+                    <?= $bloqueadas ?> por fallos &bull; <?= $inactivas ?> manuales
                 </small>
             </div>
-            <div class="stat-icon" style="background: <?= $bloqueadas > 0 ? 'rgba(220, 53, 69, 0.12)' : 'rgba(197, 160, 89, 0.15)' ?>; color: <?= $bloqueadas > 0 ? '#dc3545' : '#997838' ?>;">
-                <i class="bi <?= $bloqueadas > 0 ? 'bi-shield-x' : 'bi-lock-fill' ?>"></i>
-            </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.8px;">Seguridad de Intentos</small>
-                <h5 class="fw-bold mb-0 text-dark mt-1" style="font-family: var(--font-serif);">Máx. 3 Fallos</h5>
-                <small class="text-primary" style="font-size: 0.75rem;"><i class="bi bi-shield-lock"></i> Auto-Bloqueo Activo</small>
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-secondary text-white">
+                <i class="bi bi-key-fill fs-3"></i>
             </div>
-            <div class="stat-icon" style="background: #fdf5ea; color: #c5a059;">
-                <i class="bi bi-key-fill"></i>
+            <div>
+                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Seguridad de Accesos</small>
+                <h4 class="fw-bold mb-0 text-dark">Máx. 3 Fallos</h4>
+                <small class="text-primary" style="font-size: 0.75rem;"><i class="bi bi-shield-lock me-1"></i>Auto-bloqueo activo</small>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tabla y Controles -->
-<div class="spa-card p-4">
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3">
-        <div class="input-group" style="max-width: 320px;">
-            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-            <input type="text" id="filtroUsuarios" class="form-control bg-light border-start-0 ps-0" placeholder="Buscar por usuario, nombre o cargo..." onkeyup="filtrarTabla()">
+<!-- Buscador & Filtro por Rol -->
+<div class="spa-card p-3 mb-4">
+    <div class="row g-3 align-items-center justify-content-between">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="filtroUsuarios" class="form-control bg-light border-start-0 ps-0" placeholder="Buscar usuario por nombre, login, rol o correo..." onkeyup="filtrarGaleriaUsuarios()">
+            </div>
         </div>
-        <div class="text-muted small">
-            Mostrando <strong id="conteoVisible"><?= count($usuarios) ?></strong> usuario(s)
+        <div class="col-md-6 text-md-end">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Filtro por rol">
+                <button type="button" class="btn btn-outline-secondary active" onclick="filtrarRolUsuario('todos', this)">Todos (<?= count($usuarios) ?>)</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="filtrarRolUsuario('Administrador', this)">Admin</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="filtrarRolUsuario('Recepcionista', this)">Recepción</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="filtrarRolUsuario('Terapeuta', this)">Terapeutas</button>
+            </div>
         </div>
     </div>
+</div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="tablaUsuarios">
-            <thead class="table-light">
-                <tr style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #5a6e65;">
-                    <th>Usuario / Identificador</th>
-                    <th>Personal Vinculado</th>
-                    <th>Rol en Sistema</th>
-                    <th>Intentos / Acceso</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($usuarios)): ?>
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
-                            <i class="bi bi-inbox fs-2 d-block mb-1"></i>
-                            No hay cuentas de usuario registradas.
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($usuarios as $u): ?>
-                        <tr class="<?= $u['estado'] === 'bloqueado' ? 'table-danger-subtle' : '' ?>">
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="user-avatar-circle" style="width: 36px; height: 36px; font-size: 0.85rem; background: <?= $u['estado'] === 'bloqueado' ? '#dc3545' : 'var(--spa-primary)' ?>; color: #fff;">
-                                        <?= strtoupper(substr($u['usuario'], 0, 2)) ?>
-                                    </div>
-                                    <div>
-                                        <span class="fw-semibold text-dark d-block"><?= htmlspecialchars($u['usuario']) ?></span>
-                                        <small class="text-muted" style="font-size: 0.75rem;">ID: #<?= $u['id'] ?></small>
-                                    </div>
+<!-- Galería Grid de Usuarios -->
+<div class="row g-4 mb-4" id="galeriaUsuarios">
+    <?php if (empty($usuarios)): ?>
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-person-x fs-1 d-block mb-2 text-muted"></i>
+            No hay cuentas de usuario registradas en la base de datos.<br>
+            <small>Haz clic en "Nuevo Usuario" para agregar uno.</small>
+        </div>
+    <?php else: ?>
+        <?php foreach ($usuarios as $u): 
+            $initials = strtoupper(substr($u['usuario'], 0, 2));
+            $rolIcon = match($u['rol_nombre']) {
+                'Administrador' => 'bi-shield-fill-check',
+                'Recepcionista' => 'bi-headset',
+                'Terapeuta'     => 'bi-heart-pulse-fill',
+                default         => 'bi-person-badge'
+            };
+            $rolColorClass = match($u['rol_nombre']) {
+                'Administrador' => 'bg-danger-subtle text-danger border border-danger-subtle',
+                'Recepcionista' => 'bg-info-subtle text-info border border-info-subtle',
+                'Terapeuta'     => 'bg-success-subtle text-success border border-success-subtle',
+                default         => 'bg-secondary-subtle text-secondary'
+            };
+            $cardBorderColor = $u['estado'] === 'bloqueado' ? 'border-danger' : ($u['estado'] === 'activo' ? 'border-success' : 'border-secondary');
+        ?>
+            <div class="col-md-6 col-lg-4 tarjeta-usuario-item" data-rol="<?= htmlspecialchars($u['rol_nombre']) ?>">
+                <div class="spa-card p-4 h-100 position-relative d-flex flex-column justify-content-between border-top border-4 <?= $cardBorderColor ?> shadow-sm hover-shadow transition-all">
+                    
+                    <div>
+                        <!-- Header Tarjeta -->
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
+                                     style="width: 48px; height: 48px; font-size: 1rem; background: <?= $u['estado'] === 'bloqueado' ? '#dc3545' : 'linear-gradient(135deg, var(--spa-primary), #2c5341)' ?>;">
+                                    <?= htmlspecialchars($initials) ?>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="fw-medium text-dark"><?= htmlspecialchars($u['nombre_completo']) ?></div>
-                                <small class="text-muted" style="font-size: 0.76rem;"><?= htmlspecialchars($u['cargo']) ?> &bull; <?= htmlspecialchars($u['email']) ?></small>
-                            </td>
-                            <td>
-                                <?php
-                                    $badgeClass = match($u['rol_nombre']) {
-                                        'Administrador' => 'badge-admin',
-                                        'Recepcionista' => 'badge-recepcion',
-                                        'Terapeuta'     => 'badge-terapeuta',
-                                        default         => 'badge-default'
-                                    };
-                                ?>
-                                <span class="badge-rol <?= $badgeClass ?>">
-                                    <?= htmlspecialchars($u['rol_nombre']) ?>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0 fs-6"><?= htmlspecialchars($u['usuario']) ?></h6>
+                                    <small class="text-muted" style="font-size: 0.73rem;">ID: #<?= $u['id'] ?></small>
+                                </div>
+                            </div>
+                            <?php if ($u['estado'] === 'activo'): ?>
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.7rem;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activo
                                 </span>
-                            </td>
-                            <td>
-                                <div class="small">
-                                    <?php if ((int)($u['intentos_fallidos'] ?? 0) > 0): ?>
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
-                                            <i class="bi bi-exclamation-circle-fill"></i> <?= (int)$u['intentos_fallidos'] ?> fallo(s)
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-success small"><i class="bi bi-check2"></i> 0 fallos</span>
-                                    <?php endif; ?>
-                                </div>
-                                <small class="text-muted" style="font-size: 0.73rem;">
-                                    Último: <?= $u['ultimo_acceso'] ? date('d/m/Y H:i', strtotime($u['ultimo_acceso'])) : '<span class="text-black-50">Nunca</span>' ?>
-                                </small>
-                            </td>
-                            <td>
-                                <?php if ($u['estado'] === 'activo'): ?>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
-                                        <i class="bi bi-dot"></i> Activo
-                                    </span>
-                                <?php elseif ($u['estado'] === 'bloqueado'): ?>
-                                    <span class="badge bg-danger text-white rounded-pill px-2 py-1 shadow-sm" title="Bloqueado por superar intentos de ingreso">
-                                        <i class="bi bi-shield-x"></i> Bloqueado
+                            <?php elseif ($u['estado'] === 'bloqueado'): ?>
+                                <span class="badge rounded-pill bg-danger text-white px-2 py-1 shadow-sm" style="font-size: 0.7rem;" title="Bloqueado por superar 3 intentos fallidos">
+                                    <i class="bi bi-shield-x me-1"></i>Bloqueado
+                                </span>
+                            <?php else: ?>
+                                <span class="badge rounded-pill bg-secondary-subtle text-secondary px-2 py-1" style="font-size: 0.7rem;">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Inactivo
+                                </span>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Detalles del Usuario & Empleado -->
+                        <div class="p-3 rounded-3 mb-3" style="background: #f8faf9; font-size: 0.8rem;">
+                            <div class="fw-bold text-dark mb-1">
+                                <i class="bi bi-person text-success me-2"></i><?= htmlspecialchars($u['nombre_completo']) ?>
+                            </div>
+                            <div class="text-muted mb-1">
+                                <i class="bi bi-briefcase text-primary me-2"></i><?= htmlspecialchars($u['cargo']) ?>
+                            </div>
+                            <div class="text-muted text-truncate" title="<?= htmlspecialchars($u['email']) ?>">
+                                <i class="bi bi-envelope me-2"></i><?= htmlspecialchars($u['email']) ?>
+                            </div>
+                        </div>
+
+                        <!-- Rol & Fallos -->
+                        <div class="d-flex align-items-center justify-content-between mb-3" style="font-size: 0.78rem;">
+                            <span class="badge <?= $rolColorClass ?> px-2 py-1">
+                                <i class="bi <?= $rolIcon ?> me-1"></i><?= htmlspecialchars($u['rol_nombre']) ?>
+                            </span>
+                            <div>
+                                <?php if ((int)($u['intentos_fallidos'] ?? 0) > 0): ?>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i><?= (int)$u['intentos_fallidos'] ?> fallo(s)
                                     </span>
                                 <?php else: ?>
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2 py-1">
-                                        <i class="bi bi-dot"></i> Inactivo
-                                    </span>
+                                    <small class="text-success fw-semibold"><i class="bi bi-shield-check me-1"></i>0 fallos</small>
                                 <?php endif; ?>
-                            </td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <?php if ($u['estado'] === 'bloqueado'): ?>
-                                        <button class="btn btn-danger btn-sm px-2 text-white fw-semibold" 
-                                                title="Desbloquear cuenta de usuario" 
-                                                onclick="desbloquearUsuario(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
-                                            <i class="bi bi-unlock-fill me-1"></i> Desbloquear
-                                        </button>
-                                    <?php endif; ?>
-                                    <button class="btn btn-outline-secondary" title="Editar Usuario" onclick="abrirModalEditar(<?= $u['id'] ?>)">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button class="btn btn-outline-warning" title="Cambiar Contraseña" onclick="abrirModalPassword(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
-                                        <i class="bi bi-key"></i>
-                                    </button>
-                                    <?php if ($u['id'] != $currentUserId): ?>
-                                        <button class="btn <?= $u['estado'] === 'activo' ? 'btn-outline-danger' : 'btn-outline-success' ?>" 
-                                                title="<?= $u['estado'] === 'activo' ? 'Desactivar cuenta' : 'Activar cuenta' ?>" 
-                                                onclick="toggleEstadoUsuario(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>', '<?= $u['estado'] ?>')">
-                                            <i class="bi <?= $u['estado'] === 'activo' ? 'bi-person-slash' : 'bi-person-check' ?>"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Acciones -->
+                    <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
+                        <?php if ($u['estado'] === 'bloqueado'): ?>
+                            <button class="btn btn-danger btn-sm w-100 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 shadow-sm" onclick="desbloquearUsuario(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
+                                <i class="bi bi-unlock-fill"></i> Desbloquear Cuenta
+                            </button>
+                        <?php else: ?>
+                            <button class="btn btn-outline-secondary btn-sm flex-fill" title="Editar Usuario" onclick="abrirModalEditar(<?= $u['id'] ?>)">
+                                <i class="bi bi-pencil-square me-1"></i>Editar
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm flex-fill text-dark" title="Cambiar Contraseña" onclick="abrirModalPassword(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
+                                <i class="bi bi-key me-1"></i>Clave
+                            </button>
+                            <?php if ($u['id'] != $currentUserId): ?>
+                                <button class="btn <?= $u['estado'] === 'activo' ? 'btn-outline-danger' : 'btn-outline-success' ?> btn-sm px-2" 
+                                        title="<?= $u['estado'] === 'activo' ? 'Desactivar cuenta' : 'Activar cuenta' ?>" 
+                                        onclick="toggleEstadoUsuario(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>', '<?= $u['estado'] ?>')">
+                                    <i class="bi <?= $u['estado'] === 'activo' ? 'bi-person-slash' : 'bi-person-check' ?>"></i>
+                                </button>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
 
 <!-- MODAL: Crear / Editar Usuario -->
@@ -358,23 +369,32 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 <script>
 const CSRF_TOKEN = '<?= htmlspecialchars($csrfToken) ?>';
 
-function filtrarTabla() {
-    const q = document.getElementById('filtroUsuarios').value.toLowerCase();
-    const rows = document.querySelectorAll('#tablaUsuarios tbody tr');
-    let visible = 0;
+let filtroRolActual = 'todos';
 
-    rows.forEach(r => {
-        const text = r.innerText.toLowerCase();
-        if (text.includes(q)) {
-            r.style.display = '';
-            visible++;
+function filtrarGaleriaUsuarios() {
+    const q = document.getElementById('filtroUsuarios').value.toLowerCase();
+    const cards = document.querySelectorAll('#galeriaUsuarios .tarjeta-usuario-item');
+
+    cards.forEach(c => {
+        const text = c.innerText.toLowerCase();
+        const rol = c.getAttribute('data-rol') || '';
+
+        const coincideTexto = text.includes(q);
+        const coincideRol = (filtroRolActual === 'todos' || rol === filtroRolActual);
+
+        if (coincideTexto && coincideRol) {
+            c.style.display = '';
         } else {
-            r.style.display = 'none';
+            c.style.display = 'none';
         }
     });
+}
 
-    const conteoEl = document.getElementById('conteoVisible');
-    if (conteoEl) conteoEl.innerText = visible;
+function filtrarRolUsuario(rol, btn) {
+    filtroRolActual = rol;
+    document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtrarGaleriaUsuarios();
 }
 
 function abrirModalCrear() {
