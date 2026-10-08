@@ -101,56 +101,257 @@
     </div>
 </div>
 
-<!-- Modal Nueva Cita -->
+<!-- Modal Nueva Cita Rediseñado & Optimizado -->
 <div class="modal fade" id="modalNuevaCita" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-calendar-plus text-warning me-2"></i> Agendar Nueva Cita
-                </h5>
+                <div>
+                    <h5 class="modal-title fw-bold mb-0" style="font-family: var(--font-serif);">
+                        <i class="bi bi-calendar-plus text-warning me-2"></i> Agendar Cita Terapéutica
+                    </h5>
+                    <small class="text-white-50" style="font-size: 0.78rem;">Selección interactiva de paciente, fecha, servicio y terapeuta disponible.</small>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="index.php?c=citas&a=guardar" method="POST">
+            <form action="index.php?c=citas&a=guardar" method="POST" id="formNuevaCita">
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">ID Cliente <span class="text-danger">*</span></label>
-                        <input type="number" name="id_cliente" class="form-control" placeholder="Ej. 1" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">ID Terapeuta/Empleado <span class="text-danger">*</span></label>
-                        <input type="number" name="id_empleado" class="form-control" placeholder="Ej. 2" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Fecha <span class="text-danger">*</span></label>
-                        <input type="date" name="fecha" class="form-control" required>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-dark">Hora Inicio <span class="text-danger">*</span></label>
-                            <input type="time" name="hora_inicio" class="form-control" required>
+                    
+                    <!-- 1. Selección o Registro Express de Cliente -->
+                    <div class="p-3 mb-4 rounded-3 border" style="background: #f8faf9;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold small text-dark mb-0">
+                                <i class="bi bi-person-heart text-success me-1"></i> Paciente / Cliente <span class="text-danger">*</span>
+                            </label>
+                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold" onclick="toggleFormNuevoCliente()">
+                                <i class="bi bi-person-plus-fill me-1"></i><span id="btnTextNuevoCliente">+ ¿Cliente nuevo? Registrar rápido</span>
+                            </button>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-dark">Hora Fin <span class="text-danger">*</span></label>
-                            <input type="time" name="hora_fin" class="form-control" required>
+
+                        <!-- Selector de Cliente Existente -->
+                        <div id="seccionClienteExistente">
+                            <select id="select_id_cliente" name="id_cliente" class="form-select" required>
+                                <option value="">-- Buscar o Seleccionar Cliente --</option>
+                                <?php foreach ($clientes as $cl): ?>
+                                    <option value="<?= $cl['id'] ?>">
+                                        <?= htmlspecialchars($cl['nombre_completo']) ?> (Tel: <?= htmlspecialchars($cl['telefono']) ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <!-- Formulario Express Cliente Nuevo -->
+                        <div id="seccionClienteNuevo" class="d-none mt-3 pt-3 border-top">
+                            <div class="alert alert-info py-2 px-3 small mb-3">
+                                <i class="bi bi-info-circle me-1"></i> Registra un nuevo paciente de inmediato y se asignará automáticamente a esta cita.
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6 mb-2">
+                                    <input type="text" id="express_nombre" class="form-control form-control-sm" placeholder="Nombre completo *">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="tel" id="express_telefono" class="form-control form-control-sm" placeholder="Teléfono *">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="date" id="express_fecha_nac" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="email" id="express_correo" class="form-control form-control-sm" placeholder="Correo (opcional)">
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success btn-sm mt-1 px-3" onclick="guardarClienteExpress()">
+                                <i class="bi bi-check-lg me-1"></i> Confirmar Nuevo Cliente
+                            </button>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Monto Total (C$) <span class="text-danger">*</span></label>
-                        <input type="number" step="0.01" name="total" class="form-control" placeholder="0.00" required>
+
+                    <!-- 2. Selección de Servicio & Tarifa -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-dark">
+                            <i class="bi bi-stars text-warning me-1"></i> Tratamiento / Servicio <span class="text-muted font-normal">(Opcional para cálculo automático)</span>
+                        </label>
+                        <select id="select_servicio" class="form-select" onchange="seleccionarServicio(this)">
+                            <option value="" data-costo="0" data-duracion="60">-- Seleccionar Tratamiento del Menú --</option>
+                            <?php foreach ($servicios as $srv): ?>
+                                <option value="<?= $srv['id'] ?>" data-costo="<?= $srv['costo'] ?>" data-duracion="<?= $srv['duracion_minutos'] ?>">
+                                    <?= htmlspecialchars($srv['nombre']) ?> - C$<?= number_format($srv['costo'], 2) ?> (<?= (int)$srv['duracion_minutos'] ?> min)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Observaciones</label>
-                        <textarea name="observaciones" class="form-control" rows="2" placeholder="Detalles de la sesión..."></textarea>
+
+                    <!-- 3. Fecha & Horario -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-dark">Fecha de Atencion <span class="text-danger">*</span></label>
+                            <input type="date" id="input_fecha" name="fecha" class="form-control" value="<?= date('Y-m-d') ?>" onchange="actualizarHorarioYDisponibilidad()" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-dark">Hora Inicio <span class="text-danger">*</span></label>
+                            <input type="time" id="input_hora_inicio" name="hora_inicio" class="form-control" value="10:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-dark">Hora Fin <span class="text-danger">*</span></label>
+                            <input type="time" id="input_hora_fin" name="hora_fin" class="form-control" value="11:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                        </div>
                     </div>
+
+                    <!-- 4. Selección de Terapeuta Disponible en Tiempo Real -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-dark">
+                            <i class="bi bi-person-badge text-primary me-1"></i> Terapeuta Asignado <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-muted" style="font-size: 0.75rem;" id="lblEstadoTerapeutas">Verificando terapeutas libres para este horario...</small>
+                        </div>
+                        <select id="select_id_empleado" name="id_empleado" class="form-select" required>
+                            <option value="">-- Seleccionar Terapeuta Disponible --</option>
+                            <?php foreach ($terapeutas as $t): ?>
+                                <option value="<?= $t['id'] ?>">
+                                    <?= htmlspecialchars($t['nombre_completo']) ?> (<?= htmlspecialchars($t['cargo']) ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- 5. Monto e Indicaciones -->
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-dark">Monto Total (C$) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text fw-bold">C$</span>
+                                <input type="number" step="0.01" id="input_total" name="total" class="form-control" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold small text-dark">Observaciones / Indicaciones Especiales</label>
+                            <textarea name="observaciones" class="form-control" rows="1" placeholder="Ej. Sensibilidad en piel, preferencia de aceite aromático..."></textarea>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
-                        <i class="bi bi-check2-circle me-1"></i> Guardar Cita
+                        <i class="bi bi-calendar-check me-1"></i> Agendar Cita
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+function toggleFormNuevoCliente() {
+    const secExistente = document.getElementById('seccionClienteExistente');
+    const secNuevo = document.getElementById('seccionClienteNuevo');
+    const select = document.getElementById('select_id_cliente');
+    const btnText = document.getElementById('btnTextNuevoCliente');
+
+    if (secNuevo.classList.contains('d-none')) {
+        secNuevo.classList.remove('d-none');
+        secExistente.classList.add('d-none');
+        select.removeAttribute('required');
+        btnText.innerText = '← Seleccionar de la lista de clientes';
+    } else {
+        secNuevo.classList.add('d-none');
+        secExistente.classList.remove('d-none');
+        select.setAttribute('required', 'required');
+        btnText.innerText = '+ ¿Cliente nuevo? Registrar rápido';
+    }
+}
+
+function guardarClienteExpress() {
+    const nombre = document.getElementById('express_nombre').value.trim();
+    const telefono = document.getElementById('express_telefono').value.trim();
+    const fechaNac = document.getElementById('express_fecha_nac').value;
+    const correo = document.getElementById('express_correo').value.trim();
+
+    if (!nombre || !telefono) {
+        alert('Por favor ingresa el nombre y teléfono del nuevo paciente.');
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append('nombre_completo', nombre);
+    fd.append('telefono', telefono);
+    fd.append('fecha_nacimiento', fechaNac);
+    fd.append('correo', correo);
+
+    fetch('index.php?c=citas&a=crearClienteExpress', {
+        method: 'POST',
+        body: fd
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success && res.cliente) {
+            const select = document.getElementById('select_id_cliente');
+            const opt = document.createElement('option');
+            opt.value = res.cliente.id;
+            opt.text = `${res.cliente.nombre_completo} (Tel: ${res.cliente.telefono})`;
+            opt.selected = true;
+            select.add(opt);
+
+            toggleFormNuevoCliente();
+            alert('¡Cliente registrado correctamente!');
+        } else {
+            alert('Error: ' + res.mensaje);
+        }
+    });
+}
+
+function seleccionarServicio(select) {
+    const opt = select.options[select.selectedIndex];
+    const costo = opt.getAttribute('data-costo');
+    const duracion = parseInt(opt.getAttribute('data-duracion') || 60);
+
+    if (costo) {
+        document.getElementById('input_total').value = parseFloat(costo).toFixed(2);
+    }
+
+    // Calcular hora fin automática basada en la duración del servicio
+    const horaInicioStr = document.getElementById('input_hora_inicio').value;
+    if (horaInicioStr) {
+        const parts = horaInicioStr.split(':');
+        const dateObj = new Date();
+        dateObj.setHours(parseInt(parts[0]), parseInt(parts[1]) + duracion, 0);
+        
+        const h = String(dateObj.getHours()).padStart(2, '0');
+        const m = String(dateObj.getMinutes()).padStart(2, '0');
+        document.getElementById('input_hora_fin').value = `${h}:${m}`;
+    }
+
+    actualizarHorarioYDisponibilidad();
+}
+
+function actualizarHorarioYDisponibilidad() {
+    const fecha = document.getElementById('input_fecha').value;
+    const horaInicio = document.getElementById('input_hora_inicio').value;
+    const horaFin = document.getElementById('input_hora_fin').value;
+    const selectTerapeutas = document.getElementById('select_id_empleado');
+    const lblState = document.getElementById('lblEstadoTerapeutas');
+
+    if (!fecha || !horaInicio || !horaFin) return;
+
+    lblState.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat spin"></i> Verificando terapeutas libres...</span>';
+
+    fetch(`index.php?c=citas&a=consultarDisponibilidad&fecha=${fecha}&hora_inicio=${horaInicio}&hora_fin=${horaFin}`)
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            selectTerapeutas.innerHTML = '<option value="">-- Seleccionar Terapeuta Disponible --</option>';
+            if (res.data.length > 0) {
+                res.data.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.text = `${t.nombre_completo} (${t.cargo})`;
+                    selectTerapeutas.add(opt);
+                });
+                lblState.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i> ${res.data.length} terapeuta(s) disponible(s) en este horario.</span>`;
+            } else {
+                lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No hay terapeutas disponibles en este horario (cruce detectado).</span>';
+            }
+        }
+    });
+}
+</script>

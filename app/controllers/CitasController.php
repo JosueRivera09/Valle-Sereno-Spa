@@ -17,11 +17,49 @@ class CitasController {
 
 
     public function index(): void {
+        require_once __DIR__ . '/../models/Cliente.php';
+        require_once __DIR__ . '/../models/Empleado.php';
+        require_once __DIR__ . '/../models/ServicioModel.php';
+
+        $clienteModel = new Cliente();
+        $empleadoModel = new Empleado();
+        $servicioModel = new ServicioModel();
+
+        $clientes = $clienteModel->obtenerTodos();
+        $terapeutas = $empleadoModel->getAll('activo');
+        $servicios = $servicioModel->obtenerServicios();
+        $citas = $this->citaModel->getAll();
+
         $pageTitle = "Citas & Agenda - Valle Sereno Spa";
         $activePage = 'citas';
-        $citas = $this->citaModel->getAll();
         $contentView = __DIR__ . '/../views/citas/index.php';
         require_once __DIR__ . '/../views/layouts/main.php';
+    }
+
+    public function consultarDisponibilidad(): void {
+        header('Content-Type: application/json');
+        $fecha      = $_GET['fecha'] ?? '';
+        $horaInicio = $_GET['hora_inicio'] ?? '';
+        $horaFin    = $_GET['hora_fin'] ?? '';
+
+        if (empty($fecha) || empty($horaInicio) || empty($horaFin)) {
+            echo json_encode(['success' => false, 'data' => []]);
+            return;
+        }
+
+        $disponibles = $this->citaService->obtenerTerapeutasDisponibles($fecha, $horaInicio, $horaFin);
+        echo json_encode(['success' => true, 'data' => $disponibles]);
+    }
+
+    public function crearClienteExpress(): void {
+        header('Content-Type: application/json');
+        $nombre   = $_POST['nombre_completo'] ?? '';
+        $telefono = $_POST['telefono'] ?? '';
+        $fechaNac = $_POST['fecha_nacimiento'] ?? '';
+        $correo   = $_POST['correo'] ?? '';
+
+        $res = $this->citaService->registrarClienteRapido($nombre, $telefono, $fechaNac, $correo);
+        echo json_encode($res);
     }
 
     public function guardar(): void {
