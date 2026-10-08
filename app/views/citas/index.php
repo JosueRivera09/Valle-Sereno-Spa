@@ -56,7 +56,7 @@
                             </td>
                             <td>
                                 <span class="text-secondary fw-semibold">
-                                    <i class="bi bi-person me-1"></i><?= htmlspecialchars($c['terapeuta_nombre']) ?>
+                                    <i class="bi bi-person me-1"></i><?= htmlspecialchars($c['terapeuta_nombre'] ?? $c['empleado_nombre'] ?? 'Sin Asignar') ?>
                                 </span>
                             </td>
                             <td>
