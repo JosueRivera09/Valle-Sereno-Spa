@@ -32,25 +32,22 @@
 
 <!-- Tabla Dinámica de Citas -->
 <div class="spa-card p-4">
-    <div class="table-responsive">
+    <div class="table-responsive-none">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #556b61;">
-                    <th>ID</th>
-                    <th>CLIENTE</th>
+                    <th>PACIENTE & CITAS</th>
                     <th>TERAPEUTA</th>
-                    <th>FECHA</th>
-                    <th>HORARIO</th>
+                    <th>FECHA & HORARIO</th>
                     <th>TOTAL</th>
                     <th>ESTADO</th>
-                    <th>OBSERVACIONES</th>
                     <th class="text-end">ACCIONES</th>
                 </tr>
             </thead>
             <tbody style="font-size: 0.88rem;">
                 <?php if (empty($citas)): ?>
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-muted">
+                        <td colspan="6" class="text-center py-4 text-muted">
                             <i class="bi bi-calendar-x fs-3 d-block mb-1 text-muted"></i>
                             <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
                                 ? 'No tienes citas de tratamiento asignadas por el momento.' 
@@ -60,27 +57,32 @@
                 <?php else: ?>
                     <?php foreach ($citas as $c): ?>
                         <tr>
-                            <td class="fw-bold text-muted">#<?= $c['id'] ?></td>
                             <td>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($c['cliente_nombre']) ?></div>
+                                <div class="fw-bold text-dark">
+                                    <span class="text-muted fw-normal me-1">#<?= $c['id'] ?></span>
+                                    <?= htmlspecialchars($c['cliente_nombre']) ?>
+                                </div>
+                                <?php if (!empty($c['observaciones'])): ?>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 220px;" title="<?= htmlspecialchars($c['observaciones']) ?>">
+                                        <i class="bi bi-chat-left-text me-1"></i><?= htmlspecialchars($c['observaciones']) ?>
+                                    </small>
+                                <?php endif; ?>
                             </td>
                             <td>
-                                <span class="text-secondary fw-semibold">
-                                    <i class="bi bi-person me-1"></i><?= htmlspecialchars($c['terapeuta_nombre'] ?? $c['empleado_nombre'] ?? 'Sin Asignar') ?>
+                                <span class="text-dark fw-medium">
+                                    <i class="bi bi-person-badge text-primary me-1"></i><?= htmlspecialchars($c['terapeuta_nombre'] ?? $c['empleado_nombre'] ?? 'Sin Asignar') ?>
                                 </span>
                             </td>
                             <td>
-                                <span class="text-dark">
+                                <div class="fw-semibold text-dark mb-0">
                                     <i class="bi bi-calendar3 text-warning me-1"></i><?= date('d/m/Y', strtotime($c['fecha'])) ?>
-                                </span>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock me-1"></i><?= date('h:i A', strtotime($c['hora_inicio'])) ?> - <?= date('h:i A', strtotime($c['hora_fin'])) ?>
+                                </small>
                             </td>
                             <td>
-                                <span class="badge bg-light text-dark border">
-                                    <?= date('h:i A', strtotime($c['hora_inicio'])) ?> - <?= date('h:i A', strtotime($c['hora_fin'])) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="fw-bold text-dark fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
+                                <span class="fw-bold fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
                                     C$<?= number_format($c['total'], 2) ?>
                                 </span>
                             </td>
@@ -98,25 +100,20 @@
                                     <?= htmlspecialchars($c['estado']) ?>
                                 </span>
                             </td>
-                            <td>
-                                <small class="text-muted">
-                                    <?= htmlspecialchars($c['observaciones'] ?? 'Sin observaciones') ?>
-                                </small>
-                            </td>
                             <td class="text-end">
                                 <?php if ($c['estado'] !== 'Cancelada' && $c['estado'] !== 'Completada'): ?>
                                     <div class="btn-group btn-group-sm">
                                         <?php if ($c['estado'] === 'Pendiente'): ?>
-                                            <button class="btn btn-outline-success py-0 px-2" title="Marcar como Confirmada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Confirmada')">
-                                                <i class="bi bi-play-fill me-1"></i> Confirmar
+                                            <button class="btn btn-outline-success py-1 px-2" title="Confirmar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Confirmada')">
+                                                <i class="bi bi-play-fill"></i> <span class="d-none d-lg-inline ms-1">Confirmar</span>
                                             </button>
                                         <?php endif; ?>
-                                        <button class="btn btn-outline-primary py-0 px-2" title="Marcar como Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
-                                            <i class="bi bi-check2-all me-1"></i> Completar
+                                        <button class="btn btn-outline-primary py-1 px-2" title="Marcar Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
+                                            <i class="bi bi-check2-all"></i> <span class="d-none d-lg-inline ms-1">Completar</span>
                                         </button>
                                         <?php if (($_SESSION['rol_nombre'] ?? '') !== 'Terapeuta'): ?>
-                                            <button class="btn btn-outline-danger py-0 px-2" title="Cancelar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Cancelada')">
-                                                <i class="bi bi-x-lg me-1"></i> Cancelar
+                                            <button class="btn btn-outline-danger py-1 px-2" title="Cancelar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Cancelada')">
+                                                <i class="bi bi-x-lg"></i> <span class="d-none d-lg-inline ms-1">Cancelar</span>
                                             </button>
                                         <?php endif; ?>
                                     </div>
