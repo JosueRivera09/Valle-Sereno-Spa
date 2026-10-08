@@ -61,11 +61,13 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
 
             <!-- Navegación Lateral -->
             <nav class="sidebar-nav">
-                <div class="sidebar-section-title">Principal</div>
-                <a href="index.php?c=dashboard&a=index" class="nav-spa-link <?= $activePage === 'dashboard' ? 'active' : '' ?>">
-                    <i class="bi bi-grid-1x2-fill"></i>
-                    <span>Dashboard</span>
-                </a>
+                <?php if ($user['rol'] !== 'Terapeuta'): ?>
+                    <div class="sidebar-section-title">Principal</div>
+                    <a href="index.php?c=dashboard&a=index" class="nav-spa-link <?= $activePage === 'dashboard' ? 'active' : '' ?>">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                <?php endif; ?>
 
                 <div class="sidebar-section-title">Gestión Operativa</div>
                 <a href="index.php?c=citas&a=index" class="nav-spa-link <?= $activePage === 'citas' ? 'active' : '' ?>">

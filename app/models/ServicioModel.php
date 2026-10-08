@@ -93,4 +93,24 @@ class ServicioModel {
         $stmt = $this->db->prepare("UPDATE servicios SET estado = :estado WHERE id = :id");
         return $stmt->execute([':estado' => $estado, ':id' => $id]);
     }
+
+    // --- Relación Terapeuta (Empleado) - Servicios ---
+    public function obtenerServiciosEmpleado(int $idEmpleado): array {
+        $stmt = $this->db->prepare("SELECT id_servicio FROM empleado_servicios WHERE id_empleado = :id_empleado");
+        $stmt->execute([':id_empleado' => $idEmpleado]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function toggleServicioEmpleado(int $idEmpleado, int $idServicio): bool {
+        $check = $this->db->prepare("SELECT id FROM empleado_servicios WHERE id_empleado = :emp AND id_servicio = :srv");
+        $check->execute([':emp' => $idEmpleado, ':srv' => $idServicio]);
+        
+        if ($check->fetch()) {
+            $stmt = $this->db->prepare("DELETE FROM empleado_servicios WHERE id_empleado = :emp AND id_servicio = :srv");
+            return $stmt->execute([':emp' => $idEmpleado, ':srv' => $idServicio]);
+        } else {
+            $stmt = $this->db->prepare("INSERT INTO empleado_servicios (id_empleado, id_servicio) VALUES (:emp, :srv)");
+            return $stmt->execute([':emp' => $idEmpleado, ':srv' => $idServicio]);
+        }
+    }
 }

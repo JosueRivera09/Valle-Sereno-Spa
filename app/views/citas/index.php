@@ -337,6 +337,7 @@ function actualizarHorarioYDisponibilidad() {
     const fecha = document.getElementById('input_fecha').value;
     const horaInicio = document.getElementById('input_hora_inicio').value;
     const horaFin = document.getElementById('input_hora_fin').value;
+    const idServicio = document.getElementById('select_servicio')?.value || '';
     const selectTerapeutas = document.getElementById('select_id_empleado');
     const lblState = document.getElementById('lblEstadoTerapeutas');
 
@@ -344,7 +345,7 @@ function actualizarHorarioYDisponibilidad() {
 
     lblState.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat spin"></i> Verificando terapeutas libres...</span>';
 
-    fetch(`index.php?c=citas&a=consultarDisponibilidad&fecha=${fecha}&hora_inicio=${horaInicio}&hora_fin=${horaFin}`)
+    fetch(`index.php?c=citas&a=consultarDisponibilidad&fecha=${fecha}&hora_inicio=${horaInicio}&hora_fin=${horaFin}&id_servicio=${idServicio}`)
     .then(r => r.json())
     .then(res => {
         if (res.success) {

@@ -70,4 +70,16 @@ class ServicioService {
         }
         return ['valido' => true, 'mensaje' => 'OK'];
     }
+    public function obtenerServiciosEmpleado(int $idEmpleado): array {
+        return $this->model->obtenerServiciosEmpleado($idEmpleado);
+    }
+
+    public function toggleEspecialidadEmpleado(int $idEmpleado, int $idServicio): array {
+        if ($idEmpleado <= 0 || $idServicio <= 0) {
+            return ['success' => false, 'mensaje' => 'Parámetros inválidos.'];
+        }
+        $res = $this->model->toggleServicioEmpleado($idEmpleado, $idServicio);
+        return $res ? ['success' => true, 'mensaje' => 'Especialidad actualizada correctamente.']
+                    : ['success' => false, 'mensaje' => 'No se pudo actualizar la especialidad.'];
+    }
 }

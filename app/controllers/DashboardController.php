@@ -7,7 +7,7 @@ require_once __DIR__ . '/../models/Dashboard.php';
 
 class DashboardController {
     public function __construct() {
-        AuthHelper::requireAuth();
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
     }
 
     public function index(): void {

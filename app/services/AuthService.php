@@ -118,7 +118,9 @@ class AuthService {
         $this->usuarioModel->updateLastAccess((int)$user['id']);
 
         // Determinar redirección
-        $redirect = 'index.php?c=dashboard&a=index';
+        $redirect = ($user['rol_nombre'] === 'Terapeuta') 
+            ? 'index.php?c=citas&a=index' 
+            : 'index.php?c=dashboard&a=index';
 
         return [
             'success'  => true,

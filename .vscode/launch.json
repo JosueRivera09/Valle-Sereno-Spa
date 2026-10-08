@@ -5,7 +5,7 @@
             "name": "Abrir en Google Chrome",
             "type": "chrome",
             "request": "launch",
-            "url": "http://localhost/Valle-Sereno-Spa/",
+            "url": "http://localhost/SpaValleSereno/",
             "webRoot": "${workspaceFolder}",
             "runtimeExecutable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
         }

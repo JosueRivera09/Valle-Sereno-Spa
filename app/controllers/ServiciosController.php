@@ -15,11 +15,34 @@ class ServiciosController {
     public function index(): void {
         $servicios = $this->service->listarServicios();
         $categorias = $this->service->listarCategorias();
-        $pageTitle = "Catálogo de Servicios - Valle Sereno Spa";
+
+        $misEspecialidades = [];
+        $rolActual = $_SESSION['rol_nombre'] ?? '';
+        $idEmpleadoSesion = (int)($_SESSION['id_empleado'] ?? 0);
+
+        if ($rolActual === 'Terapeuta' && $idEmpleadoSesion > 0) {
+            $misEspecialidades = $this->service->obtenerServiciosEmpleado($idEmpleadoSesion);
+        }
+
+        $pageTitle = ($rolActual === 'Terapeuta') ? "Mis Servicios & Especialidades - Valle Sereno Spa" : "Catálogo de Servicios - Valle Sereno Spa";
         $activePage = 'servicios';
         $contentView = __DIR__ . '/../views/servicios/index.php';
 
         require_once __DIR__ . '/../views/layouts/main.php';
+    }
+
+    public function toggleEspecialidad(): void {
+        header('Content-Type: application/json');
+        $idServicio = (int)($_POST['id_servicio'] ?? 0);
+        $idEmpleadoSesion = (int)($_SESSION['id_empleado'] ?? 0);
+
+        if ($idEmpleadoSesion <= 0) {
+            echo json_encode(['success' => false, 'mensaje' => 'No tienes un expediente de terapeuta asociado.']);
+            return;
+        }
+
+        $res = $this->service->toggleEspecialidadEmpleado($idEmpleadoSesion, $idServicio);
+        echo json_encode($res);
     }
 
     public function guardar(): void {

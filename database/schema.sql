@@ -137,6 +137,17 @@ CREATE TABLE IF NOT EXISTS pagos (
     INDEX idx_pagos_cita_fecha (id_cita, fecha_pago)
 ) ENGINE=InnoDB;
 
+-- 11. Relación Empleado - Servicios (Especialidades ofertadas por Terapeuta)
+CREATE TABLE IF NOT EXISTS empleado_servicios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    id_servicio INT NOT NULL,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_empleado_servicio (id_empleado, id_servicio),
+    CONSTRAINT fk_emp_serv_empleados FOREIGN KEY (id_empleado) REFERENCES empleados(id) ON DELETE CASCADE,
+    CONSTRAINT fk_emp_serv_servicios FOREIGN KEY (id_servicio) REFERENCES servicios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- Datos iniciales
 INSERT INTO roles (nombre, descripcion) VALUES
 ('Administrador', 'Configuracion y control general'),

@@ -39,12 +39,32 @@ class CitaServicio {
 
     /**
      * Obtiene los terapeutas que NO tienen cruce de horario para una fecha y rango dado.
+     * Si se pasa idServicio, filtra a los terapeutas que ofrecen dicho servicio.
      */
-    public function obtenerTerapeutasDisponibles(string $fecha, string $horaInicio, string $horaFin): array {
+    public function obtenerTerapeutasDisponibles(string $fecha, string $horaInicio, string $horaFin, ?int $idServicio = null): array {
+        $params = [
+            'fecha'        => $fecha,
+            'hora_inicio1' => $horaInicio,
+            'hora_fin1'    => $horaFin,
+            'hora_inicio2' => $horaInicio,
+            'hora_fin2'    => $horaFin
+        ];
+
+        $serviceFilter = '';
+        if ($idServicio !== null && $idServicio > 0) {
+            $stmtCheck = $this->db->prepare("SELECT COUNT(*) FROM empleado_servicios WHERE id_servicio = :id_serv");
+            $stmtCheck->execute(['id_serv' => $idServicio]);
+            if ((int)$stmtCheck->fetchColumn() > 0) {
+                $serviceFilter = " AND e.id IN (SELECT id_empleado FROM empleado_servicios WHERE id_servicio = :id_servicio) ";
+                $params['id_servicio'] = $idServicio;
+            }
+        }
+
         $sql = "
             SELECT e.id, e.nombre_completo, e.cargo, e.especialidades 
             FROM empleados e 
             WHERE e.estado = 'activo' 
+              {$serviceFilter}
               AND e.id NOT IN (
                   SELECT c.id_empleado 
                   FROM citas c 
@@ -59,13 +79,7 @@ class CitaServicio {
             ORDER BY e.nombre_completo ASC
         ";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            'fecha'        => $fecha,
-            'hora_inicio1' => $horaInicio,
-            'hora_fin1'    => $horaFin,
-            'hora_inicio2' => $horaInicio,
-            'hora_fin2'    => $horaFin
-        ]);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 

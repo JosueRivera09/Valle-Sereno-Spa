@@ -50,13 +50,14 @@ class CitasController {
         $fecha      = $_GET['fecha'] ?? '';
         $horaInicio = $_GET['hora_inicio'] ?? '';
         $horaFin    = $_GET['hora_fin'] ?? '';
+        $idServicio = isset($_GET['id_servicio']) && is_numeric($_GET['id_servicio']) ? (int)$_GET['id_servicio'] : null;
 
         if (empty($fecha) || empty($horaInicio) || empty($horaFin)) {
             echo json_encode(['success' => false, 'data' => []]);
             return;
         }
 
-        $disponibles = $this->citaService->obtenerTerapeutasDisponibles($fecha, $horaInicio, $horaFin);
+        $disponibles = $this->citaService->obtenerTerapeutasDisponibles($fecha, $horaInicio, $horaFin, $idServicio);
         echo json_encode(['success' => true, 'data' => $disponibles]);
     }
 
