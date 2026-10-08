@@ -44,12 +44,13 @@
                     <th>TOTAL</th>
                     <th>ESTADO</th>
                     <th>OBSERVACIONES</th>
+                    <th class="text-end">ACCIONES</th>
                 </tr>
             </thead>
             <tbody style="font-size: 0.88rem;">
                 <?php if (empty($citas)): ?>
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">
+                        <td colspan="9" class="text-center py-4 text-muted">
                             <i class="bi bi-calendar-x fs-3 d-block mb-1 text-muted"></i>
                             <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
                                 ? 'No tienes citas de tratamiento asignadas por el momento.' 
@@ -101,6 +102,27 @@
                                 <small class="text-muted">
                                     <?= htmlspecialchars($c['observaciones'] ?? 'Sin observaciones') ?>
                                 </small>
+                            </td>
+                            <td class="text-end">
+                                <?php if ($c['estado'] !== 'Cancelada' && $c['estado'] !== 'Completada'): ?>
+                                    <div class="btn-group btn-group-sm">
+                                        <?php if ($c['estado'] === 'Pendiente'): ?>
+                                            <button class="btn btn-outline-success py-0 px-2" title="Marcar como Confirmada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Confirmada')">
+                                                <i class="bi bi-play-fill me-1"></i> Confirmar
+                                            </button>
+                                        <?php endif; ?>
+                                        <button class="btn btn-outline-primary py-0 px-2" title="Marcar como Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
+                                            <i class="bi bi-check2-all me-1"></i> Completar
+                                        </button>
+                                        <?php if (($_SESSION['rol_nombre'] ?? '') !== 'Terapeuta'): ?>
+                                            <button class="btn btn-outline-danger py-0 px-2" title="Cancelar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Cancelada')">
+                                                <i class="bi bi-x-lg me-1"></i> Cancelar
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <span class="badge bg-light text-muted border"><i class="bi bi-lock me-1"></i>Finalizada</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -362,6 +384,30 @@ function actualizarHorarioYDisponibilidad() {
                 lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No hay terapeutas disponibles en este horario (cruce detectado).</span>';
             }
         }
+    });
+}
+
+function cambiarEstadoCita(id, nuevoEstado) {
+    if (!confirm(`¿Deseas cambiar el estado de la cita #${id} a '${nuevoEstado}'?`)) return;
+
+    const fd = new FormData();
+    fd.append('id', id);
+    fd.append('estado', nuevoEstado);
+
+    fetch('index.php?c=citas&a=cambiarEstado', {
+        method: 'POST',
+        body: fd
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + res.mensaje);
+        }
+    })
+    .catch(err => {
+        alert('Ocurrió un error de conexión al actualizar la cita.');
     });
 }
 </script>

@@ -112,4 +112,48 @@ class CitasController {
             exit;
         }
     }
+
+    public function cambiarEstado(): void {
+        header('Content-Type: application/json');
+        $id = (int)($_POST['id'] ?? 0);
+        $nuevoEstado = trim($_POST['estado'] ?? '');
+
+        if ($id <= 0 || empty($nuevoEstado)) {
+            echo json_encode(['success' => false, 'mensaje' => 'Parámetros inválidos.']);
+            return;
+        }
+
+        $cita = $this->citaModel->findById($id);
+        if (!$cita) {
+            echo json_encode(['success' => false, 'mensaje' => 'La cita no existe.']);
+            return;
+        }
+
+        $rolActual = $_SESSION['rol_nombre'] ?? '';
+        $idEmpleadoSesion = (int)($_SESSION['id_empleado'] ?? 0);
+
+        if ($rolActual === 'Terapeuta') {
+            if ((int)$cita['id_empleado'] !== $idEmpleadoSesion) {
+                echo json_encode(['success' => false, 'mensaje' => 'No tienes permiso para modificar citas de otros terapeutas.']);
+                return;
+            }
+
+            if (!in_array($nuevoEstado, ['Completada', 'Confirmada', 'Pendiente'])) {
+                echo json_encode(['success' => false, 'mensaje' => 'Como terapeuta solo puedes marcar la cita como Completada o Confirmada. La cancelación debe gestionarse en Recepción.']);
+                return;
+            }
+        } else {
+            if (!in_array($nuevoEstado, ['Pendiente', 'Confirmada', 'Completada', 'Cancelada'])) {
+                echo json_encode(['success' => false, 'mensaje' => 'Estado no válido.']);
+                return;
+            }
+        }
+
+        $res = $this->citaModel->updateStatus($id, $nuevoEstado);
+        if ($res) {
+            echo json_encode(['success' => true, 'mensaje' => "Estado de la cita actualizado a '{$nuevoEstado}'."]);
+        } else {
+            echo json_encode(['success' => false, 'mensaje' => 'Error al actualizar el estado de la cita.']);
+        }
+    }
 }
