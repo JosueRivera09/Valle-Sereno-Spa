@@ -22,68 +22,6 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
     </div>
 </div>
 
-<!-- Métricas rápidas de seguridad -->
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-3 p-3 text-white" style="background: var(--spa-primary);">
-                <i class="bi bi-people-fill fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Total Cuentas</small>
-                <h4 class="fw-bold mb-0 text-dark"><?= count($usuarios) ?> Usuarios</h4>
-                <small class="text-muted" style="font-size: 0.75rem;">En el sistema</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-3 p-3 bg-success text-white">
-                <i class="bi bi-shield-check fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Cuentas Activas</small>
-                <h4 class="fw-bold mb-0 text-success">
-                    <?= count(array_filter($usuarios, fn($u) => $u['estado'] === 'activo')) ?> Habilitadas
-                </h4>
-                <small class="text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle me-1"></i>Acceso normal</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <?php 
-                $bloqueadas = count(array_filter($usuarios, fn($u) => $u['estado'] === 'bloqueado'));
-                $inactivas = count(array_filter($usuarios, fn($u) => $u['estado'] === 'inactivo'));
-            ?>
-            <div class="rounded-3 p-3 text-white <?= $bloqueadas > 0 ? 'bg-danger' : 'bg-warning' ?>">
-                <i class="bi <?= $bloqueadas > 0 ? 'bi-shield-x' : 'bi-lock-fill' ?> fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Bloqueadas / Inactivas</small>
-                <h4 class="fw-bold mb-0 <?= $bloqueadas > 0 ? 'text-danger' : 'text-dark' ?>">
-                    <?= $bloqueadas + $inactivas ?> Cuentas
-                </h4>
-                <small class="<?= $bloqueadas > 0 ? 'text-danger fw-semibold' : 'text-muted' ?>" style="font-size: 0.75rem;">
-                    <?= $bloqueadas ?> por fallos &bull; <?= $inactivas ?> manuales
-                </small>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-3 p-3 bg-secondary text-white">
-                <i class="bi bi-key-fill fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.8px;">Seguridad de Accesos</small>
-                <h4 class="fw-bold mb-0 text-dark">Máx. 3 Fallos</h4>
-                <small class="text-primary" style="font-size: 0.75rem;"><i class="bi bi-shield-lock me-1"></i>Auto-bloqueo activo</small>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Buscador & Filtro por Rol -->
 <div class="spa-card p-3 mb-4">
     <div class="row g-3 align-items-center justify-content-between">
