@@ -4,13 +4,8 @@
  */
 class PagosController {
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (!isset($_SESSION['usuario_id'])) {
-            header('Location: index.php?c=auth&a=login');
-            exit;
-        }
+        // Exclusivo para Administrador y Recepcionista (Caja)
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
     }
 
     public function index(): void {

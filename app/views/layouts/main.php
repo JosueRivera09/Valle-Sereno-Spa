@@ -37,6 +37,8 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js para Analítica y Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <!-- Estilo Armónico Personalizado Valle Sereno -->
     <link rel="stylesheet" href="public/css/spa-theme.css?v=1.2">
 </head>
@@ -70,24 +72,30 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
                     <i class="bi bi-calendar2-heart-fill"></i>
                     <span>Citas & Agenda</span>
                 </a>
-                <a href="index.php?c=clientes&a=index" class="nav-spa-link <?= $activePage === 'clientes' ? 'active' : '' ?>">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Clientes</span>
-                </a>
+
+                <?php if (in_array($user['rol'], ['Administrador', 'Recepcionista'])): ?>
+                    <a href="index.php?c=clientes&a=index" class="nav-spa-link <?= $activePage === 'clientes' ? 'active' : '' ?>">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Clientes</span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="index.php?c=servicios&a=index" class="nav-spa-link <?= $activePage === 'servicios' ? 'active' : '' ?>">
                     <i class="bi bi-droplet-half"></i>
                     <span>Servicios & Terapias</span>
                 </a>
 
-                <div class="sidebar-section-title">Finanzas & Personal</div>
-                <a href="index.php?c=pagos&a=index" class="nav-spa-link <?= $activePage === 'pagos' ? 'active' : '' ?>">
-                    <i class="bi bi-credit-card-2-front-fill"></i>
-                    <span>Caja & Pagos</span>
-                </a>
-                <a href="index.php?c=empleados&a=index" class="nav-spa-link <?= $activePage === 'empleados' ? 'active' : '' ?>">
-                    <i class="bi bi-person-badge-fill"></i>
-                    <span>Personal Terapéutico</span>
-                </a>
+                <?php if ($user['rol'] !== 'Terapeuta'): ?>
+                    <div class="sidebar-section-title">Finanzas & Personal</div>
+                    <a href="index.php?c=pagos&a=index" class="nav-spa-link <?= $activePage === 'pagos' ? 'active' : '' ?>">
+                        <i class="bi bi-credit-card-2-front-fill"></i>
+                        <span>Caja & Pagos</span>
+                    </a>
+                    <a href="index.php?c=empleados&a=index" class="nav-spa-link <?= $activePage === 'empleados' ? 'active' : '' ?>">
+                        <i class="bi bi-person-badge-fill"></i>
+                        <span>Personal Terapéutico</span>
+                    </a>
+                <?php endif; ?>
 
                 <?php if ($user['rol'] === 'Administrador'): ?>
                     <div class="sidebar-section-title">Sistema</div>
@@ -137,9 +145,11 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
-                    <a href="index.php?c=citas&a=index" class="btn btn-sm btn-outline-success d-none d-md-inline-flex align-items-center gap-1 rounded-pill px-3" style="border-color: #2c594c; color: #2c594c;">
-                        <i class="bi bi-plus-circle"></i> Nueva Cita
-                    </a>
+                    <?php if (in_array($user['rol'], ['Administrador', 'Recepcionista'])): ?>
+                        <a href="index.php?c=citas&a=index" class="btn btn-sm btn-outline-success d-none d-md-inline-flex align-items-center gap-1 rounded-pill px-3" style="border-color: #2c594c; color: #2c594c;">
+                            <i class="bi bi-plus-circle"></i> Nueva Cita
+                        </a>
+                    <?php endif; ?>
 
                     <div class="dropdown">
                         <button class="btn btn-light btn-sm rounded-pill dropdown-toggle d-flex align-items-center gap-2 border px-3" type="button" data-bs-toggle="dropdown">
@@ -165,6 +175,33 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
 
             <!-- Contenido Dinámico de la Vista Inyectada -->
             <main class="page-container flex-grow-1">
+                <?php if (!empty($_SESSION['success_flash'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                        <div><?= htmlspecialchars($_SESSION['success_flash']) ?></div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['success_flash']); ?>
+                <?php endif; ?>
+
+                <?php if (!empty($_SESSION['warning_flash'])): ?>
+                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        <div><?= htmlspecialchars($_SESSION['warning_flash']) ?></div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['warning_flash']); ?>
+                <?php endif; ?>
+
+                <?php if (!empty($_SESSION['error_flash'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                        <i class="bi bi-x-circle-fill fs-5"></i>
+                        <div><?= htmlspecialchars($_SESSION['error_flash']) ?></div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['error_flash']); ?>
+                <?php endif; ?>
+
                 <?php 
                 if (isset($contentView) && file_exists($contentView)) {
                     include $contentView;

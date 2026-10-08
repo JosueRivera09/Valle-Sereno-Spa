@@ -4,13 +4,8 @@
  */
 class ServiciosController {
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        if (!isset($_SESSION['usuario_id'])) {
-            header('Location: index.php?c=auth&a=login');
-            exit;
-        }
+        // Accesible para todos los roles autenticados
+        AuthHelper::requireAuth();
     }
 
     public function index(): void {

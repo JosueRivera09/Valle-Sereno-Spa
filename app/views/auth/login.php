@@ -3,6 +3,8 @@ $pageTitle = "Iniciar Sesión | Valle Sereno Spa & Wellness";
 $errorFlash = $_SESSION['error_flash'] ?? null;
 unset($_SESSION['error_flash']);
 $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
+$sessionExpired = isset($_GET['expired']) && $_GET['expired'] === '1';
+$csrfToken = AuthHelper::csrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -130,8 +132,13 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
                     </div>
 
                     <!-- Mensajes de Alerta -->
-                    <div id="loginAlertBox" style="<?= ($errorFlash || $logoutSuccess) ? '' : 'display:none;' ?>">
-                        <?php if ($errorFlash): ?>
+                    <div id="loginAlertBox" style="<?= ($errorFlash || $logoutSuccess || $sessionExpired) ? '' : 'display:none;' ?>">
+                        <?php if ($sessionExpired): ?>
+                            <div class="alert alert-warning spa-alert mb-3" role="alert">
+                                <i class="bi bi-clock-history fs-5"></i>
+                                <div>Su sesión ha expirado por inactividad. Por favor ingrese de nuevo.</div>
+                            </div>
+                        <?php elseif ($errorFlash): ?>
                             <div class="alert alert-danger spa-alert mb-3" role="alert">
                                 <i class="bi bi-exclamation-triangle-fill fs-5"></i>
                                 <div><?= htmlspecialchars($errorFlash) ?></div>
@@ -146,6 +153,7 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
 
                     <!-- Formulario con validación limpia y sin autocompletado de prueba -->
                     <form id="loginForm" method="POST" action="index.php?c=auth&a=authenticate" autocomplete="off" novalidate>
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                         <!-- Campo Usuario o Correo -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Usuario o Correo Institucional</label>
@@ -323,12 +331,36 @@ $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
                         window.location.href = data.redirect;
                     }, 800);
                 } else {
-                    showAlert(data.message || 'Error en las credenciales proporcionadas.', 'danger');
-                    passInput.value = '';
-                    passInput.classList.add('is-invalid');
-                    passInput.focus();
-                    btnSubmit.disabled = false;
-                    btnSubmitText.textContent = 'Ingresar al Sistema';
+                    if (data.bloqueado) {
+                        showAlert(`
+                            <div class="fw-bold mb-1"><i class="bi bi-shield-x me-1"></i> ACCESO DENEGADO - LÍMITE ALCANZADO</div>
+                            <div>${data.message}</div>
+                            <div class="mt-2 pt-2 border-top border-danger-subtle small">
+                                Comuníquese con la Administración: <strong>admin@vallesereno.com</strong>
+                            </div>
+                        `, 'danger');
+                        passInput.value = '';
+                        passInput.disabled = true;
+                        userInput.disabled = true;
+                        btnSubmit.disabled = true;
+                        btnSubmitText.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Acceso Bloqueado';
+                    } else if (data.inexistente) {
+                        showAlert(data.message, 'danger');
+                        userInput.classList.add('is-invalid');
+                        emailError.textContent = 'Ingrese un usuario o correo corporativo válido.';
+                        emailError.style.setProperty('display', 'block', 'important');
+                        passInput.value = '';
+                        userInput.focus();
+                        btnSubmit.disabled = false;
+                        btnSubmitText.textContent = 'Ingresar al Sistema';
+                    } else {
+                        showAlert(data.message || 'Error en las credenciales proporcionadas.', 'danger');
+                        passInput.value = '';
+                        passInput.classList.add('is-invalid');
+                        passInput.focus();
+                        btnSubmit.disabled = false;
+                        btnSubmitText.textContent = 'Ingresar al Sistema';
+                    }
                 }
             } catch (err) {
                 // Fallback tradicional en caso de fallo de red

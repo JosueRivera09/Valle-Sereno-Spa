@@ -3,20 +3,23 @@
  * Controlador de Dashboard
  */
 
+require_once __DIR__ . '/../models/Dashboard.php';
+
 class DashboardController {
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        // Proteger ruta: Requiere sesión activa
-        if (!isset($_SESSION['usuario_id'])) {
-            header('Location: index.php?c=auth&a=login');
-            exit;
-        }
+        AuthHelper::requireAuth();
     }
 
     public function index(): void {
+        $dashboardModel = new Dashboard();
+
+        $metricas = $dashboardModel->getMetricas();
+        $citasHoy = $dashboardModel->getCitasHoy(10);
+        $serviciosPopulares = $dashboardModel->getServiciosPopulares(5);
+        $resumenPagos = $dashboardModel->getResumenPagos();
+        $ingresosGrafico = $dashboardModel->getIngresosUltimosDias();
+        $citasCategorias = $dashboardModel->getCitasPorCategoria();
+
         $pageTitle = "Panel Principal - Valle Sereno Spa";
         $activePage = 'dashboard';
         $contentView = __DIR__ . '/../views/dashboard/index.php';

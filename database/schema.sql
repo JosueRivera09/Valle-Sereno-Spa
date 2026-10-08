@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id_empleado INT NULL,
     usuario VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    estado ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo',
+    estado ENUM('activo', 'inactivo', 'bloqueado') NOT NULL DEFAULT 'activo',
+    intentos_fallidos INT NOT NULL DEFAULT 0,
+    bloqueado_hasta DATETIME NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ultimo_acceso DATETIME NULL,
     CONSTRAINT fk_usuarios_roles FOREIGN KEY (id_rol) 
@@ -155,9 +157,9 @@ INSERT INTO empleados (id, nombre_completo, telefono, correo, cargo, especialida
 -- Inserción de Usuarios iniciales (Contraseña universal: Admin123*)
 -- Hash generado con password_hash('Admin123*', PASSWORD_BCRYPT)
 INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado) VALUES
-(1, 1, 1, 'admin', '$2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre', 'activo'),
-(2, 2, 2, 'recepcion', '$2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre', 'activo'),
-(3, 3, 3, 'terapeuta', '$2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre', 'activo');
+(1, 1, 1, 'admin', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo'),
+(2, 2, 2, 'recepcion', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo'),
+(3, 3, 3, 'terapeuta', '$2y$10$jLdRv72L47xAYCBwUcWyG.n9ObppOXYW8EZ/adtL7RWyBdOtgLjTu', 'activo');
 
 /*
 ================================================================================

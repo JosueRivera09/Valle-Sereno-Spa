@@ -19,3 +19,6 @@ define('DB_NAME', 'spa_db');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
+
+// Helper global de autenticación y seguridad
+require_once __DIR__ . '/../app/helpers/AuthHelper.php';

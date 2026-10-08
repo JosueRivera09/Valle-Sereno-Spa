@@ -33,6 +33,8 @@ class AuthController {
      * Procesa la petición de inicio de sesión (Soporta AJAX / JSON y Form estándar)
      */
     public function authenticate(): void {
+        AuthHelper::requireCsrf();
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 

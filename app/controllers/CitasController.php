@@ -9,7 +9,7 @@ class CitasController {
     private CitaServicio $citaService; 
 
     public function __construct() {
-        // ...
+        AuthHelper::requireRole(['Administrador', 'Recepcionista', 'Terapeuta']);
         $this->citaModel = new Citas();
         $this->citadetalleModel = new CitaDetalle();
         $this->citaService = new CitaServicio();
