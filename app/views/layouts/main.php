@@ -145,11 +145,6 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
-                    <?php if (in_array($user['rol'], ['Administrador', 'Recepcionista'])): ?>
-                        <a href="index.php?c=citas&a=index" class="btn btn-sm btn-outline-success d-none d-md-inline-flex align-items-center gap-1 rounded-pill px-3" style="border-color: #2c594c; color: #2c594c;">
-                            <i class="bi bi-plus-circle"></i> Nueva Cita
-                        </a>
-                    <?php endif; ?>
 
                     <div class="dropdown">
                         <button class="btn btn-light btn-sm rounded-pill dropdown-toggle d-flex align-items-center gap-2 border px-3" type="button" data-bs-toggle="dropdown">
