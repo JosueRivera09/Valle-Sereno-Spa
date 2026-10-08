@@ -63,7 +63,7 @@
                                         </span>
                                     </td>
                                     <td class="text-end fw-bold fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                        $<?= number_format($v['total_ventas'], 2) ?>
+                                        C$<?= number_format($v['total_ventas'], 2) ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -109,7 +109,7 @@
                                         </span>
                                     </td>
                                     <td class="text-end fw-bold text-dark" style="font-family: var(--font-serif);">
-                                        $<?= number_format($t['total_generado'], 2) ?>
+                                        C$<?= number_format($t['total_generado'], 2) ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -177,7 +177,7 @@ function filtrarReportes(e) {
                     <td><span class="fw-semibold">${item.fecha_pago}</span></td>
                     <td><div class="fw-bold text-dark">${item.cliente_nombre}</div></td>
                     <td><span class="badge bg-light text-dark border">${item.tipo_pago}</span></td>
-                    <td class="text-end fw-bold text-success">$${parseFloat(item.monto).toFixed(2)}</td>
+                    <td class="text-end fw-bold text-success">C$${parseFloat(item.monto).toFixed(2)}</td>
                 </tr>
             `).join('');
         } else {

@@ -71,7 +71,7 @@
                             </td>
                             <td>
                                 <span class="fw-bold text-dark fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                    $<?= number_format($c['total'], 2) ?>
+                                    C$<?= number_format($c['total'], 2) ?>
                                 </span>
                             </td>
                             <td>
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-dark">Monto Total ($) <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-semibold text-dark">Monto Total (C$) <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" name="total" class="form-control" placeholder="0.00" required>
                     </div>
                     <div class="mb-3">

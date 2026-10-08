@@ -11,6 +11,7 @@ error_reporting(E_ALL);
 // Rutas base
 define('APP_NAME', 'Valle Sereno Spa & Wellness');
 define('BASE_URL', 'http://localhost/SpaValleSereno');
+define('CURRENCY_SYMBOL', 'C$');
 
 // Credenciales Base de Datos XAMPP
 define('DB_HOST', 'localhost');

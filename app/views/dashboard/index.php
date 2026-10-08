@@ -121,7 +121,7 @@ foreach ($citasCategorias as $cat) {
             <div>
                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Ingresos de Hoy</small>
                 <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);">
-                    $ <?= number_format($metricas['ingresos_hoy'], 2) ?>
+                    C$ <?= number_format($metricas['ingresos_hoy'], 2) ?>
                 </h3>
                 <small class="text-muted" style="font-size: 0.78rem;">
                     <i class="bi bi-wallet2"></i> <?= (int)$metricas['transacciones_hoy'] ?> cobros liquidados
@@ -232,7 +232,7 @@ foreach ($citasCategorias as $cat) {
                                         </small>
                                     </td>
                                     <td>
-                                        <span class="fw-bold text-dark" style="font-family: var(--font-serif);">$<?= number_format($cita['total'], 2) ?></span>
+                                        <span class="fw-bold text-dark" style="font-family: var(--font-serif);">C$<?= number_format($cita['total'], 2) ?></span>
                                     </td>
                                     <td>
                                         <?php
@@ -287,7 +287,7 @@ foreach ($citasCategorias as $cat) {
                                     </div>
                                 </div>
                                 <div class="fw-bold text-dark" style="font-family: var(--font-serif);">
-                                    $<?= number_format($p['total'], 2) ?>
+                                    C$<?= number_format($p['total'], 2) ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -378,7 +378,7 @@ foreach ($citasCategorias as $cat) {
                                         <i class="bi bi-bookmark-check text-success"></i> <?= (int)$sp['total_solicitudes'] ?> agendada(s)
                                     </small>
                                     <span class="fw-bold text-dark fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                        $<?= number_format($sp['costo'], 2) ?>
+                                        C$<?= number_format($sp['costo'], 2) ?>
                                     </span>
                                 </div>
                             </div>
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) { return '$' + value; }
+                            callback: function(value) { return 'C$' + value; }
                         },
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'

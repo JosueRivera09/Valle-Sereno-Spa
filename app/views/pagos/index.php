@@ -28,7 +28,7 @@
         <div class="spa-card p-3 d-flex align-items-center justify-content-between">
             <div>
                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Recaudación Hoy</small>
-                <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);">$<?= number_format($totalGeneralHoy, 2) ?></h3>
+                <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);">C$<?= number_format($totalGeneralHoy, 2) ?></h3>
             </div>
             <div class="stat-icon" style="background: rgba(30, 61, 52, 0.1); color: var(--spa-primary);">
                 <i class="bi bi-wallet2"></i>
@@ -39,7 +39,7 @@
         <div class="spa-card p-3 d-flex align-items-center justify-content-between">
             <div>
                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Efectivo en Caja</small>
-                <h3 class="fw-bold mb-0 text-success" style="font-family: var(--font-serif);">$<?= number_format($totalEfectivo, 2) ?></h3>
+                <h3 class="fw-bold mb-0 text-success" style="font-family: var(--font-serif);">C$<?= number_format($totalEfectivo, 2) ?></h3>
             </div>
             <div class="stat-icon" style="background: #eef6f3; color: #3b735c;">
                 <i class="bi bi-cash-coin"></i>
@@ -50,7 +50,7 @@
         <div class="spa-card p-3 d-flex align-items-center justify-content-between">
             <div>
                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Tarjetas</small>
-                <h3 class="fw-bold mb-0 text-primary" style="font-family: var(--font-serif);">$<?= number_format($totalTarjeta, 2) ?></h3>
+                <h3 class="fw-bold mb-0 text-primary" style="font-family: var(--font-serif);">C$<?= number_format($totalTarjeta, 2) ?></h3>
             </div>
             <div class="stat-icon" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd;">
                 <i class="bi bi-credit-card-fill"></i>
@@ -61,7 +61,7 @@
         <div class="spa-card p-3 d-flex align-items-center justify-content-between">
             <div>
                 <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Transferencias</small>
-                <h3 class="fw-bold mb-0 text-warning" style="font-family: var(--font-serif);">$<?= number_format($totalTransf, 2) ?></h3>
+                <h3 class="fw-bold mb-0 text-warning" style="font-family: var(--font-serif);">C$<?= number_format($totalTransf, 2) ?></h3>
             </div>
             <div class="stat-icon" style="background: rgba(255, 193, 7, 0.15); color: #997838;">
                 <i class="bi bi-arrow-left-right"></i>
@@ -135,7 +135,7 @@
                             </td>
                             <td>
                                 <span class="fw-bold text-dark fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                    $<?= number_format($p['monto'], 2) ?>
+                                    C$<?= number_format($p['monto'], 2) ?>
                                 </span>
                             </td>
                             <td>
@@ -169,7 +169,7 @@
                             <option value="">-- Seleccionar Cita Pendiente --</option>
                             <?php foreach ($citasPendientes as $cp): ?>
                                 <option value="<?= $cp['id'] ?>" data-monto="<?= $cp['total'] ?>">
-                                    Cita #<?= $cp['id'] ?> - <?= htmlspecialchars($cp['cliente_nombre']) ?> ($<?= number_format($cp['total'], 2) ?>)
+                                    Cita #<?= $cp['id'] ?> - <?= htmlspecialchars($cp['cliente_nombre']) ?> (C$<?= number_format($cp['total'], 2) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -185,9 +185,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Monto a Cobrar ($ MXN) <span class="text-danger">*</span></label>
+                        <label class="form-label fw-bold small text-dark">Monto a Cobrar (C$ Córdobas) <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <span class="input-group-text">$</span>
+                            <span class="input-group-text">C$</span>
                             <input type="number" step="0.01" id="monto" name="monto" class="form-control" placeholder="0.00" required>
                         </div>
                     </div>
