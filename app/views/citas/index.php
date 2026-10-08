@@ -2,16 +2,23 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
         <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-calendar-heart text-warning me-2"></i>Agenda & Citas de Spa
+            <i class="bi bi-calendar-heart text-warning me-2"></i>
+            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' ? 'Mis Citas & Agenda Asignada' : 'Agenda & Citas de Spa' ?>
         </h4>
-        <p class="text-muted small mb-0">Control de sesiones terapéuticas, asignación de cabinas y horarios.</p>
+        <p class="text-muted small mb-0">
+            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
+                ? 'Consulta de tus sesiones de tratamiento programadas y pacientes asignados.' 
+                : 'Control de sesiones terapéuticas, asignación de cabinas y horarios.' ?>
+        </p>
     </div>
+    <?php if (in_array($_SESSION['rol_nombre'] ?? '', ['Administrador', 'Recepcionista'])): ?>
     <div>
         <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevaCita">
             <i class="bi bi-plus-circle-fill"></i>
             <span>Agendar Cita</span>
         </button>
     </div>
+    <?php endif; ?>
 </div>
 
 <!-- Alertas de Sesión -->
@@ -44,7 +51,9 @@
                     <tr>
                         <td colspan="8" class="text-center py-4 text-muted">
                             <i class="bi bi-calendar-x fs-3 d-block mb-1 text-muted"></i>
-                            No hay citas registradas en la base de datos.
+                            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
+                                ? 'No tienes citas de tratamiento asignadas por el momento.' 
+                                : 'No hay citas registradas en la base de datos.' ?>
                         </td>
                     </tr>
                 <?php else: ?>

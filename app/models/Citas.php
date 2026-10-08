@@ -20,8 +20,8 @@ class Citas {
      * Obtener todas las citas para el listado general / agenda, 
      * incluyendo nombres de cliente y empleado (terapeuta).
      */
-    public function getAll(): array {
-        $stmt = $this->db->prepare("
+    public function getAll(?int $idEmpleado = null): array {
+        $sql = "
             SELECT 
                 c.id,
                 c.id_cliente,
@@ -38,9 +38,18 @@ class Citas {
             FROM citas c
             LEFT JOIN clientes cl ON c.id_cliente = cl.id
             LEFT JOIN empleados e ON c.id_empleado = e.id
-            ORDER BY c.fecha DESC, c.hora_inicio ASC
-        ");
-        $stmt->execute();
+        ";
+
+        $params = [];
+        if ($idEmpleado !== null) {
+            $sql .= " WHERE c.id_empleado = :id_empleado";
+            $params['id_empleado'] = $idEmpleado;
+        }
+
+        $sql .= " ORDER BY c.fecha DESC, c.hora_inicio ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 

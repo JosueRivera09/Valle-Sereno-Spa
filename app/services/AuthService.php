@@ -111,6 +111,7 @@ class AuthService {
         $_SESSION['email']          = $user['email'];
         $_SESSION['rol_id']         = $user['id_rol'];
         $_SESSION['rol_nombre']     = $user['rol_nombre'];
+        $_SESSION['id_empleado']    = $user['id_empleado'] ?? null;
         $_SESSION['cargo']          = $user['cargo'] ?? 'Personal';
         $_SESSION['auth_time']      = time();
 

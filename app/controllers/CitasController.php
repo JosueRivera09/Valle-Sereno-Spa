@@ -28,7 +28,16 @@ class CitasController {
         $clientes = $clienteModel->obtenerTodos();
         $terapeutas = $empleadoModel->getAll('activo');
         $servicios = $servicioModel->obtenerServicios();
-        $citas = $this->citaModel->getAll();
+
+        // Si el rol es 'Terapeuta', filtrar solo sus citas asignadas
+        $rolActual = $_SESSION['rol_nombre'] ?? '';
+        $idEmpleadoSesion = (int)($_SESSION['id_empleado'] ?? 0);
+
+        if ($rolActual === 'Terapeuta' && $idEmpleadoSesion > 0) {
+            $citas = $this->citaModel->getAll($idEmpleadoSesion);
+        } else {
+            $citas = $this->citaModel->getAll();
+        }
 
         $pageTitle = "Citas & Agenda - Valle Sereno Spa";
         $activePage = 'citas';
