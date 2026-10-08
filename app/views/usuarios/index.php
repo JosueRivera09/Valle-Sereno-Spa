@@ -10,12 +10,12 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
         <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-shield-lock-fill text-warning me-2"></i> Gestión de Usuarios & Accesos
+            <i class="bi bi-shield-lock-fill text-warning me-2"></i> Gestión de Usuarios
         </h4>
-        <p class="text-muted small mb-0">Control central de cuentas, asignación de roles corporativos y credenciales encriptadas con BCRYPT.</p>
+        <p class="text-muted small mb-0">Control de cuentas de acceso al sistema, asignación de roles corporativos y credenciales de seguridad.</p>
     </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirModalCrear()">
+        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirModalCrear()">
             <i class="bi bi-person-plus-fill"></i>
             <span>Nuevo Usuario</span>
         </button>

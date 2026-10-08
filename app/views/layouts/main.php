@@ -107,7 +107,7 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
                     </a>
                     <a href="index.php?c=usuarios&a=index" class="nav-spa-link <?= $activePage === 'usuarios' ? 'active' : '' ?>">
                         <i class="bi bi-shield-lock-fill"></i>
-                        <span>Usuarios & Roles</span>
+                        <span>Usuarios</span>
                     </a>
                     <a href="index.php?c=respaldos&a=index" class="nav-spa-link <?= $activePage === 'respaldos' ? 'active' : '' ?>">
                         <i class="bi bi-database-fill-gear"></i>
