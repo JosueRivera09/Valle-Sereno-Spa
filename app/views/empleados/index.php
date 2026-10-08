@@ -1,65 +1,158 @@
 <?php
 $dias = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
+
+// Contadores de Resumen
+$totalActivos = count(array_filter($empleados, fn($e) => $e['estado'] === 'activo'));
+$totalInactivos = count($empleados) - $totalActivos;
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Encabezado del Módulo -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
         <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-person-badge text-warning me-2"></i> Personal Terapéutico & Colaboradores
+            <i class="bi bi-person-badge-fill text-warning me-2"></i> Personal Terapéutico & Especialistas
         </h4>
-        <p class="text-muted small mb-0">Especialidades, turnos de trabajo y disponibilidad semanal.</p>
+        <p class="text-muted small mb-0">Gestión de especialistas en bienestar, credenciales, catálogo de servicios y turnos semanales de atención.</p>
     </div>
-    <button class="btn btn-spa-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
-        <i class="bi bi-person-plus"></i> Registrar Empleado
-    </button>
+    <div>
+        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
+            <i class="bi bi-person-plus-fill fs-6"></i>
+            <span>Nuevo Colaborador</span>
+        </button>
+    </div>
 </div>
 
-<!-- Lista de empleados -->
-<div class="spa-card mb-4">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Cargo</th>
-                    <th>Especialidades</th>
-                    <th>Teléfono</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($empleados)): ?>
-                    <tr><td colspan="6" class="text-center text-muted py-4">No hay empleados registrados.</td></tr>
-                <?php else: ?>
-                    <?php foreach ($empleados as $emp): ?>
-                        <tr>
-                            <td>
-                                <strong><?= htmlspecialchars($emp['nombre_completo']) ?></strong><br>
-                                <small class="text-muted"><?= htmlspecialchars($emp['correo']) ?></small>
-                            </td>
-                            <td><?= htmlspecialchars($emp['cargo']) ?></td>
-                            <td><small><?= htmlspecialchars($emp['especialidades'] ?? '—') ?></small></td>
-                            <td><?= htmlspecialchars($emp['telefono']) ?></td>
-                            <td>
-                                <span class="badge <?= $emp['estado'] === 'activo' ? 'bg-success' : 'bg-secondary' ?>">
-                                    <?= ucfirst($emp['estado']) ?>
-                                </span>
-                            </td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-primary" onclick='editarEmpleado(<?= json_encode($emp) ?>)'>
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-success" onclick="abrirHorarios(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['nombre_completo'], ENT_QUOTES) ?>')">
-                                    <i class="bi bi-calendar-week"></i> Horarios
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+<!-- Tarjetas KPI de Resumen -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-md-4">
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 text-white" style="background: var(--spa-primary);">
+                <i class="bi bi-people-fill fs-3"></i>
+            </div>
+            <div>
+                <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Equipo de Trabajo</small>
+                <span class="fs-5 fw-bold text-dark"><?= count($empleados) ?> Especialistas</span>
+                <small class="d-block text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle me-1"></i><?= $totalActivos ?> activos en cabina</small>
+            </div>
+        </div>
     </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-success text-white">
+                <i class="bi bi-heart-pulse-fill fs-3"></i>
+            </div>
+            <div>
+                <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Servicios Ofertados</small>
+                <span class="fs-5 fw-bold text-dark">Catálogo Spa Completo</span>
+                <small class="d-block text-muted" style="font-size: 0.75rem;">Múltiples disciplinas integradas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+        <div class="spa-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-warning text-dark">
+                <i class="bi bi-clock-history fs-3"></i>
+            </div>
+            <div>
+                <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Horarios & Turnos</small>
+                <span class="fs-5 fw-bold text-dark">Lunes a Sábado</span>
+                <small class="d-block text-muted" style="font-size: 0.75rem;">Atención continua programada</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buscador & Filtro Rápido -->
+<div class="spa-card p-3 mb-4">
+    <div class="row g-3 align-items-center">
+        <div class="col-md-8">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="busquedaTerapeuta" class="form-control border-start-0" placeholder="Buscar especialista por nombre, cargo o especialidad..." onkeyup="filtrarTerapeutas()">
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Mostrando <?= count($empleados) ?> colaboradores registrados</small>
+        </div>
+    </div>
+</div>
+
+<!-- Galería Grid de Tarjetas de Terapeutas -->
+<div class="row g-4 mb-4" id="contenedorTerapeutas">
+    <?php if (empty($empleados)): ?>
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-person-x fs-1 d-block mb-2 text-muted"></i>
+            No hay personal terapéutico registrado en la base de datos.<br>
+            <small>Haz clic en "Nuevo Colaborador" para agregar uno.</small>
+        </div>
+    <?php else: ?>
+        <?php foreach ($empleados as $emp): 
+            $initials = strtoupper(substr($emp['nombre_completo'], 0, 1) . (strpos($emp['nombre_completo'], ' ') !== false ? substr($emp['nombre_completo'], strpos($emp['nombre_completo'], ' ') + 1, 1) : ''));
+            $tagsEspecialidades = array_filter(array_map('trim', explode(',', $emp['especialidades'] ?? '')));
+        ?>
+            <div class="col-md-6 col-lg-4 tarjeta-terapeuta-item">
+                <div class="spa-card p-4 h-100 position-relative d-flex flex-column justify-content-between border-top border-4 border-success shadow-sm hover-shadow transition-all">
+                    
+                    <div>
+                        <!-- Top Avatar & Estado -->
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
+                                     style="width: 52px; height: 52px; font-size: 1.1rem; background: linear-gradient(135deg, var(--spa-primary), #2c5341);">
+                                    <?= htmlspecialchars($initials) ?>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0 fs-6"><?= htmlspecialchars($emp['nombre_completo']) ?></h6>
+                                    <small class="badge bg-light text-primary border" style="font-size: 0.72rem;"><?= htmlspecialchars($emp['cargo']) ?></small>
+                                </div>
+                            </div>
+                            <span class="badge rounded-pill <?= $emp['estado'] === 'activo' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary' ?> px-2 py-1" style="font-size: 0.7rem;">
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><?= ucfirst($emp['estado']) ?>
+                            </span>
+                        </div>
+
+                        <!-- Información de Contacto -->
+                        <div class="p-2 px-3 rounded-3 mb-3" style="background: #f8faf9; font-size: 0.8rem;">
+                            <div class="text-dark mb-1">
+                                <i class="bi bi-telephone text-success me-2"></i><?= htmlspecialchars($emp['telefono']) ?>
+                            </div>
+                            <div class="text-muted text-truncate" title="<?= htmlspecialchars($emp['correo']) ?>">
+                                <i class="bi bi-envelope text-primary me-2"></i><?= htmlspecialchars($emp['correo']) ?>
+                            </div>
+                        </div>
+
+                        <!-- Tags de Especialidades -->
+                        <div class="mb-3">
+                            <small class="text-muted fw-semibold d-block mb-1" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Especialidades Ofertadas:</small>
+                            <?php if (empty($tagsEspecialidades)): ?>
+                                <small class="text-muted italic">Sin especialidades especificadas</small>
+                            <?php else: ?>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <?php foreach ($tagsEspecialidades as $tag): ?>
+                                        <span class="badge bg-white text-dark border px-2 py-1 font-normal" style="font-size: 0.75rem; font-weight: 500;">
+                                            <i class="bi bi-sparkles text-warning me-1"></i><?= htmlspecialchars($tag) ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Footer Acciones -->
+                    <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
+                        <button class="btn btn-outline-success btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1" onclick="abrirHorarios(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['nombre_completo'], ENT_QUOTES) ?>')">
+                            <i class="bi bi-calendar-week"></i>
+                            <span>Turnos & Horarios</span>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm px-2" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp) ?>)'>
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
 
 <!-- Modal Empleado -->
@@ -252,5 +345,15 @@ async function eliminarHorario(id) {
     const data = await res.json();
     alert(data.message);
     if (data.success) cargarHorarios(document.getElementById('horario_id_empleado').value);
+}
+
+function filtrarTerapeutas() {
+    const input = document.getElementById('busquedaTerapeuta').value.toLowerCase();
+    const cards = document.querySelectorAll('#contenedorTerapeutas .tarjeta-terapeuta-item');
+
+    cards.forEach(c => {
+        const text = c.innerText.toLowerCase();
+        c.style.display = text.includes(input) ? '' : 'none';
+    });
 }
 </script>
