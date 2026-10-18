@@ -107,7 +107,7 @@ $totalInactivos = count($empleados) - $totalActivos;
                                 </div>
                             </div>
                             <span class="badge rounded-pill <?= $emp['estado'] === 'activo' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary' ?> px-2 py-1" style="font-size: 0.7rem;">
-                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><?= ucfirst($emp['estado']) ?>
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><?= htmlspecialchars(ucfirst($emp['estado'])) ?>
                             </span>
                         </div>
 
@@ -144,7 +144,7 @@ $totalInactivos = count($empleados) - $totalActivos;
                             <i class="bi bi-calendar-week"></i>
                             <span>Turnos & Horarios</span>
                         </button>
-                        <button class="btn btn-outline-secondary btn-sm px-2" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp) ?>)'>
+                        <button class="btn btn-outline-secondary btn-sm px-2" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
                             <i class="bi bi-pencil-square"></i>
                         </button>
                     </div>
@@ -280,7 +280,7 @@ function editarEmpleado(emp) {
     document.getElementById('emp_especialidades').value = emp.especialidades || '';
     document.getElementById('emp_estado').value = emp.estado;
     document.getElementById('tituloModalEmpleado').textContent = 'Editar Empleado';
-    new bootstrap.Modal(document.getElementById('modalEmpleado')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEmpleado')).show();
 }
 
 document.getElementById('formEmpleado').addEventListener('submit', async function(e) {
@@ -298,7 +298,7 @@ function abrirHorarios(idEmpleado, nombre) {
     document.getElementById('formHorario').reset();
     document.getElementById('horario_id').value = '';
     cargarHorarios(idEmpleado);
-    new bootstrap.Modal(document.getElementById('modalHorarios')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalHorarios')).show();
 }
 
 async function cargarHorarios(idEmpleado) {
@@ -311,12 +311,12 @@ async function cargarHorarios(idEmpleado) {
     }
     tbody.innerHTML = data.data.map(h => `
         <tr>
-            <td>${diasNombres[h.dia_semana] || h.dia_semana}</td>
-            <td>${h.hora_inicio.substring(0,5)}</td>
-            <td>${h.hora_fin.substring(0,5)}</td>
-            <td><span class="badge ${h.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${h.estado}</span></td>
+            <td>${esc(diasNombres[h.dia_semana] || h.dia_semana)}</td>
+            <td>${esc(h.hora_inicio.substring(0,5))}</td>
+            <td>${esc(h.hora_fin.substring(0,5))}</td>
+            <td><span class="badge ${h.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${esc(h.estado)}</span></td>
             <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarHorario(${h.id})">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarHorario(${parseInt(h.id, 10)})">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>

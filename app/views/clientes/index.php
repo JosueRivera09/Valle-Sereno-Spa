@@ -125,7 +125,7 @@
                                         <i class="bi bi-clock-history"></i>
                                     </button>
                                     <button class="btn btn-outline-secondary" title="Editar Expediente" 
-                                            onclick='editarCliente(<?= json_encode($c) ?>)'>
+                                            onclick='editarCliente(<?= json_encode($c, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="btn btn-outline-<?= $c['estado'] === 'activo' ? 'warning' : 'success' ?>" 
@@ -307,16 +307,19 @@ function verHistorialCliente(id, nombre) {
         if (res.success && res.data.length > 0) {
             body.innerHTML = res.data.map(item => `
                 <tr>
-                    <td><span class="fw-semibold">${item.fecha}</span></td>
-                    <td>${item.hora_inicio} - ${item.hora_fin}</td>
-                    <td>${item.terapeuta_nombre || 'N/A'}</td>
-                    <td class="fw-bold">$${parseFloat(item.total).toFixed(2)}</td>
-                    <td><span class="badge bg-secondary rounded-pill">${item.estado}</span></td>
+                    <td><span class="fw-semibold">${esc(item.fecha)}</span></td>
+                    <td>${esc(item.hora_inicio)} - ${esc(item.hora_fin)}</td>
+                    <td>${esc(item.terapeuta_nombre || 'N/A')}</td>
+                    <td class="fw-bold">C$${parseFloat(item.total).toFixed(2)}</td>
+                    <td><span class="badge bg-secondary rounded-pill">${esc(item.estado)}</span></td>
                 </tr>
             `).join('');
         } else {
             body.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">El cliente no registra historial de citas previo.</td></tr>';
         }
+    })
+    .catch(() => {
+        body.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-danger">No se pudo cargar el historial. Intente de nuevo.</td></tr>';
     });
 }
 

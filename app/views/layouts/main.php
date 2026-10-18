@@ -145,7 +145,7 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
                             <?= htmlspecialchars($pageTitle ?? 'Santuario de Bienestar') ?>
                         </h5>
                         <small class="text-muted" style="font-size: 0.78rem;">
-                            <?= date('d \d\e F, Y') ?> &bull; Centro de Relajación & Terapias
+                            <?= date('d') . ' de ' . ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][(int)date('m')] . ', ' . date('Y') ?> &bull; Centro de Relajación & Terapias
                         </small>
                     </div>
                 </div>
@@ -217,6 +217,33 @@ $userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ---------------------------------------------------------------
+        // Protección global CSRF + detección AJAX para TODOS los fetch()
+        // Todas las peticiones POST envían el token (X-CSRF-TOKEN) y la
+        // cabecera X-Requested-With para recibir JSON ante sesión expirada.
+        // ---------------------------------------------------------------
+        const CSRF_TOKEN = '<?= AuthHelper::csrfToken() ?>';
+
+        // Helper global de escape para interpolaciones en innerHTML (previene XSS)
+        function esc(valor) {
+            const div = document.createElement('div');
+            div.textContent = (valor === null || valor === undefined) ? '' : String(valor);
+            return div.innerHTML;
+        }
+
+        const _fetchOriginal = window.fetch;
+        window.fetch = function(input, init) {
+            init = init || {};
+            const headers = new Headers(init.headers || {});
+            headers.set('X-CSRF-TOKEN', CSRF_TOKEN);
+            headers.set('X-Requested-With', 'XMLHttpRequest');
+            init.headers = headers;
+            if (init.body instanceof FormData) {
+                init.body.append('csrf_token', CSRF_TOKEN);
+            }
+            return _fetchOriginal(input, init);
+        };
+
         // Toggle Sidebar en dispositivos móviles
         const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
         const closeSidebarBtn = document.getElementById('closeSidebarBtn');

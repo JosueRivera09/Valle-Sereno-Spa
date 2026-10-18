@@ -305,7 +305,8 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 </style>
 
 <script>
-const CSRF_TOKEN = '<?= htmlspecialchars($csrfToken) ?>';
+// CSRF_TOKEN y el parche global de fetch (X-CSRF-TOKEN / X-Requested-With)
+// los define el layout base app/views/layouts/main.php para todo el sistema.
 
 let filtroRolActual = 'todos';
 
@@ -369,7 +370,7 @@ async function abrirModalEditar(id) {
         document.getElementById('modalUsuarioTitulo').innerHTML = `<i class="bi bi-pencil-square me-2 text-warning"></i> Editar Usuario: ${u.usuario}`;
         document.getElementById('modalAlertError').classList.add('d-none');
 
-        const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalUsuario'));
         modal.show();
     } catch (e) {
         alert('Error de conexión al cargar datos del usuario.');
@@ -416,7 +417,7 @@ function abrirModalPassword(id, usuario) {
     document.getElementById('passUsuarioNombre').innerText = usuario;
     document.getElementById('modalPassAlertError').classList.add('d-none');
 
-    const modal = new bootstrap.Modal(document.getElementById('modalPassword'));
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPassword'));
     modal.show();
 }
 

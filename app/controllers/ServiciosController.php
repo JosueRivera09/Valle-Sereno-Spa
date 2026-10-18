@@ -33,6 +33,7 @@ class ServiciosController {
 
     public function toggleEspecialidad(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $idServicio = (int)($_POST['id_servicio'] ?? 0);
         $idEmpleadoSesion = (int)($_SESSION['id_empleado'] ?? 0);
 
@@ -45,8 +46,21 @@ class ServiciosController {
         echo json_encode($res);
     }
 
+    /**
+     * Alta/edición del catálogo: función administrativa.
+     * Un Terapeuta solo consulta el catálogo y gestiona sus propias especialidades.
+     */
     public function guardar(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
+
+        $estado = $_POST['estado'] ?? 'activo';
+        if (!in_array($estado, ['activo', 'inactivo'], true)) {
+            echo json_encode(['success' => false, 'mensaje' => 'Estado no válido.']);
+            return;
+        }
+
         $data = [
             'id'               => $_POST['id'] ?? null,
             'id_categoria'     => (int)($_POST['id_categoria'] ?? 0),
@@ -54,7 +68,7 @@ class ServiciosController {
             'descripcion'      => trim($_POST['descripcion'] ?? ''),
             'costo'            => (float)($_POST['costo'] ?? 0.00),
             'duracion_minutos' => (int)($_POST['duracion_minutos'] ?? 0),
-            'estado'           => $_POST['estado'] ?? 'activo'
+            'estado'           => $estado
         ];
 
         $res = $this->service->guardarServicio($data);
@@ -63,6 +77,9 @@ class ServiciosController {
 
     public function guardarCategoria(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
+
         $data = [
             'nombre'      => trim($_POST['nombre'] ?? ''),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
@@ -74,8 +91,17 @@ class ServiciosController {
 
     public function cambiarEstado(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
+
         $id = (int)($_POST['id'] ?? 0);
         $estado = $_POST['estado'] ?? 'inactivo';
+
+        if (!in_array($estado, ['activo', 'inactivo'], true)) {
+            echo json_encode(['success' => false, 'mensaje' => 'Estado no válido.']);
+            return;
+        }
+
         $res = $this->service->cambiarEstadoServicio($id, $estado);
         echo json_encode($res);
     }

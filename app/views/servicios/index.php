@@ -151,7 +151,7 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-secondary" title="Editar Servicio" onclick='editarServicio(<?= json_encode($s) ?>)'>
+                                        <button class="btn btn-outline-secondary" title="Editar Servicio" onclick='editarServicio(<?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <button class="btn btn-outline-<?= $s['estado'] === 'activo' ? 'warning' : 'success' ?>" 

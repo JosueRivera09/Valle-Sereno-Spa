@@ -32,7 +32,7 @@
         <?= htmlspecialchars($_SESSION['mensaje']) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <?unset($_SESSION['mensaje'], $_SESSION['mensaje_tipo']); ?>
+    <?php unset($_SESSION['mensaje'], $_SESSION['mensaje_tipo']); ?>
 <?php endif; ?>
 
 <!-- Tarjetas KPI de Estado de la Base de Datos -->
@@ -151,7 +151,7 @@
                                     <i class="bi bi-clock me-1"></i><?= $r['fecha'] ?> • <span class="fw-semibold"><?= $r['tamano_kb'] ?> KB</span>
                                 </small>
                             </div>
-                            <button class="btn btn-outline-danger btn-sm p-1 px-2" title="Eliminar copia" onclick="eliminarRespaldo('<?= htmlspecialchars($r['nombre']) ?>')">
+                            <button class="btn btn-outline-danger btn-sm p-1 px-2" title="Eliminar copia" onclick="eliminarRespaldo('<?= htmlspecialchars($r['nombre'], ENT_QUOTES) ?>')">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -173,6 +173,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="index.php?c=respaldos&a=restaurar" method="POST" enctype="multipart/form-data" onsubmit="return confirm('ATENCIÓN: Esta acción reemplazará los datos actuales de spa_db por los del archivo SQL seleccionado. ¿Deseas continuar?');">
+                <input type="hidden" name="csrf_token" value="<?= AuthHelper::csrfToken() ?>">
                 <div class="modal-body p-4">
                     <div class="alert alert-warning py-2 px-3 small mb-3">
                         <i class="bi bi-info-circle me-1"></i> Selecciona un archivo de respaldo con extensión <strong>.sql</strong> generado previamente por este sistema.
@@ -197,7 +198,7 @@
 function guardarRespaldoLocal() {
     if (!confirm('¿Deseas generar y guardar una copia de seguridad completa en el almacenamiento interno del servidor?')) return;
 
-    fetch('index.php?c=respaldos&a=generarLocal')
+    fetch('index.php?c=respaldos&a=generarLocal', { method: 'POST' })
     .then(r => r.json())
     .then(res => {
         if (res.success) {
@@ -206,18 +207,22 @@ function guardarRespaldoLocal() {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al generar el respaldo.'));
 }
 
 function optimizarTablas() {
-    fetch('index.php?c=respaldos&a=optimizar')
+    fetch('index.php?c=respaldos&a=optimizar', { method: 'POST' })
     .then(r => r.json())
     .then(res => {
         if (res.success) {
             alert('¡Las tablas de la base de datos se han optimizado correctamente!');
             location.reload();
+        } else {
+            alert('Error: ' + (res.mensaje || 'No se pudieron optimizar las tablas.'));
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al optimizar las tablas.'));
 }
 
 function eliminarRespaldo(filename) {
@@ -237,6 +242,7 @@ function eliminarRespaldo(filename) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al eliminar la copia.'));
 }
 </script>
