@@ -229,16 +229,19 @@ function filtrarReportes(e) {
 
             body.innerHTML = res.data.map(item => `
                 <tr>
-                    <td><span class="fw-semibold text-dark">${item.fecha_pago}</span></td>
-                    <td><div class="fw-bold text-dark">${item.cliente_nombre}</div></td>
-                    <td><small class="text-muted"><i class="bi bi-person me-1"></i>${item.terapeuta_nombre}</small></td>
-                    <td><span class="badge bg-light text-dark border">${item.tipo_pago}</span></td>
+                    <td><span class="fw-semibold text-dark">${esc(item.fecha_pago)}</span></td>
+                    <td><div class="fw-bold text-dark">${esc(item.cliente_nombre)}</div></td>
+                    <td><small class="text-muted"><i class="bi bi-person me-1"></i>${esc(item.terapeuta_nombre)}</small></td>
+                    <td><span class="badge bg-light text-dark border">${esc(item.tipo_pago)}</span></td>
                     <td class="text-end fw-bold text-success fs-6" style="font-family: var(--font-serif);">C$${parseFloat(item.monto).toFixed(2)}</td>
                 </tr>
             `).join('');
         } else {
             body.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No existen transacciones liquidadas registradas en el periodo seleccionado.</td></tr>';
         }
+    })
+    .catch(() => {
+        body.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">No se pudo generar el informe. Intente de nuevo.</td></tr>';
     });
 }
 
