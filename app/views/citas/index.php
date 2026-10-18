@@ -107,10 +107,11 @@
                                             <button class="btn btn-outline-success py-1 px-2" title="Confirmar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Confirmada')">
                                                 <i class="bi bi-play-fill"></i> <span class="d-none d-lg-inline ms-1">Confirmar</span>
                                             </button>
+                                        <?php elseif ($c['estado'] === 'Confirmada'): ?>
+                                            <button class="btn btn-outline-primary py-1 px-2" title="Marcar Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
+                                                <i class="bi bi-check2-all"></i> <span class="d-none d-lg-inline ms-1">Completar</span>
+                                            </button>
                                         <?php endif; ?>
-                                        <button class="btn btn-outline-primary py-1 px-2" title="Marcar Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
-                                            <i class="bi bi-check2-all"></i> <span class="d-none d-lg-inline ms-1">Completar</span>
-                                        </button>
                                         <?php if (($_SESSION['rol_nombre'] ?? '') !== 'Terapeuta'): ?>
                                             <button class="btn btn-outline-danger py-1 px-2" title="Cancelar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Cancelada')">
                                                 <i class="bi bi-x-lg"></i> <span class="d-none d-lg-inline ms-1">Cancelar</span>
@@ -143,6 +144,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="index.php?c=citas&a=guardar" method="POST" id="formNuevaCita">
+                <input type="hidden" name="csrf_token" value="<?= AuthHelper::csrfToken() ?>">
                 <div class="modal-body p-4">
                     
                     <!-- 1. Selección o Registro Express de Cliente -->
@@ -198,7 +200,7 @@
                         <label class="form-label fw-bold small text-dark">
                             <i class="bi bi-stars text-warning me-1"></i> Tratamiento / Servicio <span class="text-muted font-normal">(Opcional para cálculo automático)</span>
                         </label>
-                        <select id="select_servicio" class="form-select" onchange="seleccionarServicio(this)">
+                        <select id="select_servicio" name="id_servicio" class="form-select" onchange="seleccionarServicio(this)">
                             <option value="" data-costo="0" data-duracion="60">-- Seleccionar Tratamiento del Menú --</option>
                             <?php foreach ($servicios as $srv): ?>
                                 <option value="<?= $srv['id'] ?>" data-costo="<?= $srv['costo'] ?>" data-duracion="<?= $srv['duracion_minutos'] ?>">
@@ -325,16 +327,32 @@ function guardarClienteExpress() {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al registrar el cliente.'));
 }
+
+// Validación de coherencia horaria antes de enviar el formulario de nueva cita
+document.getElementById('formNuevaCita').addEventListener('submit', function(e) {
+    const ini = document.getElementById('input_hora_inicio').value;
+    const fin = document.getElementById('input_hora_fin').value;
+    if (ini && fin && fin <= ini) {
+        e.preventDefault();
+        alert('La hora de fin debe ser posterior a la hora de inicio.');
+    }
+});
 
 function seleccionarServicio(select) {
     const opt = select.options[select.selectedIndex];
-    const costo = opt.getAttribute('data-costo');
+    const costo = parseFloat(opt.getAttribute('data-costo') || '0');
     const duracion = parseInt(opt.getAttribute('data-duracion') || 60);
+    const inputTotal = document.getElementById('input_total');
 
-    if (costo) {
-        document.getElementById('input_total').value = parseFloat(costo).toFixed(2);
+    if (costo > 0) {
+        // El servidor calculará el total real desde el catálogo; el campo queda como referencia
+        inputTotal.value = costo.toFixed(2);
+        inputTotal.readOnly = true;
+    } else {
+        inputTotal.readOnly = false;
     }
 
     // Calcular hora fin automática basada en la duración del servicio
@@ -355,14 +373,33 @@ function seleccionarServicio(select) {
 function actualizarHorarioYDisponibilidad() {
     const fecha = document.getElementById('input_fecha').value;
     const horaInicio = document.getElementById('input_hora_inicio').value;
-    const horaFin = document.getElementById('input_hora_fin').value;
-    const idServicio = document.getElementById('select_servicio')?.value || '';
+    const selectServicio = document.getElementById('select_servicio');
+    const idServicio = selectServicio?.value || '';
     const selectTerapeutas = document.getElementById('select_id_empleado');
     const lblState = document.getElementById('lblEstadoTerapeutas');
 
+    // Recalcular hora fin si cambió la hora de inicio y hay un servicio con duración definida
+    if (idServicio) {
+        const duracion = parseInt(selectServicio.options[selectServicio.selectedIndex].getAttribute('data-duracion') || 0);
+        if (duracion > 0 && horaInicio) {
+            const parts = horaInicio.split(':');
+            const dateObj = new Date();
+            dateObj.setHours(parseInt(parts[0]), parseInt(parts[1]) + duracion, 0);
+            document.getElementById('input_hora_fin').value =
+                `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+        }
+    }
+
+    const horaFin = document.getElementById('input_hora_fin').value;
+
     if (!fecha || !horaInicio || !horaFin) return;
 
-    lblState.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat spin"></i> Verificando terapeutas libres...</span>';
+    if (horaFin <= horaInicio) {
+        lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> La hora de fin debe ser posterior a la de inicio.</span>';
+        return;
+    }
+
+    lblState.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat"></i> Verificando terapeutas libres...</span>';
 
     fetch(`index.php?c=citas&a=consultarDisponibilidad&fecha=${fecha}&hora_inicio=${horaInicio}&hora_fin=${horaFin}&id_servicio=${idServicio}`)
     .then(r => r.json())
@@ -378,9 +415,12 @@ function actualizarHorarioYDisponibilidad() {
                 });
                 lblState.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i> ${res.data.length} terapeuta(s) disponible(s) en este horario.</span>`;
             } else {
-                lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No hay terapeutas disponibles en este horario (cruce detectado).</span>';
+                lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No hay terapeutas disponibles en este horario (cruce o fuera de turno).</span>';
             }
         }
+    })
+    .catch(() => {
+        lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No se pudo verificar la disponibilidad. Intente de nuevo.</span>';
     });
 }
 
