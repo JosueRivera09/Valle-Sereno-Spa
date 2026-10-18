@@ -68,14 +68,14 @@ ON DUPLICATE KEY UPDATE nombre_completo=VALUES(nombre_completo), telefono=VALUES
 -- ----------------------------------------------------------------------------
 -- 4. USUARIOS DEL SISTEMA
 -- Contraseña universal para todos: Admin123*
--- Hash bcrypt: $2y$10$vNm2aJ4rahvc58ClFyY5yOEEJnWEGDyshwm1.6KJ8OO3M8gmEcIre
+-- Hash bcrypt verificado: password_verify('Admin123*', hash) => true
 -- ----------------------------------------------------------------------------
 INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado, ultimo_acceso) VALUES
-(4, 3, 4, 'andrea.terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-28 16:30:00'),
-(5, 3, 5, 'david.terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-29 08:15:00'),
-(6, 3, 6, 'lucia.terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-29 09:00:00'),
-(7, 2, 7, 'mariana.recepcion', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo', '2026-09-29 11:20:00')
-ON DUPLICATE KEY UPDATE usuario=VALUES(usuario), estado=VALUES(estado);
+(4, 3, 4, 'andrea.terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-28 16:30:00'),
+(5, 3, 5, 'david.terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 08:15:00'),
+(6, 3, 6, 'lucia.terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 09:00:00'),
+(7, 2, 7, 'mariana.recepcion', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 11:20:00')
+ON DUPLICATE KEY UPDATE usuario=VALUES(usuario), estado=VALUES(estado), password_hash=VALUES(password_hash);
 
 -- ----------------------------------------------------------------------------
 -- 5. DISPONIBILIDAD HORARIA DEL PERSONAL
@@ -141,7 +141,7 @@ INSERT INTO citas (id, id_cliente, id_empleado, fecha, hora_inicio, hora_fin, to
 (5, 5, 6, CURRENT_DATE(), '15:30:00', '16:45:00', 85.00, 'Pendiente', 'Cliente con piel sensible; usar mascarilla hipoalergénica.'),
 (6, 6, 4, CURRENT_DATE(), '17:00:00', '18:00:00', 45.00, 'Confirmada', 'Masaje sueco clásico.'),
 (7, 7, 3, CURRENT_DATE(), '08:00:00', '09:00:00', 70.00, 'Completada', 'Sesión matutina completada satisfactoriamente.'),
-(8, 8, 5, CURRENT_DATE(), '18:30:00', '19:15:00', 40.00, 'Pendiente', 'Reflexología podal vespertina.'),
+(8, 8, 5, CURRENT_DATE(), '15:15:00', '16:00:00', 40.00, 'Pendiente', 'Reflexología podal vespertina.'),
 
 -- Citas de Ayer y días anteriores (Histórico completado y cancelado)
 (9, 9, 3, DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY), '10:00:00', '11:15:00', 65.00, 'Completada', 'Piedras calientes.'),
@@ -157,9 +157,12 @@ INSERT INTO citas (id, id_cliente, id_empleado, fecha, hora_inicio, hora_fin, to
 (17, 8, 5, DATE_ADD(CURRENT_DATE(), INTERVAL 2 DAY), '15:00:00', '16:00:00', 55.00, 'Pendiente', 'Drenaje linfático.')
 ON DUPLICATE KEY UPDATE total=VALUES(total), estado=VALUES(estado), observaciones=VALUES(observaciones);
 
--- ----------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------- 
 -- 8. DETALLE DE CITAS (Servicios asociados)
--- ----------------------------------------------------------------------------
+-- Limpieza previa para que el seed sea re-ejecutable sin duplicar registros
+-- ---------------------------------------------------------------------------- 
+DELETE FROM cita_detalles WHERE id_cita BETWEEN 1 AND 17;
+
 INSERT INTO cita_detalles (id_cita, id_servicio, precio_aplicado, duracion_aplicada) VALUES
 -- Cita 1: Piedras volcánicas
 (1, 2, 65.00, 75),
@@ -192,7 +195,10 @@ INSERT INTO cita_detalles (id_cita, id_servicio, precio_aplicado, duracion_aplic
 -- ----------------------------------------------------------------------------
 -- 9. PAGOS REGISTRADOS
 -- Transacciones para citas de hoy y días previos
+-- Limpieza previa para que el seed sea re-ejecutable sin duplicar ingresos
 -- ----------------------------------------------------------------------------
+DELETE FROM pagos WHERE id_cita BETWEEN 1 AND 17;
+
 INSERT INTO pagos (id_cita, tipo_pago, fecha_pago, monto, estado) VALUES
 -- Pagos recibidos el día de hoy (Suman ingresos para el Dashboard)
 (7, 'Efectivo', NOW(), 70.00, 'Pagado'),

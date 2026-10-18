@@ -183,11 +183,11 @@ INSERT INTO empleados (id, nombre_completo, telefono, correo, cargo, especialida
 (3, 'Mateo Delgado', '3015554321', 'terapeuta@vallesereno.com', 'Terapeuta Principal', 'Masajes Holísticos, Aromaterapia', 'activo');
 
 -- Inserción de Usuarios iniciales (Contraseña universal: Admin123*)
--- Hash generado con password_hash('Admin123*', PASSWORD_BCRYPT)
+-- Hash generado con password_hash('Admin123*', PASSWORD_BCRYPT) y verificado con password_verify
 INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado) VALUES
-(1, 1, 1, 'admin', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo'),
-(2, 2, 2, 'recepcion', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo'),
-(3, 3, 3, 'terapeuta', '$2y$10$iIH8ejIOIZL/Q18SrGTflOxYtlTSQp7W.X02xOugjswzXjygXtfYa', 'activo');
+(1, 1, 1, 'admin', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo'),
+(2, 2, 2, 'recepcion', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo'),
+(3, 3, 3, 'terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo');
 
 /*
 ================================================================================
