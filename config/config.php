@@ -8,9 +8,12 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Zona horaria coherente con los NOW()/CURDATE() de MySQL (Nicaragua)
+date_default_timezone_set('America/Managua');
+
 // Rutas base
 define('APP_NAME', 'Valle Sereno Spa & Wellness');
-define('BASE_URL', 'http://localhost/SpaValleSereno');
+define('BASE_URL', 'http://localhost/Valle-Sereno-Spa');
 define('CURRENCY_SYMBOL', 'C$');
 
 // Credenciales Base de Datos XAMPP

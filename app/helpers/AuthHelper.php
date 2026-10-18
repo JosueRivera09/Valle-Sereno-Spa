@@ -68,10 +68,23 @@ class AuthHelper {
                 echo json_encode(['success' => false, 'message' => 'Acceso denegado: No tiene permisos suficientes.']);
                 exit;
             }
+            // Redirigir SIEMPRE a un módulo que el rol SÍ pueda consultar
+            // (nunca al dashboard: el Terapeuta no tiene acceso y se producía un bucle infinito)
             $_SESSION['warning_flash'] = 'No tienes permiso para acceder a esa sección.';
-            header('Location: index.php?c=dashboard&a=index');
+            header('Location: ' . self::homeUrl());
             exit;
         }
+    }
+
+    /**
+     * URL "segura" de inicio según el rol del usuario autenticado.
+     * Evita bucles de redirección cuando un rol sin acceso al Dashboard entra a la raíz.
+     */
+    public static function homeUrl(): string {
+        self::initSession();
+        return (($_SESSION['rol_nombre'] ?? '') === 'Terapeuta')
+            ? 'index.php?c=citas&a=index'
+            : 'index.php?c=dashboard&a=index';
     }
 
     /**

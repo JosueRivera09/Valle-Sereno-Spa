@@ -19,7 +19,7 @@ class AuthService {
      */
     public function login(string $loginIdentifier, string $password): array {
         $loginIdentifier = trim($loginIdentifier);
-        $password = trim($password);
+        // Nota: la contraseña NO se recorta: los espacios forman parte válida de una contraseña
         $maxAttempts = 3;
 
         if (empty($loginIdentifier) || empty($password)) {
@@ -100,10 +100,11 @@ class AuthService {
         // 4. Si las credenciales son válidas, restablecer intentos fallidos
         $this->usuarioModel->resetFailedAttempts((int)$user['id']);
 
-        // Iniciar sesión y guardar datos del usuario
+        // Regenerar el ID de sesión tras autenticar (previene fijación de sesión)
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        session_regenerate_id(true);
 
         $_SESSION['usuario_id']     = $user['id'];
         $_SESSION['usuario']        = $user['usuario'];

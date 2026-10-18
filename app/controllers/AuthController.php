@@ -20,9 +20,9 @@ class AuthController {
             session_start();
         }
 
-        // Si ya está autenticado, enviarlo directo al Dashboard
+        // Si ya está autenticado, enviarlo directo a su módulo inicial según rol
         if (isset($_SESSION['usuario_id'])) {
-            header('Location: index.php?c=dashboard&a=index');
+            header('Location: ' . AuthHelper::homeUrl());
             exit;
         }
 
