@@ -31,6 +31,7 @@ class PagosController {
 
     public function cobrar(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
 
         // Verificar si la caja está abierta antes de cobrar
         $estadoCaja = $this->cajaService->obtenerEstadoCaja();
@@ -52,6 +53,7 @@ class PagosController {
 
     public function abrirCaja(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $idUsuario = (int)($_SESSION['usuario_id'] ?? 0);
         $montoInicial = (float)($_POST['monto_inicial'] ?? 0.00);
         $observaciones = trim($_POST['observaciones'] ?? '');
@@ -62,6 +64,7 @@ class PagosController {
 
     public function cerrarCaja(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $montoFinalEfectivo = (float)($_POST['monto_final_efectivo'] ?? 0.00);
         $observaciones = trim($_POST['observaciones'] ?? '');
 

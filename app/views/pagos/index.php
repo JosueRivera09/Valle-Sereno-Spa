@@ -315,8 +315,8 @@
                         <select id="id_cita" name="id_cita" class="form-select" onchange="actualizarMontoPorCita(this)" required>
                             <option value="">-- Seleccionar Cita Pendiente --</option>
                             <?php foreach ($citasPendientes as $cp): ?>
-                                <option value="<?= $cp['id'] ?>" data-monto="<?= $cp['total'] ?>">
-                                    Cita #<?= $cp['id'] ?> - <?= htmlspecialchars($cp['cliente_nombre']) ?> (C$<?= number_format($cp['total'], 2) ?>)
+                                <option value="<?= $cp['id'] ?>" data-monto="<?= $cp['saldo_pendiente'] ?>">
+                                    Cita #<?= $cp['id'] ?> - <?= htmlspecialchars($cp['cliente_nombre']) ?> (Saldo: C$<?= number_format($cp['saldo_pendiente'], 2) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -356,6 +356,15 @@ const MONTO_ESPERADO_EFECTIVO = <?= (float)($estadoCaja['monto_esperado_efectivo
 
 document.addEventListener('DOMContentLoaded', () => {
     modalCobroBs = new bootstrap.Modal(document.getElementById('modalCobro'));
+
+    // Reiniciar el formulario de arqueo cada vez que se cierra el modal de cierre de caja
+    const modalCerrarCajaEl = document.getElementById('modalCerrarCaja');
+    if (modalCerrarCajaEl) {
+        modalCerrarCajaEl.addEventListener('hidden.bs.modal', () => {
+            document.getElementById('formCerrarCaja').reset();
+            document.getElementById('lblResultadoDiferencia').textContent = 'Ingresa el efectivo contado';
+        });
+    }
 });
 
 function prepararNuevoCobro() {
@@ -387,7 +396,8 @@ function procesarCobro(e) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al procesar el cobro.'));
 }
 
 function procesarAbrirCaja(e) {
@@ -406,7 +416,8 @@ function procesarAbrirCaja(e) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al abrir la caja.'));
 }
 
 function calcularCuadreCaja() {
@@ -417,7 +428,8 @@ function calcularCuadreCaja() {
 
     if (isNaN(contado)) return;
 
-    if (dif === 0) {
+    // Tolerancia de medio centavo: evita falsos faltantes por redondeo de punto flotante
+    if (Math.abs(dif) < 0.005) {
         box.style.background = '#eef8f3';
         lbl.className = 'fs-5 fw-bold text-success';
         lbl.innerHTML = '<i class="bi bi-check-circle me-1"></i> Cuadre Perfecto (Sin Diferencia)';
@@ -448,7 +460,8 @@ function procesarCerrarCaja(e) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al cerrar la caja.'));
 }
 
 function imprimirTicket(idPago) {
