@@ -25,10 +25,11 @@ class SimpleRunner {
         }
     }
 
-    public function summary(): void {
+    public function summary(): int {
         echo "\n----------------------------------------\n";
         echo "RESULTADOS DEL TEST: {$this->passed} pasados, {$this->failed} fallidos.\n";
         echo "----------------------------------------\n";
+        return $this->failed;
     }
 }
 
@@ -71,4 +72,5 @@ $res4 = $service->crearCliente([
 ]);
 $runner->assert($res4['success'] === true, 'Registro exitoso de cliente');
 
-$runner->summary();
+$fallos = $runner->summary();
+exit($fallos > 0 ? 1 : 0);

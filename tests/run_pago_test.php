@@ -20,10 +20,11 @@ class SimpleRunner {
         }
     }
 
-    public function summary(): void {
+    public function summary(): int {
         echo "\n----------------------------------------\n";
         echo "RESULTADOS PAGOS TEST: {$this->passed} pasados, {$this->failed} fallidos.\n";
         echo "----------------------------------------\n";
+        return $this->failed;
     }
 }
 
@@ -62,4 +63,5 @@ $res4 = $service->validarPago([
 ]);
 $runner->assert($res4['valido'] === false, 'Rechazo de cobro con monto de $0.00');
 
-$runner->summary();
+$fallos = $runner->summary();
+exit($fallos > 0 ? 1 : 0);
