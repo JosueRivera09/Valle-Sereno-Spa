@@ -5,7 +5,7 @@
 -- ================================================================================
 USE spa_db;
 
--- 1. Restablecer todas las cuentas a la contraseña documenteda Admin123*
+-- 1. Restablecer todas las cuentas a la contraseña documentada Admin123*
 --    (hash bcrypt generado con password_hash('Admin123*', PASSWORD_BCRYPT) y
 --     verificado con password_verify)
 UPDATE usuarios

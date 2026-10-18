@@ -42,7 +42,7 @@ Valle-Sereno-Spa/
 │   │   ├── ServicioModel.php        # Catálogo de servicios y especialidades
 │   │   ├── PagoModel.php            # Pagos, validación de cobro y control de duplicados
 │   │   ├── CajaModel.php            # Sesiones de caja, arqueos y cierres
-│   │   ├── ReporteModel.php         # Consultes contables y fiscales
+│   │   ├── ReporteModel.php         # Consultas contables y fiscales
 │   │   ├── Dashboard.php            # Métricas e indicadores del panel
 │   │   └── RespaldoModel.php        # Generación/restauración de dumps SQL
 │   ├── services/            # [Capa de Negocio]: Reglas de negocio, validaciones y lógica
@@ -110,7 +110,7 @@ El proyecto se desarrolló aplicando **Scrum** (los roles no se detallan por dec
 | **Sprint 4** | *“Como administrador, quiero reportes contables exportables”* | Módulo de Reportes (filtros, CSV/Excel, PDF) con tests |
 | **Sprint 5** | *“Como terapeuta, quiero ver solo mis citas y avanzar su estado”* | Permisos por rol, disponibilidad en tiempo real, rediseño del modal de citas |
 | **Sprint 6** | *“Como administrador, quiero gestionar usuarios y respaldos seguros”* | Usuarios con bloqueo por intentos, módulo de Respaldos, ticket PDF y cierre de caja (Fase 1) |
-| **Sprint 7 (Hardening)* | *“Como usuario, quiero un sistema íntegro y a prueba de errores”* | CSRF global, máquina de estados de citas, anti cobros duplicados, agendamiento transaccional, validación de turnos, seeds idempotentes y corrección de hashes |
+| **Sprint 7 (Hardening)** | *“Como usuario, quiero un sistema íntegro y a prueba de errores”* | CSRF global, máquina de estados de citas, anti cobros duplicados, agendamiento transaccional, validación de turnos, seeds idempotentes y corrección de hashes |
 
 ### Prácticas Scrum aplicadas
 
