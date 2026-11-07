@@ -30,19 +30,41 @@ class CajaModel {
     }
 
     /**
-     * Abrir turno / sesión de caja con fondo inicial
+     * Abrir turno / sesión de caja con fondo inicial.
+     * Protegido contra aperturas dobles concurrentes mediante bloqueo FOR UPDATE.
      */
-    public function abrirCaja(int $idUsuario, float $montoInicial, ?string $observaciones = null): int {
-        $stmt = $this->db->prepare("
-            INSERT INTO caja_sesiones (id_usuario, fecha_apertura, monto_inicial, observaciones, estado)
-            VALUES (:id_usuario, NOW(), :monto_inicial, :observaciones, 'abierta')
-        ");
-        $stmt->execute([
-            'id_usuario'    => $idUsuario,
-            'monto_inicial' => $montoInicial,
-            'observaciones' => $observaciones
-        ]);
-        return (int)$this->db->lastInsertId();
+    public function abrirCaja(int $idUsuario, float $montoInicial, ?string $observaciones = null) {
+        try {
+            $this->db->beginTransaction();
+
+            // Bloquear las sesiones abiertas para serializar aperturas simultáneas
+            $stmtLock = $this->db->prepare("SELECT id FROM caja_sesiones WHERE estado = 'abierta' FOR UPDATE");
+            $stmtLock->execute();
+            if ($stmtLock->fetch()) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            $stmt = $this->db->prepare("
+                INSERT INTO caja_sesiones (id_usuario, fecha_apertura, monto_inicial, observaciones, estado)
+                VALUES (:id_usuario, NOW(), :monto_inicial, :observaciones, 'abierta')
+            ");
+            $stmt->execute([
+                'id_usuario'    => $idUsuario,
+                'monto_inicial' => $montoInicial,
+                'observaciones' => $observaciones
+            ]);
+
+            $id = (int)$this->db->lastInsertId();
+            $this->db->commit();
+            return $id;
+        } catch (Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            error_log('[CajaModel::abrirCaja] ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -63,10 +85,14 @@ class CajaModel {
     }
 
     /**
-     * Cerrar y realizar el arqueo final de la sesión de caja
+     * Cerrar y realizar el arqueo final de la sesión de caja.
+     * Devuelve false si la sesión ya no estaba abierta (cierre duplicado).
+     * Las observaciones vacías no ensucian el registro con separadores colgantes.
      */
     public function cerrarCaja(int $idCaja, float $montoFinalEfectivo, float $montoEsperadoEfectivo, float $diferencia, float $totalTarjeta, float $totalTransferencia, ?string $observaciones = null): bool {
-        $stmt = $this->db->prepare("
+        $obsLimpia = trim((string)($observaciones ?? ''));
+
+        $sql = "
             UPDATE caja_sesiones 
             SET fecha_cierre = NOW(),
                 monto_final_efectivo = :final_efectivo,
@@ -74,20 +100,29 @@ class CajaModel {
                 diferencia_efectivo = :diferencia,
                 monto_tarjeta = :tarjeta,
                 monto_transferencia = :transferencia,
-                observaciones = COALESCE(CONCAT(observaciones, ' | ', :obs), :obs2),
+                " . ($obsLimpia !== ''
+                    ? "observaciones = CASE WHEN observaciones IS NULL OR observaciones = '' THEN :obs ELSE CONCAT(observaciones, ' | ', :obs2) END,"
+                    : "") . "
                 estado = 'cerrada'
             WHERE id = :id AND estado = 'abierta'
-        ");
-        return $stmt->execute([
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $params = [
             'id'                => $idCaja,
             'final_efectivo'    => $montoFinalEfectivo,
             'esperado_efectivo' => $montoEsperadoEfectivo,
             'diferencia'        => $diferencia,
             'tarjeta'           => $totalTarjeta,
-            'transferencia'     => $totalTransferencia,
-            'obs'               => $observaciones ?? '',
-            'obs2'              => $observaciones ?? ''
-        ]);
+            'transferencia'     => $totalTransferencia
+        ];
+        if ($obsLimpia !== '') {
+            $params['obs']  = $obsLimpia;
+            $params['obs2'] = $obsLimpia;
+        }
+
+        $stmt->execute($params);
+        return $stmt->rowCount() > 0;
     }
 
     /**

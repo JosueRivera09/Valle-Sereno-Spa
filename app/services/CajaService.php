@@ -50,6 +50,9 @@ class CajaService {
         }
 
         $idNew = $this->model->abrirCaja($idUsuario, $montoInicial, $observaciones);
+        if (!$idNew) {
+            return ['success' => false, 'mensaje' => 'No se pudo abrir la caja: ya existe una sesión abierta o hubo un error interno.'];
+        }
         return ['success' => true, 'mensaje' => 'Sesión de caja abierta correctamente.', 'id' => $idNew];
     }
 
@@ -61,7 +64,7 @@ class CajaService {
 
         $caja = $estadoCaja['caja'];
         $montoEsperado = (float)$estadoCaja['monto_esperado_efectivo'];
-        $diferencia = $montoFinalEfectivo - $montoEsperado;
+        $diferencia = round($montoFinalEfectivo - $montoEsperado, 2);
 
         $res = $this->model->cerrarCaja(
             (int)$caja['id'],
@@ -74,8 +77,9 @@ class CajaService {
         );
 
         if ($res) {
-            $msgDiferencia = ($diferencia === 0.0) 
-                ? 'Cuadre perfecto de efectivo.' 
+            // Tolerancia de medio centavo: evita falsos faltantes por redondeo IEEE754
+            $msgDiferencia = (abs($diferencia) < 0.005)
+                ? 'Cuadre perfecto de efectivo.'
                 : ($diferencia > 0 ? "Sobrante de efectivo: C$" . number_format($diferencia, 2) : "Faltante de efectivo: C$" . number_format(abs($diferencia), 2));
 
             return [
@@ -85,7 +89,7 @@ class CajaService {
             ];
         }
 
-        return ['success' => false, 'mensaje' => 'Error al registrar el cierre de caja.'];
+        return ['success' => false, 'mensaje' => 'No se cerró la caja: la sesión ya había sido cerrada previamente.'];
     }
 
     public function obtenerHistorial(): array {

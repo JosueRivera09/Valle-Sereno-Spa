@@ -1,0 +1,10 @@
+# Bloqueo de acceso directo al almacenamiento interno del servidor.
+# Los respaldos contienen datos sensibles (PII y hashes): solo deben
+# descargarse mediante el controlador autenticado index.php?c=respaldos&a=descargar
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

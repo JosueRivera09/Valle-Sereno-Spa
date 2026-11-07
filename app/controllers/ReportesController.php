@@ -23,23 +23,39 @@ class ReportesController {
         require_once __DIR__ . '/../views/layouts/main.php';
     }
 
+    /**
+     * Valida y normaliza un parámetro de fecha YYYY-MM-DD recibido por GET.
+     */
+    private function fechaValida(string $fecha, string $fallback): string {
+        $obj = DateTime::createFromFormat('Y-m-d', $fecha);
+        return ($obj && $obj->format('Y-m-d') === $fecha) ? $fecha : $fallback;
+    }
+
+    /**
+     * Neutraliza la inyección de fórmulas en Excel/CSV (=, +, -, @ al inicio de una celda).
+     */
+    private function csvSeguro(string $valor): string {
+        return preg_match('/^[=+\-@]/', $valor) ? "'" . $valor : $valor;
+    }
+
     public function filtrar(): void {
         header('Content-Type: application/json');
-        $inicio = $_GET['inicio'] ?? '';
-        $fin = $_GET['fin'] ?? '';
+        $inicio = $this->fechaValida($_GET['inicio'] ?? '', date('Y-m-01'));
+        $fin = $this->fechaValida($_GET['fin'] ?? '', date('Y-m-d'));
 
         $res = $this->service->generarReporteRango($inicio, $fin);
         echo json_encode($res);
     }
 
     public function exportarExcel(): void {
-        $inicio = $_GET['inicio'] ?? date('Y-m-01');
-        $fin = $_GET['fin'] ?? date('Y-m-d');
+        $inicio = $this->fechaValida($_GET['inicio'] ?? '', date('Y-m-01'));
+        $fin = $this->fechaValida($_GET['fin'] ?? '', date('Y-m-d'));
 
         $reporte = $this->service->generarReporteRango($inicio, $fin);
         $data = $reporte['data'] ?? [];
         $resumen = $reporte['resumen_contable'] ?? [];
 
+        // Nombre de archivo estrictamente seguro (solo guiones bajos, dígitos y guiones)
         $filename = "Reporte_Contable_ValleSereno_{$inicio}_al_{$fin}.csv";
 
         header('Content-Type: text/csv; charset=utf-8');
@@ -76,10 +92,10 @@ class ReportesController {
                 $row['pago_id'],
                 $row['id_cita'],
                 $row['fecha_pago'],
-                $row['cliente_nombre'],
-                $row['cliente_telefono'],
-                $row['cliente_correo'],
-                $row['terapeuta_nombre'],
+                $this->csvSeguro((string)$row['cliente_nombre']),
+                $this->csvSeguro((string)$row['cliente_telefono']),
+                $this->csvSeguro((string)$row['cliente_correo']),
+                $this->csvSeguro((string)$row['terapeuta_nombre']),
                 $row['tipo_pago'],
                 $row['estado_pago'],
                 number_format((float)$row['monto'], 2, '.', '')
@@ -99,8 +115,8 @@ class ReportesController {
     }
 
     public function exportarPdf(): void {
-        $inicio = $_GET['inicio'] ?? date('Y-m-01');
-        $fin = $_GET['fin'] ?? date('Y-m-d');
+        $inicio = $this->fechaValida($_GET['inicio'] ?? '', date('Y-m-01'));
+        $fin = $this->fechaValida($_GET['fin'] ?? '', date('Y-m-d'));
 
         $reporte = $this->service->generarReporteRango($inicio, $fin);
         $data = $reporte['data'] ?? [];

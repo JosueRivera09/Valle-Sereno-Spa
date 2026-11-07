@@ -21,10 +21,11 @@ class SimpleRunner {
         }
     }
 
-    public function summary(): void {
+    public function summary(): int {
         echo "\n----------------------------------------\n";
         echo "RESULTADOS SERVICIOS TEST: {$this->passed} pasados, {$this->failed} fallidos.\n";
         echo "----------------------------------------\n";
+        return $this->failed;
     }
 }
 
@@ -62,4 +63,5 @@ $runner->assert($res3['valido'] === false, 'Rechazo por duración de 0 minutos')
 $res4 = $service->crearCategoria(['nombre' => '']);
 $runner->assert($res4['success'] === false, 'Rechazo de categoría con nombre vacío');
 
-$runner->summary();
+$fallos = $runner->summary();
+exit($fallos > 0 ? 1 : 0);

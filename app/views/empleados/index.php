@@ -6,59 +6,35 @@ $totalActivos = count(array_filter($empleados, fn($e) => $e['estado'] === 'activ
 $totalInactivos = count($empleados) - $totalActivos;
 ?>
 
-<!-- Encabezado del Módulo -->
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<!-- Encabezado Editorial -->
+<div class="page-head">
     <div>
-        <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-person-badge-fill text-warning me-2"></i> Personal Terapéutico & Especialistas
-        </h4>
-        <p class="text-muted small mb-0">Gestión de especialistas en bienestar, credenciales, catálogo de servicios y turnos semanales de atención.</p>
+        <span class="kicker">Equipo</span>
+        <h1 class="display-title">Personal Terapéutico <em>& Especialistas</em></h1>
     </div>
-    <div>
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
+    <div class="page-head-actions">
+        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
             <i class="bi bi-person-plus-fill fs-6"></i>
             <span>Nuevo Colaborador</span>
         </button>
     </div>
 </div>
 
-<!-- Tarjetas KPI de Resumen -->
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-3 p-3 text-white" style="background: var(--spa-primary);">
-                <i class="bi bi-people-fill fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Equipo de Trabajo</small>
-                <span class="fs-5 fw-bold text-dark"><?= count($empleados) ?> Especialistas</span>
-                <small class="d-block text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle me-1"></i><?= $totalActivos ?> activos en cabina</small>
-            </div>
-        </div>
+<!-- Métricas Libro Mayor -->
+<div class="metrics">
+    <div class="metric">
+        <span class="metric-label">Equipo de Trabajo</span>
+        <span class="metric-value"><?= count($empleados) ?></span>
+        <span class="metric-note">Especialistas registrados</span>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-3 p-3 bg-success text-white">
-                <i class="bi bi-heart-pulse-fill fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Servicios Ofertados</small>
-                <span class="fs-5 fw-bold text-dark">Catálogo Spa Completo</span>
-                <small class="d-block text-muted" style="font-size: 0.75rem;">Múltiples disciplinas integradas</small>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Activos en Cabina</span>
+        <span class="metric-value"><?= $totalActivos ?></span>
+        <span class="metric-note"><strong>Disponibles para agenda</strong></span>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-3 p-3 bg-warning text-dark">
-                <i class="bi bi-clock-history fs-3"></i>
-            </div>
-            <div>
-                <small class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.7rem;">Horarios & Turnos</small>
-                <span class="fs-5 fw-bold text-dark">Lunes a Sábado</span>
-                <small class="d-block text-muted" style="font-size: 0.75rem;">Atención continua programada</small>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Inactivos</span>
+        <span class="metric-value"><?= $totalInactivos ?></span>
     </div>
 </div>
 
@@ -78,7 +54,7 @@ $totalInactivos = count($empleados) - $totalActivos;
 </div>
 
 <!-- Galería Grid de Tarjetas de Terapeutas -->
-<div class="row g-4 mb-4" id="contenedorTerapeutas">
+<div class="row g-3 mb-4" id="contenedorTerapeutas">
     <?php if (empty($empleados)): ?>
         <div class="col-12 text-center py-5 text-muted">
             <i class="bi bi-person-x fs-1 d-block mb-2 text-muted"></i>
@@ -90,7 +66,7 @@ $totalInactivos = count($empleados) - $totalActivos;
             $initials = strtoupper(substr($emp['nombre_completo'], 0, 1) . (strpos($emp['nombre_completo'], ' ') !== false ? substr($emp['nombre_completo'], strpos($emp['nombre_completo'], ' ') + 1, 1) : ''));
             $tagsEspecialidades = array_filter(array_map('trim', explode(',', $emp['especialidades'] ?? '')));
         ?>
-            <div class="col-md-6 col-lg-4 tarjeta-terapeuta-item">
+            <div class="col-sm-6 col-lg-4 col-xl-3 tarjeta-terapeuta-item">
                 <div class="spa-card p-4 h-100 position-relative d-flex flex-column justify-content-between border-top border-4 border-success shadow-sm hover-shadow transition-all">
                     
                     <div>
@@ -107,7 +83,7 @@ $totalInactivos = count($empleados) - $totalActivos;
                                 </div>
                             </div>
                             <span class="badge rounded-pill <?= $emp['estado'] === 'activo' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary' ?> px-2 py-1" style="font-size: 0.7rem;">
-                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><?= ucfirst($emp['estado']) ?>
+                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><?= htmlspecialchars(ucfirst($emp['estado'])) ?>
                             </span>
                         </div>
 
@@ -144,7 +120,7 @@ $totalInactivos = count($empleados) - $totalActivos;
                             <i class="bi bi-calendar-week"></i>
                             <span>Turnos & Horarios</span>
                         </button>
-                        <button class="btn btn-outline-secondary btn-sm px-2" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp) ?>)'>
+                        <button class="btn btn-outline-secondary btn-sm px-2" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
                             <i class="bi bi-pencil-square"></i>
                         </button>
                     </div>
@@ -157,36 +133,39 @@ $totalInactivos = count($empleados) - $totalActivos;
 
 <!-- Modal Empleado -->
 <div class="modal fade" id="modalEmpleado" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-editorial">
             <form id="formEmpleado">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="tituloModalEmpleado">Registrar Empleado</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div>
+                        <span class="modal-kicker">Equipo</span>
+                        <h5 class="modal-title" id="tituloModalEmpleado">Registrar Empleado</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id" id="emp_id">
                     <div class="mb-3">
-                        <label class="form-label">Nombre completo *</label>
+                        <label class="form-label">Nombre completo <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="nombre_completo" id="emp_nombre" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Correo *</label>
+                        <label class="form-label">Correo <span class="text-danger">*</span></label>
                         <input type="email" class="form-control" name="correo" id="emp_correo" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Teléfono *</label>
+                        <label class="form-label">Teléfono <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="telefono" id="emp_telefono" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Cargo *</label>
+                        <label class="form-label">Cargo <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="cargo" id="emp_cargo" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Especialidades</label>
                         <textarea class="form-control" name="especialidades" id="emp_especialidades" rows="2"></textarea>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-0">
                         <label class="form-label">Estado</label>
                         <select class="form-select" name="estado" id="emp_estado">
                             <option value="activo">Activo</option>
@@ -195,8 +174,8 @@ $totalInactivos = count($empleados) - $totalActivos;
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-spa-primary">Guardar</button>
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-spa-primary btn-sm px-4">Guardar</button>
                 </div>
             </form>
         </div>
@@ -205,57 +184,72 @@ $totalInactivos = count($empleados) - $totalActivos;
 
 <!-- Modal Horarios -->
 <div class="modal fade" id="modalHorarios" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-editorial">
             <div class="modal-header">
-                <h5 class="modal-title">Horarios de <span id="nombreEmpleadoHorario"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div>
+                    <span class="modal-kicker">Disponibilidad</span>
+                    <h5 class="modal-title">Horarios de <span id="nombreEmpleadoHorario"></span></h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="horario_id_empleado">
 
                 <!-- Formulario para agregar horario -->
-                <form id="formHorario" class="row g-2 mb-4 align-items-end">
-                    <input type="hidden" name="id" id="horario_id">
-                    <div class="col-md-3">
-                        <label class="form-label small">Día</label>
-                        <select class="form-select form-select-sm" name="dia_semana" id="horario_dia" required>
-                            <?php foreach ($dias as $num => $nombre): ?>
-                                <option value="<?= $num ?>"><?= $nombre ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                <div class="form-section">
+                    <div class="form-section-head">
+                        <span class="form-section-num">01</span>
+                        <h6 class="form-section-title">Agregar turno</h6>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label small">Hora inicio</label>
-                        <input type="time" class="form-control form-control-sm" name="hora_inicio" id="horario_inicio" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label small">Hora fin</label>
-                        <input type="time" class="form-control form-control-sm" name="hora_fin" id="horario_fin" required>
-                    </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-spa-primary btn-sm w-100">
-                            <i class="bi bi-plus-lg"></i> Agregar
-                        </button>
-                    </div>
-                </form>
+                    <form id="formHorario" class="row g-2 align-items-end">
+                        <input type="hidden" name="id" id="horario_id">
+                        <div class="col-md-3">
+                            <label class="form-label">Día</label>
+                            <select class="form-select form-select-sm" name="dia_semana" id="horario_dia" required>
+                                <?php foreach ($dias as $num => $nombre): ?>
+                                    <option value="<?= $num ?>"><?= $nombre ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Hora inicio</label>
+                            <input type="time" class="form-control form-control-sm" name="hora_inicio" id="horario_inicio" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Hora fin</label>
+                            <input type="time" class="form-control form-control-sm" name="hora_fin" id="horario_fin" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-spa-primary btn-sm w-100">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <!-- Tabla de horarios -->
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Día</th>
-                                <th>Inicio</th>
-                                <th>Fin</th>
-                                <th>Estado</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaHorarios">
-                            <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="form-section">
+                    <div class="form-section-head">
+                        <span class="form-section-num">02</span>
+                        <h6 class="form-section-title">Turnos registrados</h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Día</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHorarios">
+                                <tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -280,7 +274,7 @@ function editarEmpleado(emp) {
     document.getElementById('emp_especialidades').value = emp.especialidades || '';
     document.getElementById('emp_estado').value = emp.estado;
     document.getElementById('tituloModalEmpleado').textContent = 'Editar Empleado';
-    new bootstrap.Modal(document.getElementById('modalEmpleado')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEmpleado')).show();
 }
 
 document.getElementById('formEmpleado').addEventListener('submit', async function(e) {
@@ -298,7 +292,7 @@ function abrirHorarios(idEmpleado, nombre) {
     document.getElementById('formHorario').reset();
     document.getElementById('horario_id').value = '';
     cargarHorarios(idEmpleado);
-    new bootstrap.Modal(document.getElementById('modalHorarios')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalHorarios')).show();
 }
 
 async function cargarHorarios(idEmpleado) {
@@ -311,12 +305,12 @@ async function cargarHorarios(idEmpleado) {
     }
     tbody.innerHTML = data.data.map(h => `
         <tr>
-            <td>${diasNombres[h.dia_semana] || h.dia_semana}</td>
-            <td>${h.hora_inicio.substring(0,5)}</td>
-            <td>${h.hora_fin.substring(0,5)}</td>
-            <td><span class="badge ${h.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${h.estado}</span></td>
+            <td>${esc(diasNombres[h.dia_semana] || h.dia_semana)}</td>
+            <td>${esc(h.hora_inicio.substring(0,5))}</td>
+            <td>${esc(h.hora_fin.substring(0,5))}</td>
+            <td><span class="badge ${h.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${esc(h.estado)}</span></td>
             <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarHorario(${h.id})">
+                <button class="btn btn-sm btn-outline-danger" onclick="eliminarHorario(${parseInt(h.id, 10)})">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>

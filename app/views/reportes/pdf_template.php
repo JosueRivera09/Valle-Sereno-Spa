@@ -78,14 +78,14 @@
         </div>
     </div>
 
-    <!-- Encabezado Corporativo & Datos Fiscales -->
+    <!-- Encabezado Corporativo & Datos Fiscales de ejemplo -->
     <div class="row align-items-center mb-4 pb-3 border-bottom">
         <div class="col-7">
             <h2 class="header-title mb-1">VALLE SERENO SPA S.A.</h2>
             <div class="fw-semibold text-success small mb-1">Centro de Relajación, Salud Terapéutica & Bienestar</div>
             <div class="text-muted small">
                 <strong>RUC:</strong> <?= htmlspecialchars($resumen['ruc_empresa'] ?? 'J031000029384') ?><br>
-                <strong>Dirección:</strong> Km 14.5 Carretera a Masaya, Managua, Nicaragua<br>
+                <strong>Dirección:</strong> Rivas, Nicaragua<br>
                 <strong>Teléfono:</strong> +505 2255-8899 | <strong>Correo:</strong> contabilidad@vallesereno.com
             </div>
         </div>

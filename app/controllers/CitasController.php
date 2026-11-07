@@ -52,8 +52,10 @@ class CitasController {
         $horaFin    = $_GET['hora_fin'] ?? '';
         $idServicio = isset($_GET['id_servicio']) && is_numeric($_GET['id_servicio']) ? (int)$_GET['id_servicio'] : null;
 
-        if (empty($fecha) || empty($horaInicio) || empty($horaFin)) {
-            echo json_encode(['success' => false, 'data' => []]);
+        // Validar formatos antes de tocar la base de datos (evita excepciones PDO con cadenas basura)
+        $validacion = $this->citaService->validarFechaHorario($fecha, $horaInicio, $horaFin);
+        if (!$validacion['valido']) {
+            echo json_encode(['success' => false, 'mensaje' => $validacion['mensaje'], 'data' => []]);
             return;
         }
 
@@ -61,8 +63,15 @@ class CitasController {
         echo json_encode(['success' => true, 'data' => $disponibles]);
     }
 
+    /**
+     * Registro express de cliente nuevo: función de Recepción/Administración.
+     * Un Terapeuta NO debe crear expedientes de clientes.
+     */
     public function crearClienteExpress(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
+
         $nombre   = $_POST['nombre_completo'] ?? '';
         $telefono = $_POST['telefono'] ?? '';
         $fechaNac = $_POST['fecha_nacimiento'] ?? '';
@@ -72,49 +81,100 @@ class CitasController {
         echo json_encode($res);
     }
 
+    /**
+     * Agendar una nueva cita: función exclusiva de Recepción/Administración.
+     * El total y la duración se calculan en el servidor a partir del servicio seleccionado.
+     */
     public function guardar(): void {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $idEmpleado  = (int)($_POST['id_empleado'] ?? 0);
-            $fecha       = $_POST['fecha'] ?? '';
-            $horaInicio  = $_POST['hora_inicio'] ?? '';
-            $horaFin     = $_POST['hora_fin'] ?? '';
+        AuthHelper::requireCsrf();
+        AuthHelper::requireRole(['Administrador', 'Recepcionista']);
 
-            // 1. Validar cruce de horarios (Checklist de GitHub)
-            if ($this->citaService->verificarCruceHorario($idEmpleado, $fecha, $horaInicio, $horaFin)) {
-                $_SESSION['mensaje'] = "Error: El terapeuta ya cuenta con una cita asignada en este horario (cruce detectado).";
-                $_SESSION['mensaje_tipo'] = "danger";
-                header('Location: index.php?c=citas&a=index');
-                exit;
-            }
-
-            $data = [
-                'id_cliente'    => (int)($_POST['id_cliente'] ?? 0),
-                'id_empleado'   => $idEmpleado,
-                'fecha'         => $fecha,
-                'hora_inicio'   => $horaInicio,
-                'hora_fin'      => $horaFin,
-                'total'         => (float)($_POST['total'] ?? 0.00),
-                'estado'        => 'pendiente',
-                'observaciones' => trim($_POST['observaciones'] ?? '')
-            ];
-
-            $resultado = $this->citaModel->create($data);
-
-            if ($resultado) {
-                $_SESSION['mensaje'] = "Cita agendada correctamente sin cruces de horario.";
-                $_SESSION['mensaje_tipo'] = "success";
-            } else {
-                $_SESSION['mensaje'] = "Error al registrar la cita en la base de datos.";
-                $_SESSION['mensaje_tipo'] = "danger";
-            }
-
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: index.php?c=citas&a=index');
             exit;
         }
+
+        $error = function(string $mensaje) {
+            $_SESSION['mensaje'] = $mensaje;
+            $_SESSION['mensaje_tipo'] = "danger";
+            header('Location: index.php?c=citas&a=index');
+            exit;
+        };
+
+        $idCliente   = (int)($_POST['id_cliente'] ?? 0);
+        $idEmpleado  = (int)($_POST['id_empleado'] ?? 0);
+        $idServicio  = isset($_POST['id_servicio']) && (int)$_POST['id_servicio'] > 0 ? (int)$_POST['id_servicio'] : null;
+        $fecha       = $_POST['fecha'] ?? '';
+        $horaInicio  = $_POST['hora_inicio'] ?? '';
+        $horaFin     = $_POST['hora_fin'] ?? '';
+        $totalManual = (float)($_POST['total'] ?? 0.00);
+        $observaciones = trim($_POST['observaciones'] ?? '');
+
+        // 1. Validar existencia y estado de cliente y terapeuta
+        require_once __DIR__ . '/../models/Cliente.php';
+        require_once __DIR__ . '/../models/Empleado.php';
+
+        $cliente = (new Cliente())->obtenerPorId($idCliente);
+        if (!$cliente || $cliente['estado'] !== 'activo') {
+            $error('Debes seleccionar un cliente activo válido para agendar la cita.');
+        }
+
+        $empleado = (new Empleado())->findById($idEmpleado);
+        if (!$empleado || $empleado['estado'] !== 'activo') {
+            $error('Debes seleccionar un terapeuta activo válido.');
+        }
+
+        // 2. Validar formato y coherencia de fecha y horario (sin fechas pasadas)
+        $validacion = $this->citaService->validarFechaHorario($fecha, $horaInicio, $horaFin);
+        if (!$validacion['valido']) {
+            $error($validacion['mensaje']);
+        }
+
+        if ($fecha === date('Y-m-d') && $horaInicio < date('H:i')) {
+            $error('La hora de inicio ya pasó para la fecha de hoy. Elija un horario futuro.');
+        }
+
+        // 3. Sin servicio del catálogo se exige un monto manual mayor a cero
+        if ($idServicio === null && $totalManual <= 0) {
+            $error('Debes seleccionar un servicio del catálogo o indicar un monto total mayor a C$0.00.');
+        }
+
+        // 4. La cita debe caer dentro del turno registrado del terapeuta
+        if (!$this->citaService->verificarDisponibilidadEmpleado($idEmpleado, $fecha, $horaInicio, $horaFin)) {
+            $error('El terapeuta seleccionado no tiene turno registrado que cubra ese horario en la fecha elegida.');
+        }
+
+        // 5. Agendamiento atómico (bloqueo FOR UPDATE + cálculo de total/hora_fin en servidor)
+        $resultado = $this->citaModel->agendarCita([
+            'id_cliente'    => $idCliente,
+            'id_empleado'   => $idEmpleado,
+            'fecha'         => $fecha,
+            'hora_inicio'   => $horaInicio,
+            'hora_fin'      => $horaFin,
+            'total'         => $totalManual,
+            'observaciones' => $observaciones
+        ], $idServicio);
+
+        if ($resultado['success']) {
+            $_SESSION['mensaje'] = "Cita #{$resultado['id']} agendada correctamente sin cruces de horario.";
+            $_SESSION['mensaje_tipo'] = "success";
+        } else {
+            $error($resultado['mensaje']);
+        }
+
+        header('Location: index.php?c=citas&a=index');
+        exit;
     }
 
+    /**
+     * Cambiar estado de una cita aplicando la máquina de transiciones permitidas.
+     * Terapeuta: solo sus propias citas y solo transiciones hacia adelante
+     *            (Confirmada / Completada, sin cancelar ni reabrir).
+     */
     public function cambiarEstado(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
+
         $id = (int)($_POST['id'] ?? 0);
         $nuevoEstado = trim($_POST['estado'] ?? '');
 
@@ -138,22 +198,29 @@ class CitasController {
                 return;
             }
 
-            if (!in_array($nuevoEstado, ['Completada', 'Confirmada', 'Pendiente'])) {
-                echo json_encode(['success' => false, 'mensaje' => 'Como terapeuta solo puedes marcar la cita como Completada o Confirmada. La cancelación debe gestionarse en Recepción.']);
+            if (!in_array($nuevoEstado, ['Completada', 'Confirmada'], true)) {
+                echo json_encode(['success' => false, 'mensaje' => 'Como terapeuta solo puedes marcar la cita como Confirmada o Completada. La cancelación debe gestionarse en Recepción.']);
                 return;
             }
         } else {
-            if (!in_array($nuevoEstado, ['Pendiente', 'Confirmada', 'Completada', 'Cancelada'])) {
+            if (!in_array($nuevoEstado, ['Pendiente', 'Confirmada', 'Completada', 'Cancelada'], true)) {
                 echo json_encode(['success' => false, 'mensaje' => 'Estado no válido.']);
+                return;
+            }
+
+            // No se puede cancelar ni reabrir una cita que ya fue cobrada
+            if (in_array($nuevoEstado, ['Cancelada', 'Pendiente'], true) && $this->citaModel->totalPagado($id) > 0) {
+                echo json_encode(['success' => false, 'mensaje' => 'Esta cita ya tiene un pago registrado; no puede cancelarse ni reabrirse.']);
                 return;
             }
         }
 
-        $res = $this->citaModel->updateStatus($id, $nuevoEstado);
+        // Máquina de transiciones + bloqueo optimista contra el estado leído
+        $res = $this->citaModel->updateStatus($id, $nuevoEstado, $cita['estado']);
         if ($res) {
             echo json_encode(['success' => true, 'mensaje' => "Estado de la cita actualizado a '{$nuevoEstado}'."]);
         } else {
-            echo json_encode(['success' => false, 'mensaje' => 'Error al actualizar el estado de la cita.']);
+            echo json_encode(['success' => false, 'mensaje' => "Transición no permitida: la cita está en estado '{$cita['estado']}' y no puede pasar directamente a '{$nuevoEstado}'."]);
         }
     }
 }

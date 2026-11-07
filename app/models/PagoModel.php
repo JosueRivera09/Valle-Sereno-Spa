@@ -34,19 +34,88 @@ class PagoModel {
     }
 
     public function obtenerCitasPendientesPago(): array {
-        $sql = "SELECT c.id, c.fecha, c.hora_inicio, c.total, cl.nombre_completo as cliente_nombre 
+        // Consolidado por cita: evita filas duplicadas y muestra el saldo realmente pendiente
+        $sql = "SELECT c.id, c.fecha, c.hora_inicio, c.total, cl.nombre_completo as cliente_nombre,
+                       GREATEST(c.total - COALESCE(SUM(CASE WHEN p.estado = 'Pagado' THEN p.monto END), 0), 0) AS saldo_pendiente
                 FROM citas c
                 JOIN clientes cl ON c.id_cliente = cl.id
                 LEFT JOIN pagos p ON c.id = p.id_cita
-                WHERE (p.id IS NULL OR p.estado = 'Pendiente') AND c.estado != 'Cancelada'
+                WHERE c.estado != 'Cancelada'
+                GROUP BY c.id, c.fecha, c.hora_inicio, c.total, cl.nombre_completo
+                HAVING saldo_pendiente > 0
                 ORDER BY c.fecha DESC";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
 
+    /**
+     * Valida contra la base de datos que la cita sea cobrable:
+     * existe, no está cancelada, no fue ya cobrada y el monto no excede el total.
+     * @return array ['valido' => bool, 'mensaje' => string]
+     */
+    public function validarCobro(int $idCita, float $monto): array {
+        $stmt = $this->db->prepare("
+            SELECT c.total, c.estado,
+                   COALESCE((SELECT SUM(monto) FROM pagos WHERE id_cita = c.id AND estado = 'Pagado'), 0) AS pagado
+            FROM citas c 
+            WHERE c.id = :id 
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $idCita]);
+        $cita = $stmt->fetch();
+
+        if (!$cita) {
+            return ['valido' => false, 'mensaje' => 'La cita seleccionada no existe.'];
+        }
+        if ($cita['estado'] === 'Cancelada') {
+            return ['valido' => false, 'mensaje' => 'La cita seleccionada está cancelada y no puede cobrarse.'];
+        }
+
+        $total   = (float)$cita['total'];
+        $pagado  = (float)$cita['pagado'];
+        $pendiente = round($total - $pagado, 2);
+
+        if ($pendiente <= 0) {
+            return ['valido' => false, 'mensaje' => 'Esta cita ya fue cobrada anteriormente.'];
+        }
+        if ($monto > $pendiente + 0.01) {
+            return ['valido' => false, 'mensaje' => 'El monto excede el saldo pendiente de la cita (saldo: C$' . number_format($pendiente, 2) . ').'];
+        }
+
+        return ['valido' => true, 'mensaje' => 'OK'];
+    }
+
+    /**
+     * Registra un pago de forma atómica:
+     * bloquea la cita (FOR UPDATE), revalida cobro doble/exceso y solo completa
+     * la cita si estaba Pendiente o Confirmada (nunca revive citas Canceladas).
+     */
     public function registrarPago(array $data): bool {
         $this->db->beginTransaction();
         try {
+            // Bloqueo de la cita para serializar cobros concurrentes sobre la misma cita
+            $stmtCita = $this->db->prepare("
+                SELECT total, estado FROM citas WHERE id = :id FOR UPDATE
+            ");
+            $stmtCita->execute([':id' => $data['id_cita']]);
+            $cita = $stmtCita->fetch();
+
+            if (!$cita || $cita['estado'] === 'Cancelada') {
+                $this->db->rollBack();
+                return false;
+            }
+
+            $stmtPagado = $this->db->prepare("
+                SELECT COALESCE(SUM(monto), 0) FROM pagos WHERE id_cita = :id AND estado = 'Pagado'
+            ");
+            $stmtPagado->execute([':id' => $data['id_cita']]);
+            $pagado = (float)$stmtPagado->fetchColumn();
+
+            if ($pagado + (float)$data['monto'] > (float)$cita['total'] + 0.01) {
+                $this->db->rollBack();
+                return false;
+            }
+
             $sql = "INSERT INTO pagos (id_cita, tipo_pago, monto, estado) 
                     VALUES (:id_cita, :tipo_pago, :monto, :estado)";
             $stmt = $this->db->prepare($sql);
@@ -57,16 +126,20 @@ class PagoModel {
                 ':estado'    => $data['estado'] ?? 'Pagado'
             ]);
 
-            // Actualizar estado de cita a Completada si fue Pagado
+            // Actualizar estado de cita a Completada solo si estaba Pendiente o Confirmada
             if (($data['estado'] ?? 'Pagado') === 'Pagado') {
-                $stmtCita = $this->db->prepare("UPDATE citas SET estado = 'Completada' WHERE id = :id_cita");
-                $stmtCita->execute([':id_cita' => $data['id_cita']]);
+                $stmtCitaUpd = $this->db->prepare("
+                    UPDATE citas SET estado = 'Completada' 
+                    WHERE id = :id_cita AND estado IN ('Pendiente', 'Confirmada')
+                ");
+                $stmtCitaUpd->execute([':id_cita' => $data['id_cita']]);
             }
 
             $this->db->commit();
             return true;
         } catch (Exception $e) {
             $this->db->rollBack();
+            error_log('[PagoModel::registrarPago] ' . $e->getMessage());
             return false;
         }
     }

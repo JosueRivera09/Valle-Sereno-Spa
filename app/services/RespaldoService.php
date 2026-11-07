@@ -74,6 +74,12 @@ class RespaldoService {
             return ['success' => false, 'mensaje' => 'Error en la subida del archivo SQL.'];
         }
 
+        // Límite máximo de tamaño: 25 MB para prevenir DoS por memoria
+        $maxBytes = 25 * 1024 * 1024;
+        if (($fileInfo['size'] ?? 0) > $maxBytes) {
+            return ['success' => false, 'mensaje' => 'El archivo supera el tamaño máximo permitido de 25 MB.'];
+        }
+
         $extension = strtolower(pathinfo($fileInfo['name'], PATHINFO_EXTENSION));
         if ($extension !== 'sql') {
             return ['success' => false, 'mensaje' => 'Formato no permitido. Solo se permiten archivos .sql'];
@@ -94,6 +100,12 @@ class RespaldoService {
 
     public function eliminarRespaldo(string $filename): array {
         $filename = basename($filename);
+
+        // Validar que coincida estrictamente con el patrón de respaldos del sistema
+        if (!preg_match('/^backup_spa_db_[\w\-]+\.sql$/i', $filename)) {
+            return ['success' => false, 'mensaje' => 'Nombre de archivo no válido.'];
+        }
+
         $filepath = $this->backupDir . '/' . $filename;
 
         if (file_exists($filepath)) {

@@ -1,10 +1,10 @@
 <?php
 /**
- * Layout Base con Sidebar Izquierdo y Header Superior
+ * Layout Base — Editorial Wellness (Masthead Top Navigation)
  * Variables esperadas:
  * - $pageTitle: Título de la página
- * - $activePage: Identificador de la vista activa ('dashboard', 'citas', 'clientes', 'servicios', 'empleados', 'pagos', 'reportes', 'usuarios')
- * - $contentView: Ruta absoluta o relativa al contenido de la vista
+ * - $activePage: Identificador de la vista activa
+ * - $contentView: Ruta al contenido
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -21,247 +21,243 @@ $user = [
 ];
 
 $activePage = $activePage ?? 'dashboard';
-$userInitials = strtoupper(substr($user['nombre'], 0, 1) . (strpos($user['nombre'], ' ') !== false ? substr($user['nombre'], strpos($user['nombre'], ' ') + 1, 1) : ''));
+
+$nombreCompleto = trim($user['nombre']);
+$partesNombre   = preg_split('/\s+/', $nombreCompleto);
+$initials       = strtoupper(
+    (isset($partesNombre[0]) ? mb_substr($partesNombre[0], 0, 1, 'UTF-8') : '') .
+    (isset($partesNombre[1]) ? mb_substr($partesNombre[1], 0, 1, 'UTF-8') : '')
+);
+if ($initials === '') {
+    $initials = 'U';
+}
+$userEmail = $user['email'] ?: $user['usuario'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'Valle Sereno Spa') ?></title>
-    <!-- Google Fonts -->
+    <title><?= htmlspecialchars($pageTitle ?? 'Valle Sereno Spa', ENT_QUOTES, 'UTF-8') ?></title>
+
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF Core + AutoTable (exportación de reportes a PDF en el navegador) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Chart.js para Analítica y Dashboard -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <!-- Estilo Armónico Personalizado Valle Sereno -->
-    <link rel="stylesheet" href="public/css/spa-theme.css?v=1.2">
+
+    <!-- Estilos -->
+    <link href="public/css/spa-theme.css?v=2.5" rel="stylesheet">
 </head>
-<body>
 
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<body class="app-body">
+    <!-- Masthead Editorial -->
+    <header class="masthead">
+        <div class="masthead-inner">
+            <button id="navToggle" class="nav-toggle d-lg-none" type="button" aria-label="Abrir menú de navegación">
+                <i class="bi bi-list fs-4"></i>
+            </button>
 
-    <div class="app-wrapper">
-        <!-- Sidebar Izquierdo -->
-        <aside class="app-sidebar" id="appSidebar">
-            <!-- Cabecera Sidebar -->
-            <div class="sidebar-header d-flex align-items-center justify-content-between">
-                <a href="index.php?c=dashboard&a=index" class="spa-brand">
-                    <i class="bi bi-flower1 me-2 text-warning"></i>Valle <span>Sereno</span>
-                </a>
-                <button class="btn btn-sm btn-link text-white-50 d-lg-none p-0" id="closeSidebarBtn">
-                    <i class="bi bi-x-lg fs-5"></i>
-                </button>
-            </div>
+            <a class="wordmark" href="index.php?c=dashboard&a=index">
+                Valle <span>Sereno</span>
+            </a>
 
-            <!-- Navegación Lateral -->
-            <nav class="sidebar-nav">
+            <nav class="mainnav" id="mainnav">
                 <?php if ($user['rol'] !== 'Terapeuta'): ?>
-                    <div class="sidebar-section-title">Principal</div>
-                    <a href="index.php?c=dashboard&a=index" class="nav-spa-link <?= $activePage === 'dashboard' ? 'active' : '' ?>">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
+                    <a href="index.php?c=dashboard&a=index"
+                        class="nav-link-ed <?= $activePage === 'dashboard' ? 'is-active' : '' ?>"
+                        title="Panel Principal">
+                        <span>Inicio</span>
                     </a>
                 <?php endif; ?>
 
-                <div class="sidebar-section-title">Gestión Operativa</div>
-                <a href="index.php?c=citas&a=index" class="nav-spa-link <?= $activePage === 'citas' ? 'active' : '' ?>">
-                    <i class="bi bi-calendar2-heart-fill"></i>
-                    <span>Citas & Agenda</span>
+                <a href="index.php?c=citas&a=index"
+                    class="nav-link-ed <?= $activePage === 'citas' ? 'is-active' : '' ?>"
+                    title="Citas & Agenda">
+                    <span>Citas</span>
                 </a>
 
                 <?php if (in_array($user['rol'], ['Administrador', 'Recepcionista'])): ?>
-                    <a href="index.php?c=clientes&a=index" class="nav-spa-link <?= $activePage === 'clientes' ? 'active' : '' ?>">
-                        <i class="bi bi-people-fill"></i>
+                    <a href="index.php?c=clientes&a=index"
+                        class="nav-link-ed <?= $activePage === 'clientes' ? 'is-active' : '' ?>"
+                        title="Clientes">
                         <span>Clientes</span>
                     </a>
                 <?php endif; ?>
 
-                <a href="index.php?c=servicios&a=index" class="nav-spa-link <?= $activePage === 'servicios' ? 'active' : '' ?>">
-                    <i class="bi bi-droplet-half"></i>
-                    <span>Servicios & Terapias</span>
+                <a href="index.php?c=servicios&a=index"
+                    class="nav-link-ed <?= $activePage === 'servicios' ? 'is-active' : '' ?>"
+                    title="Servicios & Terapias">
+                    <span>Servicios</span>
                 </a>
 
                 <?php if ($user['rol'] !== 'Terapeuta'): ?>
-                    <div class="sidebar-section-title">Finanzas & Personal</div>
-                    <a href="index.php?c=pagos&a=index" class="nav-spa-link <?= $activePage === 'pagos' ? 'active' : '' ?>">
-                        <i class="bi bi-credit-card-2-front-fill"></i>
-                        <span>Caja & Pagos</span>
+                    <a href="index.php?c=pagos&a=index"
+                        class="nav-link-ed <?= $activePage === 'pagos' ? 'is-active' : '' ?>"
+                        title="Caja & Pagos">
+                        <span>Caja</span>
                     </a>
-                    <a href="index.php?c=empleados&a=index" class="nav-spa-link <?= $activePage === 'empleados' ? 'active' : '' ?>">
-                        <i class="bi bi-person-badge-fill"></i>
-                        <span>Personal Terapéutico</span>
+                    <a href="index.php?c=empleados&a=index"
+                        class="nav-link-ed <?= $activePage === 'empleados' ? 'is-active' : '' ?>"
+                        title="Personal Terapéutico">
+                        <span>Personal</span>
                     </a>
                 <?php endif; ?>
 
                 <?php if ($user['rol'] === 'Administrador'): ?>
-                    <div class="sidebar-section-title">Sistema</div>
-                    <a href="index.php?c=reportes&a=index" class="nav-spa-link <?= $activePage === 'reportes' ? 'active' : '' ?>">
-                        <i class="bi bi-graph-up-arrow"></i>
+                    <a href="index.php?c=reportes&a=index"
+                        class="nav-link-ed <?= $activePage === 'reportes' ? 'is-active' : '' ?>"
+                        title="Reportes & Analítica">
                         <span>Reportes</span>
                     </a>
-                    <a href="index.php?c=usuarios&a=index" class="nav-spa-link <?= $activePage === 'usuarios' ? 'active' : '' ?>">
-                        <i class="bi bi-shield-lock-fill"></i>
+                    <a href="index.php?c=usuarios&a=index"
+                        class="nav-link-ed <?= $activePage === 'usuarios' ? 'is-active' : '' ?>"
+                        title="Gestión de Usuarios">
                         <span>Usuarios</span>
                     </a>
-                    <a href="index.php?c=respaldos&a=index" class="nav-spa-link <?= $activePage === 'respaldos' ? 'active' : '' ?>">
-                        <i class="bi bi-database-fill-gear"></i>
-                        <span>Respaldos & Sistema</span>
+                    <a href="index.php?c=respaldos&a=index"
+                        class="nav-link-ed <?= $activePage === 'respaldos' ? 'is-active' : '' ?>"
+                        title="Respaldos & Mantenimiento">
+                        <span>Respaldos</span>
                     </a>
                 <?php endif; ?>
             </nav>
 
-            <!-- Footer Sidebar: Usuario Autenticado -->
-            <div class="sidebar-footer">
-                <div class="user-badge-box">
-                    <div class="user-avatar-circle">
-                        <?= htmlspecialchars($userInitials) ?>
-                    </div>
-                    <div class="overflow-hidden">
-                        <div class="text-white fw-semibold small text-truncate"><?= htmlspecialchars($user['nombre']) ?></div>
-                        <small class="badge rounded-pill text-warning border border-warning-subtle" style="font-size: 0.65rem; background: rgba(197, 160, 89, 0.15);">
-                            <?= htmlspecialchars($user['rol']) ?>
-                        </small>
-                    </div>
+            <div class="masthead-end">
+                <div class="dropdown">
+                    <button class="user-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="user-avatar-circle"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="user-chip-name">
+                            <strong><?= htmlspecialchars($user['nombre'], ENT_QUOTES, 'UTF-8') ?></strong>
+                            <small><?= htmlspecialchars($user['rol'], ENT_QUOTES, 'UTF-8') ?></small>
+                        </span>
+                        <i class="bi bi-chevron-down ms-1"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end masthead-menu">
+                        <li>
+                            <h6 class="dropdown-header mb-0">
+                                <?= htmlspecialchars($user['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                            </h6>
+                            <small class="d-block px-3 pb-1 text-muted">
+                                <?= htmlspecialchars($userEmail, ENT_QUOTES, 'UTF-8') ?>
+                            </small>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="index.php?c=auth&a=logout"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
                 </div>
             </div>
-        </aside>
-
-        <!-- Main Content Wrapper -->
-        <div class="app-main">
-            <!-- Header Superior -->
-            <header class="app-header">
-                <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-outline-secondary btn-sm d-lg-none" id="toggleSidebarBtn">
-                        <i class="bi bi-list fs-5"></i>
-                    </button>
-                    <div>
-                        <h5 class="mb-0 fw-bold" style="color: var(--spa-primary); font-family: var(--font-serif);">
-                            <?= htmlspecialchars($pageTitle ?? 'Santuario de Bienestar') ?>
-                        </h5>
-                        <small class="text-muted" style="font-size: 0.78rem;">
-                            <?= date('d \d\e F, Y') ?> &bull; Centro de Relajación & Terapias
-                        </small>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center gap-3">
-
-                    <div class="dropdown">
-                        <button class="btn btn-light btn-sm rounded-pill dropdown-toggle d-flex align-items-center gap-2 border px-3" type="button" data-bs-toggle="dropdown">
-                            <span class="user-avatar-circle" style="width:26px; height:26px; font-size:0.75rem;">
-                                <?= htmlspecialchars($userInitials) ?>
-                            </span>
-                            <span class="d-none d-sm-inline fw-semibold small"><?= htmlspecialchars($user['usuario']) ?></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2">
-                            <li class="px-3 py-2 border-bottom">
-                                <div class="fw-bold small"><?= htmlspecialchars($user['nombre']) ?></div>
-                                <small class="text-muted"><?= htmlspecialchars($user['email']) ?></small>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 text-danger small" href="index.php?c=auth&a=logout">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Contenido Dinámico de la Vista Inyectada -->
-            <main class="page-container flex-grow-1">
-                <?php if (!empty($_SESSION['success_flash'])): ?>
-                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
-                        <i class="bi bi-check-circle-fill fs-5"></i>
-                        <div><?= htmlspecialchars($_SESSION['success_flash']) ?></div>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <?php unset($_SESSION['success_flash']); ?>
-                <?php endif; ?>
-
-                <?php if (!empty($_SESSION['warning_flash'])): ?>
-                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                        <div><?= htmlspecialchars($_SESSION['warning_flash']) ?></div>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <?php unset($_SESSION['warning_flash']); ?>
-                <?php endif; ?>
-
-                <?php if (!empty($_SESSION['error_flash'])): ?>
-                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
-                        <i class="bi bi-x-circle-fill fs-5"></i>
-                        <div><?= htmlspecialchars($_SESSION['error_flash']) ?></div>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                    <?php unset($_SESSION['error_flash']); ?>
-                <?php endif; ?>
-
-                <?php 
-                if (isset($contentView) && file_exists($contentView)) {
-                    include $contentView;
-                } else {
-                    echo "<div class='alert alert-warning'>Vista no disponible.</div>";
-                }
-                ?>
-            </main>
         </div>
-    </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="page-wrap">
+        <?php if (!empty($_SESSION['success_flash'])): ?>
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 spa-alert" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div><?= htmlspecialchars($_SESSION['success_flash']) ?></div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['success_flash']); ?>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['warning_flash'])): ?>
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center gap-2 spa-alert" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                <div><?= htmlspecialchars($_SESSION['warning_flash']) ?></div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['warning_flash']); ?>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['error_flash'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 spa-alert" role="alert">
+                <i class="bi bi-x-circle-fill fs-5"></i>
+                <div><?= htmlspecialchars($_SESSION['error_flash']) ?></div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['error_flash']); ?>
+        <?php endif; ?>
+
+        <?php
+        if (isset($contentView) && file_exists($contentView)) {
+            include $contentView;
+        } else {
+            echo "<div class='alert alert-warning'>Vista no disponible.</div>";
+        }
+        ?>
+    </main>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Toggle Sidebar en dispositivos móviles
-        const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-        const appSidebar = document.getElementById('appSidebar');
-        const sidebarNav = document.querySelector('.sidebar-nav');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        // ---------------------------------------------------------------
+        // Protección global CSRF + detección AJAX para TODOS los fetch()
+        // Todas las peticiones POST envían el token (X-CSRF-TOKEN) y la
+        // cabecera X-Requested-With para recibir JSON ante sesión expirada.
+        // ---------------------------------------------------------------
+        const CSRF_TOKEN = '<?= AuthHelper::csrfToken() ?>';
 
-        function toggleSidebar() {
-            appSidebar.classList.toggle('show');
-            sidebarBackdrop.classList.toggle('show');
+        // Helper global de escape para interpolaciones en innerHTML (previene XSS)
+        function esc(valor) {
+            const div = document.createElement('div');
+            div.textContent = (valor === null || valor === undefined) ? '' : String(valor);
+            return div.innerHTML;
         }
 
-        if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
-        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
-        if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', toggleSidebar);
-
-        // Mantener la posición de scroll y foco en el botón/enlace seleccionado
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!sidebarNav) return;
-
-            // 1. Restaurar posición exacta guardada si existe
-            const savedScroll = sessionStorage.getItem('spa_sidebar_scroll');
-            if (savedScroll !== null) {
-                sidebarNav.scrollTop = parseInt(savedScroll, 10);
+        const _fetchOriginal = window.fetch;
+        window.fetch = function(input, init) {
+            init = init || {};
+            const headers = new Headers(init.headers || {});
+            headers.set('X-CSRF-TOKEN', CSRF_TOKEN);
+            headers.set('X-Requested-With', 'XMLHttpRequest');
+            init.headers = headers;
+            if (init.body instanceof FormData) {
+                init.body.append('csrf_token', CSRF_TOKEN);
             }
+            return _fetchOriginal(input, init);
+        };
 
-            // 2. Asegurar que el elemento activo esté siempre enfocado y a la vista
-            const activeLink = sidebarNav.querySelector('.nav-spa-link.active');
-            if (activeLink) {
-                activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-            }
+        // Toggle navegación móvil
+        const navToggle = document.getElementById('navToggle');
+        const mainNav = document.getElementById('mainnav');
 
-            // 3. Guardar posición cada vez que el usuario hace scroll dentro del sidebar
-            sidebarNav.addEventListener('scroll', function() {
-                sessionStorage.setItem('spa_sidebar_scroll', sidebarNav.scrollTop);
+        if (navToggle && mainNav) {
+            navToggle.addEventListener('click', function() {
+                mainNav.classList.toggle('is-open');
+                const icon = navToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('bi-list');
+                    icon.classList.toggle('bi-x');
+                }
             });
 
-            // 4. Guardar inmediatamente cuando se hace clic en cualquier enlace
-            const navLinks = sidebarNav.querySelectorAll('.nav-spa-link');
-            navLinks.forEach(function(link) {
+            // Cerrar menú móvil al hacer clic en un enlace
+            mainNav.querySelectorAll('.nav-link-ed').forEach(function(link) {
                 link.addEventListener('click', function() {
-                    sessionStorage.setItem('spa_sidebar_scroll', sidebarNav.scrollTop);
+                    mainNav.classList.remove('is-open');
+                    const icon = navToggle.querySelector('i');
+                    if (icon) {
+                        icon.classList.add('bi-list');
+                        icon.classList.remove('bi-x');
+                    }
                 });
             });
-        });
+        }
     </script>
 </body>
+
 </html>

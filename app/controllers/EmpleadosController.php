@@ -22,6 +22,7 @@ class EmpleadosController {
 
     public function guardar(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $data = [
             'nombre_completo' => $_POST['nombre_completo'] ?? '',
             'telefono'        => $_POST['telefono'] ?? '',
@@ -30,6 +31,12 @@ class EmpleadosController {
             'especialidades'  => $_POST['especialidades'] ?? null,
             'estado'          => $_POST['estado'] ?? 'activo'
         ];
+
+        // Lista blanca de estado (además de escapar en la vista, evita persistir HTML)
+        if (!in_array($data['estado'], ['activo', 'inactivo'], true)) {
+            echo json_encode(['success' => false, 'message' => 'Estado no válido.']);
+            return;
+        }
 
         if (!empty($_POST['id'])) {
             $result = $this->service->actualizarEmpleado((int)$_POST['id'], $data);
@@ -48,6 +55,7 @@ class EmpleadosController {
 
     public function guardarHorario(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $data = [
             'id'          => $_POST['id'] ?? null,
             'id_empleado' => $_POST['id_empleado'] ?? 0,
@@ -62,6 +70,7 @@ class EmpleadosController {
 
     public function eliminarHorario(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $id = (int)($_POST['id'] ?? 0);
         $result = $this->service->eliminarDisponibilidad($id);
         echo json_encode($result);

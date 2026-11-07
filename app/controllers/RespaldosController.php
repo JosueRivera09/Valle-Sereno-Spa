@@ -37,18 +37,29 @@ class RespaldosController {
 
     public function generarLocal(): void {
         header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'mensaje' => 'Método no permitido.']);
+            return;
+        }
+        AuthHelper::requireCsrf();
         $res = $this->service->generarYGuardarRespaldo();
         echo json_encode($res);
     }
 
     public function optimizar(): void {
         header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'mensaje' => 'Método no permitido.']);
+            return;
+        }
+        AuthHelper::requireCsrf();
         $res = $this->service->optimizarBaseDatos();
         echo json_encode(['success' => true, 'mensaje' => 'Tablas optimizadas con éxito.', 'detalles' => $res]);
     }
 
     public function restaurar(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo_sql'])) {
+            AuthHelper::requireCsrf();
             $res = $this->service->restaurarDesdeArchivo($_FILES['archivo_sql']);
             $_SESSION['mensaje'] = $res['mensaje'];
             $_SESSION['mensaje_tipo'] = $res['success'] ? 'success' : 'danger';
@@ -59,6 +70,7 @@ class RespaldosController {
 
     public function eliminar(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $filename = $_POST['filename'] ?? '';
         $res = $this->service->eliminarRespaldo($filename);
         echo json_encode($res);

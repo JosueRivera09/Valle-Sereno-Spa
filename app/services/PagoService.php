@@ -33,9 +33,15 @@ class PagoService {
             return ['success' => false, 'mensaje' => $val['mensaje']];
         }
 
+        // Validación de integridad contra BD: cita existente, no cancelada, sin cobro doble ni exceso
+        $cobro = $this->model->validarCobro((int)$data['id_cita'], (float)$data['monto']);
+        if (!$cobro['valido']) {
+            return ['success' => false, 'mensaje' => $cobro['mensaje']];
+        }
+
         $res = $this->model->registrarPago($data);
         return $res ? ['success' => true, 'mensaje' => 'Pago procesado exitosamente. Recibo emitido.']
-                    : ['success' => false, 'mensaje' => 'Error al registrar el cobro en caja.'];
+                    : ['success' => false, 'mensaje' => 'Error al registrar el cobro en caja. Verifique que la cita siga pendiente de pago.'];
     }
 
     public function validarPago(array $data): array {

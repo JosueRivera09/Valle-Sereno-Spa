@@ -23,6 +23,7 @@ class ClientesController {
 
     public function guardar(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $data = [
             'nombre_completo'  => trim($_POST['nombre_completo'] ?? ''),
             'fecha_nacimiento' => $_POST['fecha_nacimiento'] ?? '',
@@ -42,8 +43,15 @@ class ClientesController {
 
     public function cambiarEstado(): void {
         header('Content-Type: application/json');
+        AuthHelper::requireCsrf();
         $id = (int)($_POST['id'] ?? 0);
         $estado = $_POST['estado'] ?? 'inactivo';
+
+        if (!in_array($estado, ['activo', 'inactivo'], true)) {
+            echo json_encode(['success' => false, 'mensaje' => 'Estado no válido.']);
+            return;
+        }
+
         $res = $this->service->cambiarEstado($id, $estado);
         echo json_encode($res);
     }

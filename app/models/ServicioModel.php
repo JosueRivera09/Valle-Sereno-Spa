@@ -113,4 +113,25 @@ class ServicioModel {
             return $stmt->execute([':emp' => $idEmpleado, ':srv' => $idServicio]);
         }
     }
+
+    /**
+     * Servicios más vendidos / solicitados (para vitrinas y catálogo público).
+     * Ordena por número de solicitudes registradas en citas y, en empate, por costo.
+     */
+    public function obtenerMasVendidos(int $limit = 4): array {
+        $sql = "SELECT s.id, s.nombre, s.descripcion, s.costo, s.duracion_minutos,
+                       c.nombre AS categoria_nombre,
+                       COUNT(cd.id) AS total_solicitudes
+                FROM servicios s
+                LEFT JOIN categorias c ON s.id_categoria = c.id
+                LEFT JOIN cita_detalles cd ON s.id = cd.id_servicio
+                WHERE s.estado = 'activo'
+                GROUP BY s.id, s.nombre, s.descripcion, s.costo, s.duracion_minutos, c.nombre
+                ORDER BY total_solicitudes DESC, s.costo DESC
+                LIMIT :limite";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':limite', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }

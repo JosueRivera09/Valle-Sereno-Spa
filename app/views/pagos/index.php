@@ -1,13 +1,12 @@
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<!-- Encabezado Editorial -->
+<div class="page-head">
     <div>
-        <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-receipt text-warning me-2"></i> Caja & Conciliación de Pagos
-        </h4>
-        <p class="text-muted small mb-0">Emisión de recibos, registro de cobros por cita, apertura de turno y arqueo diario con cuadre de efectivo.</p>
+        <span class="kicker">Caja</span>
+        <h1 class="display-title">Caja <em>& Registro de Pagos</em></h1>
     </div>
-    <div class="d-flex gap-2">
+    <div class="page-head-actions">
         <?php if (!empty($estadoCaja['abierta'])): ?>
-            <button class="btn btn-outline-warning btn-sm px-3 text-dark d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCerrarCaja">
+            <button class="btn btn-quiet btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCerrarCaja">
                 <i class="bi bi-lock-fill"></i>
                 <span>Arqueo & Cierre de Caja</span>
             </button>
@@ -56,71 +55,110 @@
     </div>
 <?php endif; ?>
 
-<!-- Tarjetas Resumen de Caja del Día -->
-<div class="row g-3 mb-4">
-    <?php
-        $totalEfectivo = 0;
-        $totalTarjeta = 0;
-        $totalTransf = 0;
-        foreach ($resumenCaja ?? [] as $r) {
-            if ($r['tipo_pago'] === 'Efectivo') $totalEfectivo = $r['total'];
-            if ($r['tipo_pago'] === 'Tarjeta') $totalTarjeta = $r['total'];
-            if ($r['tipo_pago'] === 'Transferencia') $totalTransf = $r['total'];
-        }
-        $totalGeneralHoy = $totalEfectivo + $totalTarjeta + $totalTransf;
-    ?>
-    <div class="col-sm-6 col-md-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Recaudación Hoy</small>
-                <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);">C$<?= number_format($totalGeneralHoy, 2) ?></h3>
-            </div>
-            <div class="stat-icon" style="background: rgba(30, 61, 52, 0.1); color: var(--spa-primary);">
-                <i class="bi bi-wallet2"></i>
-            </div>
-        </div>
+<!-- Métricas Libro Mayor de Caja del Día -->
+<?php
+    $totalEfectivo = 0;
+    $totalTarjeta = 0;
+    $totalTransf = 0;
+    foreach ($resumenCaja ?? [] as $r) {
+        if ($r['tipo_pago'] === 'Efectivo') $totalEfectivo = $r['total'];
+        if ($r['tipo_pago'] === 'Tarjeta') $totalTarjeta = $r['total'];
+        if ($r['tipo_pago'] === 'Transferencia') $totalTransf = $r['total'];
+    }
+    $totalGeneralHoy = $totalEfectivo + $totalTarjeta + $totalTransf;
+?>
+<div class="metrics">
+    <div class="metric">
+        <span class="metric-label">Recaudación Hoy</span>
+        <span class="metric-value">C$<?= number_format($totalGeneralHoy, 2) ?></span>
     </div>
-    <div class="col-sm-6 col-md-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Efectivo en Caja</small>
-                <h3 class="fw-bold mb-0 text-success" style="font-family: var(--font-serif);">C$<?= number_format($totalEfectivo, 2) ?></h3>
-            </div>
-            <div class="stat-icon" style="background: #eef6f3; color: #3b735c;">
-                <i class="bi bi-cash-coin"></i>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Efectivo en Caja</span>
+        <span class="metric-value">C$<?= number_format($totalEfectivo, 2) ?></span>
     </div>
-    <div class="col-sm-6 col-md-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Tarjetas</small>
-                <h3 class="fw-bold mb-0 text-primary" style="font-family: var(--font-serif);">C$<?= number_format($totalTarjeta, 2) ?></h3>
-            </div>
-            <div class="stat-icon" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd;">
-                <i class="bi bi-credit-card-fill"></i>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Tarjetas</span>
+        <span class="metric-value">C$<?= number_format($totalTarjeta, 2) ?></span>
     </div>
-    <div class="col-sm-6 col-md-3">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Transferencias</small>
-                <h3 class="fw-bold mb-0 text-warning" style="font-family: var(--font-serif);">C$<?= number_format($totalTransf, 2) ?></h3>
-            </div>
-            <div class="stat-icon" style="background: rgba(255, 193, 7, 0.15); color: #997838;">
-                <i class="bi bi-arrow-left-right"></i>
-            </div>
-        </div>
+    <div class="metric metric--gold">
+        <span class="metric-label">Transferencias</span>
+        <span class="metric-value">C$<?= number_format($totalTransf, 2) ?></span>
     </div>
 </div>
 
+<?php if (!empty($estadoCaja['abierta'])): ?>
+    <!-- Panel Operativo: Registrar Cobro Directo en Caja -->
+    <div class="panel panel--feature mb-4 shadow-sm">
+        <div class="panel-head">
+            <div>
+                <h2 class="panel-title d-flex align-items-center gap-2">
+                    <i class="bi bi-cash-stack text-warning"></i>
+                    <span>Registrar Cobro en Caja</span>
+                </h2>
+                <small class="text-muted" style="font-size: 0.78rem;">
+                    Seleccione la cita con saldo pendiente e ingrese el pago para emitir el comprobante de inmediato.
+                </small>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i>Caja Lista
+            </span>
+        </div>
+
+        <form id="formCobroDirecto" onsubmit="procesarCobroDirecto(event)">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-5 col-md-6">
+                    <label class="form-label fw-bold small text-dark mb-1">
+                        Cita por Cobrar <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-calendar-check text-muted"></i></span>
+                        <select id="directo_id_cita" name="id_cita" class="form-select" onchange="actualizarMontoPorCitaDirecto(this)" required>
+                            <option value="">-- Seleccionar Cita Pendiente (<?= count($citasPendientes) ?>) --</option>
+                            <?php foreach ($citasPendientes as $cp): ?>
+                                <option value="<?= $cp['id'] ?>" data-monto="<?= $cp['saldo_pendiente'] ?>">
+                                    Cita #<?= $cp['id'] ?> &bull; <?= htmlspecialchars($cp['cliente_nombre']) ?> &bull; Saldo: C$<?= number_format($cp['saldo_pendiente'], 2) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-3 col-sm-6">
+                    <label class="form-label fw-bold small text-dark mb-1">
+                        Método de Pago <span class="text-danger">*</span>
+                    </label>
+                    <select id="directo_tipo_pago" name="tipo_pago" class="form-select" required>
+                        <option value="Efectivo">Efectivo (Caja Chica)</option>
+                        <option value="Tarjeta">Tarjeta Débito / Crédito (POS)</option>
+                        <option value="Transferencia">Transferencia Bancaria</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <label class="form-label fw-bold small text-dark mb-1">
+                        Monto (C$) <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">C$</span>
+                        <input type="number" step="0.01" id="directo_monto" name="monto" class="form-control fw-bold text-dark" placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-12">
+                    <button type="submit" class="btn btn-spa-primary btn-sm px-3 py-2 w-100 d-inline-flex align-items-center justify-content-center gap-2" id="btnSubmitCobroDirecto">
+                        <i class="bi bi-check2-circle fs-6"></i>
+                        <span>Cobrar Ahora</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+<?php endif; ?>
+
 <!-- Tabla de Pagos Realizados -->
 <div class="spa-card p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-journal-check text-warning me-2"></i> Historial de Transacciones & Recibos
-        </h5>
+    <div class="panel-head">
+        <h2 class="panel-title">Historial de Transacciones &amp; Recibos</h2>
         <div class="input-group input-group-sm" style="max-width: 280px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
             <input type="text" id="busquedaPago" class="form-control border-start-0" placeholder="Buscar por cliente..." onkeyup="filtrarTablaPagos()">
@@ -205,32 +243,36 @@
 <!-- Modal Apertura de Caja -->
 <div class="modal fade" id="modalAbrirCaja" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-key-fill text-warning me-2"></i> Apertura de Turno de Caja
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Caja</span>
+                    <h5 class="modal-title">
+                        <i class="bi bi-key-fill me-2"></i>Apertura de Turno de Caja
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formAbrirCaja" onsubmit="procesarAbrirCaja(event)">
-                <div class="modal-body p-4">
-                    <div class="alert alert-info py-2 px-3 small mb-3">
-                        <i class="bi bi-info-circle me-1"></i> Ingresa el monto del fondo base de efectivo entregado para dar inicio a la jornada.
+                <div class="modal-body">
+                    <div class="modal-note">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Ingresa el monto del fondo base de efectivo entregado para dar inicio a la jornada.</span>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Monto Inicial en Fondo (C$ Córdobas) <span class="text-danger">*</span></label>
+                        <label class="form-label">Monto inicial en fondo (C$) <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <span class="input-group-text fw-bold">C$</span>
+                            <span class="input-group-text">C$</span>
                             <input type="number" step="0.01" name="monto_inicial" class="form-control" placeholder="0.00" value="1000.00" required>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Observaciones de Apertura</label>
+                    <div class="mb-0">
+                        <label class="form-label">Observaciones de apertura</label>
                         <textarea name="observaciones" class="form-control" rows="2" placeholder="Fondo inicial entregado por administración..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
                         <i class="bi bi-unlock me-1"></i> Confirmar Apertura
                     </button>
@@ -243,52 +285,54 @@
 <!-- Modal Arqueo y Cierre de Caja -->
 <div class="modal fade" id="modalCerrarCaja" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-calculator me-2"></i> Arqueo & Cierre de Turno
-                </h5>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Caja</span>
+                    <h5 class="modal-title">
+                        <i class="bi bi-calculator me-2"></i>Arqueo &amp; Cierre de Turno
+                    </h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formCerrarCaja" onsubmit="procesarCerrarCaja(event)">
-                <div class="modal-body p-4">
-                    
-                    <div class="p-3 mb-3 bg-light rounded-3 border">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span class="text-muted">Fondo Inicial:</span>
-                            <span class="fw-bold">C$<?= number_format($estadoCaja['monto_inicial'] ?? 0, 2) ?></span>
+                <div class="modal-body">
+
+                    <div class="summary-box mb-3">
+                        <div class="summary-row">
+                            <span class="label">Fondo inicial:</span>
+                            <span class="value">C$<?= number_format($estadoCaja['monto_inicial'] ?? 0, 2) ?></span>
                         </div>
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span class="text-muted">Efectivo Cobrado:</span>
-                            <span class="fw-bold text-success">+ C$<?= number_format($estadoCaja['efectivo_cobrado'] ?? 0, 2) ?></span>
+                        <div class="summary-row">
+                            <span class="label">Efectivo cobrado:</span>
+                            <span class="value" style="color: var(--spa-leaf-ink);">+ C$<?= number_format($estadoCaja['efectivo_cobrado'] ?? 0, 2) ?></span>
                         </div>
-                        <div class="dashed-line my-2 border-top"></div>
-                        <div class="d-flex justify-content-between font-monospace">
-                            <span class="fw-bold text-dark">EFECTIVO ESPERADO EN CAJA:</span>
-                            <span class="fw-bold text-success fs-6" id="valEsperadoEfectivo">C$<?= number_format($estadoCaja['monto_esperado_efectivo'] ?? 0, 2) ?></span>
+                        <div class="summary-total">
+                            <span class="label">Efectivo esperado en caja</span>
+                            <span class="value" id="valEsperadoEfectivo">C$<?= number_format($estadoCaja['monto_esperado_efectivo'] ?? 0, 2) ?></span>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Efectivo Físico Contado (C$) <span class="text-danger">*</span></label>
+                        <label class="form-label">Efectivo físico contado (C$) <span class="text-danger">*</span></label>
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text fw-bold">C$</span>
+                            <span class="input-group-text">C$</span>
                             <input type="number" step="0.01" id="monto_final_efectivo" name="monto_final_efectivo" class="form-control" placeholder="0.00" onkeyup="calcularCuadreCaja()" onchange="calcularCuadreCaja()" required>
                         </div>
                     </div>
 
-                    <div class="p-3 mb-3 rounded-3 text-center border" id="boxCuadreCaja" style="background: #f8faf9;">
-                        <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.72rem;">Resultado del Arqueo</small>
+                    <div class="summary-box text-center mb-3" id="boxCuadreCaja">
+                        <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.72rem; letter-spacing: 1.4px;">Resultado del arqueo</small>
                         <div class="fs-5 fw-bold" id="lblResultadoDiferencia">Ingresa el efectivo contado</div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Observaciones del Arqueo</label>
+                    <div class="mb-0">
+                        <label class="form-label">Observaciones del arqueo</label>
                         <textarea name="observaciones" class="form-control" rows="2" placeholder="Justificación en caso de sobrante o faltante..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-warning btn-sm px-4 fw-bold">
                         <i class="bi bi-lock-fill me-1"></i> Cerrar Caja Oficialmente
                     </button>
@@ -301,29 +345,32 @@
 <!-- Modal Registrar Cobro -->
 <div class="modal fade" id="modalCobro" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-cash-stack text-warning me-2"></i> Registrar Cobro en Caja
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Caja</span>
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-stack me-2"></i>Registrar Cobro en Caja
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formCobro" onsubmit="procesarCobro(event)">
-                <div class="modal-body p-4">
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Seleccionar Cita por Cobrar <span class="text-danger">*</span></label>
+                        <label class="form-label">Seleccionar cita por cobrar <span class="text-danger">*</span></label>
                         <select id="id_cita" name="id_cita" class="form-select" onchange="actualizarMontoPorCita(this)" required>
                             <option value="">-- Seleccionar Cita Pendiente --</option>
                             <?php foreach ($citasPendientes as $cp): ?>
-                                <option value="<?= $cp['id'] ?>" data-monto="<?= $cp['total'] ?>">
-                                    Cita #<?= $cp['id'] ?> - <?= htmlspecialchars($cp['cliente_nombre']) ?> (C$<?= number_format($cp['total'], 2) ?>)
+                                <option value="<?= $cp['id'] ?>" data-monto="<?= $cp['saldo_pendiente'] ?>">
+                                    Cita #<?= $cp['id'] ?> - <?= htmlspecialchars($cp['cliente_nombre']) ?> (Saldo: C$<?= number_format($cp['saldo_pendiente'], 2) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Método de Pago <span class="text-danger">*</span></label>
+                        <label class="form-label">Método de pago <span class="text-danger">*</span></label>
                         <select id="tipo_pago" name="tipo_pago" class="form-select" required>
                             <option value="Efectivo">Efectivo (Caja Chica)</option>
                             <option value="Tarjeta">Tarjeta Débito / Crédito (POS)</option>
@@ -331,18 +378,18 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Monto a Cobrar (C$ Córdobas) <span class="text-danger">*</span></label>
+                    <div class="mb-0">
+                        <label class="form-label">Monto a cobrar (C$) <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">C$</span>
                             <input type="number" step="0.01" id="monto" name="monto" class="form-control" placeholder="0.00" required>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
-                        <i class="bi bi-printer me-1"></i> Procesar & Emitir Recibo
+                        <i class="bi bi-printer me-1"></i> Procesar &amp; Emitir Recibo
                     </button>
                 </div>
             </form>
@@ -356,6 +403,15 @@ const MONTO_ESPERADO_EFECTIVO = <?= (float)($estadoCaja['monto_esperado_efectivo
 
 document.addEventListener('DOMContentLoaded', () => {
     modalCobroBs = new bootstrap.Modal(document.getElementById('modalCobro'));
+
+    // Reiniciar el formulario de arqueo cada vez que se cierra el modal de cierre de caja
+    const modalCerrarCajaEl = document.getElementById('modalCerrarCaja');
+    if (modalCerrarCajaEl) {
+        modalCerrarCajaEl.addEventListener('hidden.bs.modal', () => {
+            document.getElementById('formCerrarCaja').reset();
+            document.getElementById('lblResultadoDiferencia').textContent = 'Ingresa el efectivo contado';
+        });
+    }
 });
 
 function prepararNuevoCobro() {
@@ -368,6 +424,51 @@ function actualizarMontoPorCita(select) {
     if (monto) {
         document.getElementById('monto').value = monto;
     }
+}
+
+function actualizarMontoPorCitaDirecto(select) {
+    const option = select.options[select.selectedIndex];
+    const monto = option.getAttribute('data-monto');
+    const inputMonto = document.getElementById('directo_monto');
+    if (inputMonto) {
+        inputMonto.value = monto ? parseFloat(monto).toFixed(2) : '';
+    }
+}
+
+function procesarCobroDirecto(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitCobroDirecto');
+    const fd = new FormData(document.getElementById('formCobroDirecto'));
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Procesando...';
+    }
+
+    fetch('index.php?c=pagos&a=cobrar', {
+        method: 'POST',
+        body: fd
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            alert('¡Pago registrado correctamente! Se actualizará la caja y el historial.');
+            location.reload();
+        } else {
+            alert('Error: ' + res.mensaje);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check2-circle fs-6"></i> <span>Cobrar Ahora</span>';
+            }
+        }
+    })
+    .catch(() => {
+        alert('Ocurrió un error de conexión al procesar el cobro.');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check2-circle fs-6"></i> <span>Cobrar Ahora</span>';
+        }
+    });
 }
 
 function procesarCobro(e) {
@@ -387,7 +488,8 @@ function procesarCobro(e) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al procesar el cobro.'));
 }
 
 function procesarAbrirCaja(e) {
@@ -406,7 +508,8 @@ function procesarAbrirCaja(e) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al abrir la caja.'));
 }
 
 function calcularCuadreCaja() {
@@ -417,7 +520,8 @@ function calcularCuadreCaja() {
 
     if (isNaN(contado)) return;
 
-    if (dif === 0) {
+    // Tolerancia de medio centavo: evita falsos faltantes por redondeo de punto flotante
+    if (Math.abs(dif) < 0.005) {
         box.style.background = '#eef8f3';
         lbl.className = 'fs-5 fw-bold text-success';
         lbl.innerHTML = '<i class="bi bi-check-circle me-1"></i> Cuadre Perfecto (Sin Diferencia)';
@@ -448,7 +552,8 @@ function procesarCerrarCaja(e) {
         } else {
             alert('Error: ' + res.mensaje);
         }
-    });
+    })
+    .catch(() => alert('Ocurrió un error de conexión al cerrar la caja.'));
 }
 
 function imprimirTicket(idPago) {

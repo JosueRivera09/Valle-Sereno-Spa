@@ -6,6 +6,11 @@
 require_once __DIR__ . '/../models/Usuario.php';
 
 class AuthService {
+    // Parámetros de seguridad del acceso
+    private const MAX_INTENTOS    = 3;   // intentos fallidos antes de bloquear la cuenta
+    private const MINUTOS_BLOQUEO = 15;  // duración del bloqueo temporal (minutos)
+    private const DIAS_RECORDAR   = 30;  // vigencia de "Recordar este dispositivo" (días)
+
     private Usuario $usuarioModel;
 
     public function __construct() {
@@ -13,60 +18,54 @@ class AuthService {
     }
 
     /**
-     * Autenticar usuario por credenciales (Acepta usuario o correo)
-     * Límite de seguridad: 3 intentos fallidos consecutivos bloquean la cuenta.
+     * Autenticar por correo institucional o usuario (alias) + contraseña.
+     * - Mensaje genérico ante credenciales inválidas (evita enumeración de cuentas).
+     * - Bloqueo temporal tras N intentos fallidos (se auto-libera al expirar).
      * @return array [ 'success' => bool, 'message' => string, 'user' => array|null, 'redirect' => string|null ]
      */
-    public function login(string $loginIdentifier, string $password): array {
+    public function login(string $loginIdentifier, string $password, bool $remember = false): array {
         $loginIdentifier = trim($loginIdentifier);
-        $password = trim($password);
-        $maxAttempts = 3;
+        // Nota: la contraseña NO se recorta: los espacios forman parte válida de una contraseña
 
-        if (empty($loginIdentifier) || empty($password)) {
+        if ($loginIdentifier === '' || $password === '') {
             return [
                 'success' => false,
                 'message' => 'Por favor complete todos los campos obligatorios.'
             ];
         }
 
-        // Iniciar sesión para gestionar control de intentos en memoria de sesión si no existe aún
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
         $user = $this->usuarioModel->findByLogin($loginIdentifier);
 
-        // Si el usuario o correo no existe en el sistema
+        // Mensaje único para credenciales inválidas: no revelamos si la cuenta existe
+        $credencialesInvalidas = [
+            'success' => false,
+            'message' => 'Correo o contraseña incorrectos.'
+        ];
+
         if (!$user) {
-            $_SESSION['intentos_usuario_inexistente'] = ($_SESSION['intentos_usuario_inexistente'] ?? 0) + 1;
-            $fallosInexistentes = $_SESSION['intentos_usuario_inexistente'];
-            $restantesInexistentes = max(0, $maxAttempts - $fallosInexistentes);
-
-            if ($restantesInexistentes <= 0) {
-                return [
-                    'success'    => false,
-                    'bloqueado'  => true,
-                    'inexistente'=> true,
-                    'message'    => "El usuario o correo institucional ingresado no existe en nuestros registros. Ha alcanzado el límite de {$maxAttempts} intentos permitidos desde este dispositivo. Ingrese un usuario/correo corporativo válido o contacte a Administración."
-                ];
-            }
-
-            return [
-                'success'    => false,
-                'inexistente'=> true,
-                'message'    => "El usuario o correo institucional ingresado no existe. Ingrese un usuario o correo corporativo válido. (Le restan {$restantesInexistentes} intento(s))."
-            ];
+            return $credencialesInvalidas;
         }
 
-        // Si el usuario existe pero antes hubo intentos erróneos de usuario inexistente, limpiar ese contador
-        unset($_SESSION['intentos_usuario_inexistente']);
+        // Auto-liberación del bloqueo temporal una vez transcurrido el tiempo
+        if ($user['estado'] === 'bloqueado'
+            && !empty($user['bloqueado_hasta'])
+            && strtotime($user['bloqueado_hasta']) <= time()) {
+            $this->usuarioModel->desbloquear((int)$user['id']);
+            $user['estado'] = 'activo';
+            $user['intentos_fallidos'] = 0;
+            $user['bloqueado_hasta'] = null;
+        }
 
-        // 1. Verificar si la cuenta ya está bloqueada por exceso de intentos
+        // 1. Cuenta bloqueada (por intentos fallidos o por decisión de Administración)
         if ($user['estado'] === 'bloqueado') {
             return [
                 'success'   => false,
                 'bloqueado' => true,
-                'message'   => 'Su cuenta ha sido bloqueada por exceder el límite de intentos fallidos (' . $maxAttempts . '). Para restablecer el acceso, debe contactar obligatoriamente a un Administrador del Spa.'
+                'message'   => $this->mensajeBloqueo($user['bloqueado_hasta'])
             ];
         }
 
@@ -80,30 +79,33 @@ class AuthService {
 
         // 3. Validar contraseña
         if (!password_verify($password, $user['password_hash'])) {
-            $intentosActuales = $this->usuarioModel->registerFailedAttempt((int)$user['id'], $maxAttempts);
-            $restantes = $maxAttempts - $intentosActuales;
+            $intentos = $this->usuarioModel->registerFailedAttempt(
+                (int)$user['id'],
+                self::MAX_INTENTOS,
+                self::MINUTOS_BLOQUEO
+            );
 
-            if ($restantes <= 0) {
+            if ($intentos >= self::MAX_INTENTOS) {
                 return [
                     'success'   => false,
                     'bloqueado' => true,
-                    'message'   => '¡Cuenta bloqueada por seguridad! Ha superado el límite de ' . $maxAttempts . ' intentos fallidos. Deberá contactar a un Administrador del sistema para reactivar su cuenta.'
+                    'message'   => 'Su cuenta ha sido bloqueada temporalmente por ' . self::MINUTOS_BLOQUEO
+                                 . ' minutos tras ' . self::MAX_INTENTOS
+                                 . ' intentos fallidos. Intente nuevamente más tarde o contacte a un Administrador.'
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => "Contraseña incorrecta. Le restan {$restantes} intento(s) antes de que su cuenta sea bloqueada."
-            ];
+            return $credencialesInvalidas;
         }
 
         // 4. Si las credenciales son válidas, restablecer intentos fallidos
         $this->usuarioModel->resetFailedAttempts((int)$user['id']);
 
-        // Iniciar sesión y guardar datos del usuario
+        // Regenerar el ID de sesión tras autenticar (previene fijación de sesión)
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        session_regenerate_id(true);
 
         $_SESSION['usuario_id']     = $user['id'];
         $_SESSION['usuario']        = $user['usuario'];
@@ -114,6 +116,23 @@ class AuthService {
         $_SESSION['id_empleado']    = $user['id_empleado'] ?? null;
         $_SESSION['cargo']          = $user['cargo'] ?? 'Personal';
         $_SESSION['auth_time']      = time();
+        $_SESSION['last_activity']  = time();
+
+        // "Recordar este dispositivo": extiende la vida de la cookie de sesión.
+        // Si no se marca, la cookie es de sesión (se borra al cerrar el navegador).
+        if ($remember) {
+            $_SESSION['remember'] = true;
+            $cookieParams = session_get_cookie_params();
+            setcookie(session_name(), session_id(), [
+                'expires'  => time() + (60 * 60 * 24 * self::DIAS_RECORDAR),
+                'path'     => $cookieParams['path'] !== '' ? $cookieParams['path'] : '/',
+                'secure'   => !empty($cookieParams['secure']),
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
+        } else {
+            unset($_SESSION['remember']);
+        }
 
         $this->usuarioModel->updateLastAccess((int)$user['id']);
 
@@ -132,6 +151,19 @@ class AuthService {
             ],
             'redirect' => $redirect
         ];
+    }
+
+    /**
+     * Mensaje claro según el tipo de bloqueo (temporal por intentos o manual del Administrador).
+     */
+    private function mensajeBloqueo(?string $bloqueadoHasta): string {
+        if (empty($bloqueadoHasta)) {
+            return 'Su cuenta está bloqueada. Contacte a un Administrador del sistema para reactivar su acceso.';
+        }
+        $segundosRestantes = strtotime($bloqueadoHasta) - time();
+        $minutosRestantes  = max(1, (int)ceil($segundosRestantes / 60));
+        return 'Su cuenta está bloqueada temporalmente por seguridad. Podrá intentarlo de nuevo en '
+             . $minutosRestantes . ' minuto(s) o contacte a un Administrador.';
     }
 
     public function logout(): void {

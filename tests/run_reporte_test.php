@@ -24,10 +24,11 @@ class SimpleRunner {
         }
     }
 
-    public function summary(): void {
+    public function summary(): int {
         echo "\n----------------------------------------\n";
         echo "RESULTADOS REPORTES TEST: {$this->passed} pasados, {$this->failed} fallidos.\n";
         echo "----------------------------------------\n";
+        return $this->failed;
     }
 }
 
@@ -46,4 +47,5 @@ $runner->assert($res2['success'] === false, 'Rechazo cuando fecha inicio es post
 $res3 = $service->generarReporteRango('', '2026-10-07');
 $runner->assert($res3['success'] === false, 'Rechazo de fechas vacías');
 
-$runner->summary();
+$fallos = $runner->summary();
+exit($fallos > 0 ? 1 : 0);

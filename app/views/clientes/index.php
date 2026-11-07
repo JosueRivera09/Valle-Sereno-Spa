@@ -1,63 +1,38 @@
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<!-- Encabezado Editorial -->
+<div class="page-head">
     <div>
-        <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-people text-warning me-2"></i> Directorio de Clientes & Expedientes
-        </h4>
-        <p class="text-muted small mb-0">Gestión integral de la comunidad de clientes, datos de contacto e historial de atenciones.</p>
+        <span class="kicker">Comunidad</span>
+        <h1 class="display-title">Directorio de Clientes <em>& Expedientes</em></h1>
     </div>
-    <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="prepararNuevoCliente()">
-        <i class="bi bi-person-plus-fill"></i>
-        <span>Nuevo Cliente</span>
-    </button>
+    <div class="page-head-actions">
+        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="prepararNuevoCliente()">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Nuevo Cliente</span>
+        </button>
+    </div>
 </div>
 
-<!-- Tarjetas Resumen -->
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Total Registrados</small>
-                <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);"><?= count($clientes ?? []) ?></h3>
-            </div>
-            <div class="stat-icon" style="background: rgba(30, 61, 52, 0.1); color: var(--spa-primary);">
-                <i class="bi bi-people-fill"></i>
-            </div>
-        </div>
+<!-- Métricas Libro Mayor -->
+<div class="metrics">
+    <div class="metric">
+        <span class="metric-label">Total Registrados</span>
+        <span class="metric-value"><?= count($clientes ?? []) ?></span>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Clientes Activos</small>
-                <h3 class="fw-bold mb-0 text-success" style="font-family: var(--font-serif);">
-                    <?= count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'activo')) ?>
-                </h3>
-            </div>
-            <div class="stat-icon" style="background: #eef6f3; color: #3b735c;">
-                <i class="bi bi-person-check-fill"></i>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Clientes Activos</span>
+        <span class="metric-value"><?= count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'activo')) ?></span>
+        <span class="metric-note"><strong>Comunidad fidelizada</strong></span>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Inactivos</small>
-                <h3 class="fw-bold mb-0 text-secondary" style="font-family: var(--font-serif);">
-                    <?= count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'inactivo')) ?>
-                </h3>
-            </div>
-            <div class="stat-icon" style="background: #f4f4f4; color: #6c757d;">
-                <i class="bi bi-person-dash"></i>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Inactivos</span>
+        <span class="metric-value"><?= count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'inactivo')) ?></span>
     </div>
 </div>
 
 <!-- Tabla de Clientes -->
 <div class="spa-card p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-journal-bookmark text-warning me-2"></i> Listado General
-        </h5>
+    <div class="panel-head">
+        <h2 class="panel-title">Listado General</h2>
         <div class="input-group input-group-sm" style="max-width: 280px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
             <input type="text" id="busquedaCliente" class="form-control border-start-0" placeholder="Buscar cliente..." onkeyup="filtrarTablaClientes()">
@@ -125,7 +100,7 @@
                                         <i class="bi bi-clock-history"></i>
                                     </button>
                                     <button class="btn btn-outline-secondary" title="Editar Expediente" 
-                                            onclick='editarCliente(<?= json_encode($c) ?>)'>
+                                            onclick='editarCliente(<?= json_encode($c, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="btn btn-outline-<?= $c['estado'] === 'activo' ? 'warning' : 'success' ?>" 
@@ -146,48 +121,51 @@
 <!-- Modal Registro / Edición de Cliente -->
 <div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" id="modalClienteLabel" style="font-family: var(--font-serif);">
-                    <i class="bi bi-person-lines-fill text-warning me-2"></i> Expediente de Cliente
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Expediente</span>
+                    <h5 class="modal-title" id="modalClienteLabel">
+                        <i class="bi bi-person-lines-fill me-2"></i>Expediente de Cliente
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formCliente" onsubmit="guardarCliente(event)">
-                <div class="modal-body p-4">
+                <div class="modal-body">
                     <input type="hidden" id="cliente_id" name="id">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Nombre Completo <span class="text-danger">*</span></label>
+                        <label class="form-label">Nombre completo <span class="text-danger">*</span></label>
                         <input type="text" id="nombre_completo" name="nombre_completo" class="form-control" placeholder="Ej. María Elena Torres" required>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-6">
-                            <label class="form-label fw-bold small text-dark">Fecha Nacimiento <span class="text-danger">*</span></label>
+                            <label class="form-label">Fecha nacimiento <span class="text-danger">*</span></label>
                             <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" class="form-control" required>
                         </div>
                         <div class="col-6">
-                            <label class="form-label fw-bold small text-dark">Teléfono <span class="text-danger">*</span></label>
+                            <label class="form-label">Teléfono <span class="text-danger">*</span></label>
                             <input type="tel" id="telefono" name="telefono" class="form-control" placeholder="Ej. 555-0192" required>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Correo Electrónico</label>
+                        <label class="form-label">Correo electrónico</label>
                         <input type="email" id="correo" name="correo" class="form-control" placeholder="cliente@ejemplo.com">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Estado del Cliente</label>
+                    <div class="mb-0">
+                        <label class="form-label">Estado del cliente</label>
                         <select id="estado" name="estado" class="form-select">
                             <option value="activo">Activo</option>
                             <option value="inactivo">Inactivo</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
                         <i class="bi bi-save me-1"></i> Guardar Expediente
                     </button>
@@ -199,15 +177,18 @@
 
 <!-- Modal Historial de Citas -->
 <div class="modal fade" id="modalHistorial" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-clock-history text-warning me-2"></i> Historial del Cliente: <span id="historialNombreCliente"></span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Historial clínico</span>
+                    <h5 class="modal-title">
+                        <i class="bi bi-clock-history me-2"></i>Historial del Cliente: <span id="historialNombreCliente"></span>
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
@@ -307,16 +288,19 @@ function verHistorialCliente(id, nombre) {
         if (res.success && res.data.length > 0) {
             body.innerHTML = res.data.map(item => `
                 <tr>
-                    <td><span class="fw-semibold">${item.fecha}</span></td>
-                    <td>${item.hora_inicio} - ${item.hora_fin}</td>
-                    <td>${item.terapeuta_nombre || 'N/A'}</td>
-                    <td class="fw-bold">$${parseFloat(item.total).toFixed(2)}</td>
-                    <td><span class="badge bg-secondary rounded-pill">${item.estado}</span></td>
+                    <td><span class="fw-semibold">${esc(item.fecha)}</span></td>
+                    <td>${esc(item.hora_inicio)} - ${esc(item.hora_fin)}</td>
+                    <td>${esc(item.terapeuta_nombre || 'N/A')}</td>
+                    <td class="fw-bold">C$${parseFloat(item.total).toFixed(2)}</td>
+                    <td><span class="badge bg-secondary rounded-pill">${esc(item.estado)}</span></td>
                 </tr>
             `).join('');
         } else {
             body.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">El cliente no registra historial de citas previo.</td></tr>';
         }
+    })
+    .catch(() => {
+        body.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-danger">No se pudo cargar el historial. Intente de nuevo.</td></tr>';
     });
 }
 

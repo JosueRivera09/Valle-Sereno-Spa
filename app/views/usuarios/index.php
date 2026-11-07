@@ -6,16 +6,14 @@ $empleados = $catalogos['empleados'] ?? [];
 $currentUserId = $_SESSION['usuario_id'] ?? 0;
 ?>
 
-<!-- Header de Sección -->
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<!-- Encabezado Editorial -->
+<div class="page-head">
     <div>
-        <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-shield-lock-fill text-warning me-2"></i> Gestión de Usuarios
-        </h4>
-        <p class="text-muted small mb-0">Control de cuentas de acceso al sistema, asignación de roles corporativos y credenciales de seguridad.</p>
+        <span class="kicker">Sistema</span>
+        <h1 class="display-title">Gestión <em>de Usuarios</em></h1>
     </div>
-    <div class="d-flex gap-2">
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirModalCrear()">
+    <div class="page-head-actions">
+        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirModalCrear()">
             <i class="bi bi-person-plus-fill"></i>
             <span>Nuevo Usuario</span>
         </button>
@@ -43,7 +41,7 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 </div>
 
 <!-- Galería Grid de Usuarios -->
-<div class="row g-4 mb-4" id="galeriaUsuarios">
+<div class="row g-3 mb-4" id="galeriaUsuarios">
     <?php if (empty($usuarios)): ?>
         <div class="col-12 text-center py-5 text-muted">
             <i class="bi bi-person-x fs-1 d-block mb-2 text-muted"></i>
@@ -67,7 +65,7 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
             };
             $cardBorderColor = $u['estado'] === 'bloqueado' ? 'border-danger' : ($u['estado'] === 'activo' ? 'border-success' : 'border-secondary');
         ?>
-            <div class="col-md-6 col-lg-4 tarjeta-usuario-item" data-rol="<?= htmlspecialchars($u['rol_nombre']) ?>">
+            <div class="col-sm-6 col-lg-4 col-xl-3 tarjeta-usuario-item" data-rol="<?= htmlspecialchars($u['rol_nombre']) ?>">
                 <div class="spa-card p-4 h-100 position-relative d-flex flex-column justify-content-between border-top border-4 <?= $cardBorderColor ?> shadow-sm hover-shadow transition-all">
                     
                     <div>
@@ -160,33 +158,46 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 <!-- MODAL: Crear / Editar Usuario -->
 <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioTitulo" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header" style="background: var(--spa-primary); color: #fff;">
-                <h5 class="modal-title fw-bold" id="modalUsuarioTitulo" style="font-family: var(--font-serif);">
-                    <i class="bi bi-person-fill-gear me-2 text-warning"></i> Nuevo Usuario
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Acceso</span>
+                    <h5 class="modal-title" id="modalUsuarioTitulo">
+                        <i class="bi bi-person-fill-gear me-2"></i>Nuevo Usuario
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formUsuario" onsubmit="guardarUsuario(event)">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <input type="hidden" id="usuario_id" name="id" value="">
 
-                <div class="modal-body p-4">
+                <div class="modal-body">
                     <div id="modalAlertError" class="alert alert-danger py-2 small d-none"></div>
 
                     <!-- Usuario -->
                     <div class="mb-3">
-                        <label for="inputUsuario" class="form-label small fw-semibold text-dark">Nombre de Usuario *</label>
+                        <label for="inputUsuario" class="form-label">Nombre de usuario <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control" id="inputUsuario" name="usuario" placeholder="ej. mdelgado" required minlength="3" maxlength="50" autocomplete="off">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" id="inputUsuario" name="usuario" placeholder="ej. nombre.apellido" required minlength="3" maxlength="50" autocomplete="off">
                         </div>
-                        <small class="text-muted" style="font-size: 0.74rem;">Se utiliza para acceder al sistema.</small>
+                        <small class="text-muted" style="font-size: 0.74rem;">Alias corto de acceso (alternativo al correo).</small>
+                    </div>
+
+                    <!-- Correo institucional -->
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">Correo institucional <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="inputEmail" name="email" placeholder="usuario@vallesereno.com" required maxlength="100" autocomplete="off">
+                        </div>
+                        <small class="text-muted" style="font-size: 0.74rem;">Credencial principal para iniciar sesión.</small>
                     </div>
 
                     <!-- Empleado Vinculado -->
                     <div class="mb-3">
-                        <label for="selectEmpleado" class="form-label small fw-semibold text-dark">Vincular a Empleado (Opcional)</label>
+                        <label for="selectEmpleado" class="form-label">Vincular a empleado <span class="text-muted">(opcional)</span></label>
                         <select class="form-select" id="selectEmpleado" name="id_empleado">
                             <option value="">-- Sin vincular a personal --</option>
                             <?php foreach ($empleados as $emp): ?>
@@ -200,7 +211,7 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 
                     <!-- Rol -->
                     <div class="mb-3">
-                        <label for="selectRol" class="form-label small fw-semibold text-dark">Rol en el Spa *</label>
+                        <label for="selectRol" class="form-label">Rol en el spa <span class="text-danger">*</span></label>
                         <select class="form-select" id="selectRol" name="id_rol" required>
                             <option value="">-- Seleccionar Rol --</option>
                             <?php foreach ($roles as $r): ?>
@@ -211,17 +222,17 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 
                     <!-- Contraseña (Solo en creación) -->
                     <div class="mb-3" id="campoPasswordWrapper">
-                        <label for="inputPassword" class="form-label small fw-semibold text-dark">Contraseña Inicial *</label>
+                        <label for="inputPassword" class="form-label">Contraseña inicial <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Mínimo 8 caracteres (letras y números)" minlength="8" autocomplete="new-password">
                         </div>
                         <small class="text-muted" style="font-size: 0.74rem;">Se encriptará con BCRYPT antes de persistirse.</small>
                     </div>
 
                     <!-- Estado -->
-                    <div class="mb-3">
-                        <label for="selectEstado" class="form-label small fw-semibold text-dark">Estado de la Cuenta</label>
+                    <div class="mb-0">
+                        <label for="selectEstado" class="form-label">Estado de la cuenta</label>
                         <select class="form-select" id="selectEstado" name="estado">
                             <option value="activo">Activo (Habilitado para ingresar)</option>
                             <option value="inactivo">Inactivo (Bloqueado)</option>
@@ -229,9 +240,9 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-sm btn-spa-primary px-4" id="btnGuardarUsuario">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-spa-primary btn-sm px-4" id="btnGuardarUsuario">
                         <i class="bi bi-check2-circle me-1"></i> Guardar
                     </button>
                 </div>
@@ -243,32 +254,35 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 <!-- MODAL: Cambiar Contraseña -->
 <div class="modal fade" id="modalPassword" tabindex="-1" aria-labelledby="modalPasswordTitulo" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header" style="background: var(--spa-primary); color: #fff;">
-                <h6 class="modal-title fw-bold" id="modalPasswordTitulo" style="font-family: var(--font-serif);">
-                    <i class="bi bi-key-fill text-warning me-1"></i> Cambiar Contraseña
-                </h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Seguridad</span>
+                    <h5 class="modal-title" id="modalPasswordTitulo">
+                        <i class="bi bi-key-fill me-2"></i>Cambiar Contraseña
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formPassword" onsubmit="guardarNuevaPassword(event)">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <input type="hidden" id="pass_usuario_id" name="id" value="">
 
-                <div class="modal-body p-3">
+                <div class="modal-body">
                     <p class="small text-muted mb-2">
                         Actualizar credencial de acceso para: <strong id="passUsuarioNombre" class="text-dark"></strong>
                     </p>
                     <div id="modalPassAlertError" class="alert alert-danger py-1 small d-none"></div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Nueva Contraseña</label>
-                        <input type="password" class="form-control form-control-sm" id="inputNuevaPass" name="password" placeholder="Mínimo 6 caracteres" minlength="6" required autocomplete="new-password">
+                    <div class="mb-0">
+                        <label for="inputNuevaPass" class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="inputNuevaPass" name="password" placeholder="Mínimo 8 caracteres (letras y números)" minlength="8" required autocomplete="new-password">
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light p-2">
-                    <button type="button" class="btn btn-xs btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-xs btn-spa-primary" id="btnGuardarPass">Actualizar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-spa-primary btn-sm px-4" id="btnGuardarPass">Actualizar</button>
                 </div>
             </form>
         </div>
@@ -305,7 +319,8 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 </style>
 
 <script>
-const CSRF_TOKEN = '<?= htmlspecialchars($csrfToken) ?>';
+// CSRF_TOKEN y el parche global de fetch (X-CSRF-TOKEN / X-Requested-With)
+// los define el layout base app/views/layouts/main.php para todo el sistema.
 
 let filtroRolActual = 'todos';
 
@@ -358,6 +373,7 @@ async function abrirModalEditar(id) {
         const u = json.data;
         document.getElementById('usuario_id').value = u.id;
         document.getElementById('inputUsuario').value = u.usuario;
+        document.getElementById('inputEmail').value = u.email || '';
         document.getElementById('selectEmpleado').value = u.id_empleado || '';
         document.getElementById('selectRol').value = u.id_rol;
         document.getElementById('selectEstado').value = u.estado;
@@ -369,7 +385,7 @@ async function abrirModalEditar(id) {
         document.getElementById('modalUsuarioTitulo').innerHTML = `<i class="bi bi-pencil-square me-2 text-warning"></i> Editar Usuario: ${u.usuario}`;
         document.getElementById('modalAlertError').classList.add('d-none');
 
-        const modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalUsuario'));
         modal.show();
     } catch (e) {
         alert('Error de conexión al cargar datos del usuario.');
@@ -416,7 +432,7 @@ function abrirModalPassword(id, usuario) {
     document.getElementById('passUsuarioNombre').innerText = usuario;
     document.getElementById('modalPassAlertError').classList.add('d-none');
 
-    const modal = new bootstrap.Modal(document.getElementById('modalPassword'));
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalPassword'));
     modal.show();
 }
 

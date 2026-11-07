@@ -32,17 +32,18 @@ class Usuario {
                 u.bloqueado_hasta,
                 r.nombre AS rol_nombre,
                 COALESCE(e.nombre_completo, u.usuario) AS nombre_completo,
-                COALESCE(e.correo, u.usuario) AS email,
+                COALESCE(u.email, e.correo, u.usuario) AS email,
                 e.cargo
             FROM usuarios u
             INNER JOIN roles r ON u.id_rol = r.id
             LEFT JOIN empleados e ON u.id_empleado = e.id
-            WHERE u.usuario = :user_param OR e.correo = :email_param
+            WHERE u.email = :login_email OR u.usuario = :login_user OR e.correo = :login_email_emp
             LIMIT 1
         ");
         $stmt->execute([
-            'user_param'  => $loginIdentifier,
-            'email_param' => $loginIdentifier
+            'login_email'     => $loginIdentifier,
+            'login_user'      => $loginIdentifier,
+            'login_email_emp' => $loginIdentifier
         ]);
         $user = $stmt->fetch();
         return $user ?: null;
@@ -51,16 +52,21 @@ class Usuario {
     /**
      * Incrementar intentos fallidos y bloquear si supera el límite
      */
-    public function registerFailedAttempt(int $id, int $maxAttempts = 3): int {
+    public function registerFailedAttempt(int $id, int $maxAttempts = 3, int $lockMinutes = 15): int {
+        // La fecha límite del bloqueo se calcula en PHP para evitar problemas de
+        // bind de parámetros dentro de INTERVAL en prepares nativos.
+        $lockUntil = date('Y-m-d H:i:s', time() + ($lockMinutes * 60));
         $stmt = $this->db->prepare("
             UPDATE usuarios 
             SET intentos_fallidos = intentos_fallidos + 1,
-                estado = CASE WHEN intentos_fallidos + 1 >= :max THEN 'bloqueado' ELSE estado END
+                estado = CASE WHEN intentos_fallidos + 1 >= :max THEN 'bloqueado' ELSE estado END,
+                bloqueado_hasta = CASE WHEN intentos_fallidos + 1 >= :max THEN :lock_until ELSE bloqueado_hasta END
             WHERE id = :id
         ");
         $stmt->execute([
-            'id'  => $id,
-            'max' => $maxAttempts
+            'id'         => $id,
+            'max'        => $maxAttempts,
+            'lock_until' => $lockUntil
         ]);
 
         $stmtCount = $this->db->prepare("SELECT intentos_fallidos, estado FROM usuarios WHERE id = :id");
@@ -125,7 +131,7 @@ class Usuario {
                 u.ultimo_acceso,
                 r.nombre AS rol_nombre,
                 COALESCE(e.nombre_completo, 'Sin vincular') AS nombre_completo,
-                COALESCE(e.correo, 'Sin correo') AS email,
+                COALESCE(NULLIF(u.email, ''), e.correo, 'Sin correo') AS email,
                 COALESCE(e.cargo, 'Usuario del Sistema') AS cargo
             FROM usuarios u
             INNER JOIN roles r ON u.id_rol = r.id
@@ -153,7 +159,7 @@ class Usuario {
                 u.ultimo_acceso,
                 r.nombre AS rol_nombre,
                 COALESCE(e.nombre_completo, '') AS nombre_completo,
-                COALESCE(e.correo, '') AS email,
+                COALESCE(NULLIF(u.email, ''), e.correo, '') AS email,
                 e.cargo
             FROM usuarios u
             INNER JOIN roles r ON u.id_rol = r.id
@@ -182,17 +188,33 @@ class Usuario {
     }
 
     /**
+     * Verificar si un correo ya está registrado en otra cuenta
+     */
+    public function existsEmail(string $email, ?int $excludeId = null): bool {
+        $sql = "SELECT id FROM usuarios WHERE email = :email";
+        $params = ['email' => $email];
+        if ($excludeId !== null) {
+            $sql .= " AND id != :excludeId";
+            $params['excludeId'] = $excludeId;
+        }
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (bool)$stmt->fetch();
+    }
+
+    /**
      * Crear un nuevo usuario en la base de datos
      */
     public function create(array $data): int {
         $stmt = $this->db->prepare("
-            INSERT INTO usuarios (id_rol, id_empleado, usuario, password_hash, estado)
-            VALUES (:id_rol, :id_empleado, :usuario, :password_hash, :estado)
+            INSERT INTO usuarios (id_rol, id_empleado, usuario, email, password_hash, estado)
+            VALUES (:id_rol, :id_empleado, :usuario, :email, :password_hash, :estado)
         ");
         $stmt->execute([
             'id_rol'        => $data['id_rol'],
             'id_empleado'   => !empty($data['id_empleado']) ? (int)$data['id_empleado'] : null,
             'usuario'       => $data['usuario'],
+            'email'         => $data['email'] ?? null,
             'password_hash' => $data['password_hash'],
             'estado'        => $data['estado'] ?? 'activo'
         ]);
@@ -208,6 +230,7 @@ class Usuario {
             SET id_rol = :id_rol,
                 id_empleado = :id_empleado,
                 usuario = :usuario,
+                email = :email,
                 estado = :estado
             WHERE id = :id
         ");
@@ -216,6 +239,7 @@ class Usuario {
             'id_rol'      => $data['id_rol'],
             'id_empleado' => !empty($data['id_empleado']) ? (int)$data['id_empleado'] : null,
             'usuario'     => $data['usuario'],
+            'email'       => $data['email'] ?? null,
             'estado'      => $data['estado'] ?? 'activo'
         ]);
     }
