@@ -26,6 +26,17 @@ class AuthController {
             exit;
         }
 
+        // Vitrina del login: servicios más vendidos (con degradación segura si falla la BD)
+        $serviciosDestacados = [];
+        try {
+            require_once __DIR__ . '/../models/Database.php';
+            require_once __DIR__ . '/../models/ServicioModel.php';
+            $servicioModel = new ServicioModel(Database::getConnection());
+            $serviciosDestacados = $servicioModel->obtenerMasVendidos(4);
+        } catch (Throwable $e) {
+            $serviciosDestacados = [];
+        }
+
         require_once __DIR__ . '/../views/auth/login.php';
     }
 
@@ -38,7 +49,7 @@ class AuthController {
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        $response = $this->authService->login($email, $password);
+        $response = $this->authService->login($email, $password, !empty($_POST['rememberMe']));
 
         // Si la petición viene por Fetch/AJAX (solicitud JSON)
         $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') 

@@ -24,10 +24,14 @@ class Database {
                 ];
                 self::$instance = new PDO($dsn, DB_USER, DB_PASS, $options);
             } catch (PDOException $e) {
-                // Notificación amigable de error de conexión
+                error_log("Database connection error: " . $e->getMessage());
+                http_response_code(500);
+                $msg = (defined('APP_ENV') && APP_ENV === 'development')
+                    ? 'Error de conexión a la base de datos: ' . $e->getMessage()
+                    : 'Error del servidor: No se pudo conectar a la base de datos. Contacte al administrador.';
                 die(json_encode([
                     'success' => false,
-                    'message' => 'Error de conexión a la base de datos: ' . $e->getMessage()
+                    'message' => $msg
                 ]));
             }
         }

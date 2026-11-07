@@ -1,18 +1,16 @@
-<!-- Encabezado con Botón Activo -->
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+<!-- Encabezado Editorial -->
+<div class="page-head">
     <div>
-        <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-calendar-heart text-warning me-2"></i>
-            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' ? 'Mis Citas & Agenda Asignada' : 'Agenda & Citas de Spa' ?>
-        </h4>
-        <p class="text-muted small mb-0">
-            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
-                ? 'Consulta de tus sesiones de tratamiento programadas y pacientes asignados.' 
-                : 'Control de sesiones terapéuticas, asignación de cabinas y horarios.' ?>
-        </p>
+        <span class="kicker">Operación diaria</span>
+        <h1 class="display-title">
+            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' ? 'Mis Citas <em>& Agenda Asignada</em>' : 'Agenda <em>& Citas</em>' ?>
+        </h1>
+        <?php if (($_SESSION['rol_nombre'] ?? '') === 'Terapeuta'): ?>
+            <p class="page-lede">Tus sesiones de tratamiento programadas y pacientes asignados.</p>
+        <?php endif; ?>
     </div>
     <?php if (in_array($_SESSION['rol_nombre'] ?? '', ['Administrador', 'Recepcionista'])): ?>
-    <div>
+    <div class="page-head-actions">
         <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevaCita">
             <i class="bi bi-plus-circle-fill"></i>
             <span>Agendar Cita</span>
@@ -130,36 +128,37 @@
     </div>
 </div>
 
-<!-- Modal Nueva Cita Rediseñado & Optimizado -->
+<!-- Modal Nueva Cita -->
 <div class="modal fade" id="modalNuevaCita" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
                 <div>
-                    <h5 class="modal-title fw-bold mb-0" style="font-family: var(--font-serif);">
-                        <i class="bi bi-calendar-plus text-warning me-2"></i> Agendar Cita Terapéutica
+                    <span class="modal-kicker">Agenda</span>
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-plus me-2"></i>Agendar Cita Terapéutica
                     </h5>
-                    <small class="text-white-50" style="font-size: 0.78rem;">Selección interactiva de paciente, fecha, servicio y terapeuta disponible.</small>
+                    <p class="modal-sub">Selección interactiva de paciente, fecha, servicio y terapeuta disponible.</p>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="index.php?c=citas&a=guardar" method="POST" id="formNuevaCita">
                 <input type="hidden" name="csrf_token" value="<?= AuthHelper::csrfToken() ?>">
-                <div class="modal-body p-4">
-                    
-                    <!-- 1. Selección o Registro Express de Cliente -->
-                    <div class="p-3 mb-4 rounded-3 border" style="background: #f8faf9;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label fw-bold small text-dark mb-0">
-                                <i class="bi bi-person-heart text-success me-1"></i> Paciente / Cliente <span class="text-danger">*</span>
-                            </label>
-                            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold" onclick="toggleFormNuevoCliente()">
-                                <i class="bi bi-person-plus-fill me-1"></i><span id="btnTextNuevoCliente">+ ¿Cliente nuevo? Registrar rápido</span>
+                <div class="modal-body">
+
+                    <!-- 01. Paciente / Cliente -->
+                    <div class="form-section">
+                        <div class="form-section-head">
+                            <span class="form-section-num">01</span>
+                            <h6 class="form-section-title">Paciente / Cliente</h6>
+                            <button type="button" class="modal-link ms-auto" onclick="toggleFormNuevoCliente()">
+                                <i class="bi bi-person-plus-fill me-1"></i><span id="btnTextNuevoCliente">¿Cliente nuevo? Registrar rápido</span>
                             </button>
                         </div>
 
                         <!-- Selector de Cliente Existente -->
                         <div id="seccionClienteExistente">
+                            <label class="form-label">Buscar cliente registrado <span class="text-danger">*</span></label>
                             <select id="select_id_cliente" name="id_cliente" class="form-select" required>
                                 <option value="">-- Buscar o Seleccionar Cliente --</option>
                                 <?php foreach ($clientes as $cl): ?>
@@ -171,35 +170,38 @@
                         </div>
 
                         <!-- Formulario Express Cliente Nuevo -->
-                        <div id="seccionClienteNuevo" class="d-none mt-3 pt-3 border-top">
-                            <div class="alert alert-info py-2 px-3 small mb-3">
-                                <i class="bi bi-info-circle me-1"></i> Registra un nuevo paciente de inmediato y se asignará automáticamente a esta cita.
+                        <div id="seccionClienteNuevo" class="d-none mt-3">
+                            <div class="modal-note">
+                                <i class="bi bi-info-circle"></i>
+                                <span>Registra un nuevo paciente de inmediato y se asignará automáticamente a esta cita.</span>
                             </div>
                             <div class="row g-2">
-                                <div class="col-md-6 mb-2">
+                                <div class="col-md-6">
                                     <input type="text" id="express_nombre" class="form-control form-control-sm" placeholder="Nombre completo *">
                                 </div>
-                                <div class="col-md-6 mb-2">
+                                <div class="col-md-6">
                                     <input type="tel" id="express_telefono" class="form-control form-control-sm" placeholder="Teléfono *">
                                 </div>
-                                <div class="col-md-6 mb-2">
+                                <div class="col-md-6">
                                     <input type="date" id="express_fecha_nac" class="form-control form-control-sm">
                                 </div>
-                                <div class="col-md-6 mb-2">
+                                <div class="col-md-6">
                                     <input type="email" id="express_correo" class="form-control form-control-sm" placeholder="Correo (opcional)">
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-success btn-sm mt-1 px-3" onclick="guardarClienteExpress()">
+                            <button type="button" class="btn btn-gold btn-sm mt-2 px-3" onclick="guardarClienteExpress()">
                                 <i class="bi bi-check-lg me-1"></i> Confirmar Nuevo Cliente
                             </button>
                         </div>
                     </div>
 
-                    <!-- 2. Selección de Servicio & Tarifa -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-dark">
-                            <i class="bi bi-stars text-warning me-1"></i> Tratamiento / Servicio <span class="text-muted font-normal">(Opcional para cálculo automático)</span>
-                        </label>
+                    <!-- 02. Tratamiento / Servicio -->
+                    <div class="form-section">
+                        <div class="form-section-head">
+                            <span class="form-section-num">02</span>
+                            <h6 class="form-section-title">Tratamiento / Servicio</h6>
+                        </div>
+                        <label class="form-label">Tratamiento del catálogo <span class="text-muted">(opcional · cálculo automático)</span></label>
                         <select id="select_servicio" name="id_servicio" class="form-select" onchange="seleccionarServicio(this)">
                             <option value="" data-costo="0" data-duracion="60">-- Seleccionar Tratamiento del Menú --</option>
                             <?php foreach ($servicios as $srv): ?>
@@ -210,30 +212,35 @@
                         </select>
                     </div>
 
-                    <!-- 3. Fecha & Horario -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-dark">Fecha de Atencion <span class="text-danger">*</span></label>
-                            <input type="date" id="input_fecha" name="fecha" class="form-control" value="<?= date('Y-m-d') ?>" onchange="actualizarHorarioYDisponibilidad()" required>
+                    <!-- 03. Fecha & Horario -->
+                    <div class="form-section">
+                        <div class="form-section-head">
+                            <span class="form-section-num">03</span>
+                            <h6 class="form-section-title">Fecha &amp; Horario</h6>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-dark">Hora Inicio <span class="text-danger">*</span></label>
-                            <input type="time" id="input_hora_inicio" name="hora_inicio" class="form-control" value="10:00" onchange="actualizarHorarioYDisponibilidad()" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-dark">Hora Fin <span class="text-danger">*</span></label>
-                            <input type="time" id="input_hora_fin" name="hora_fin" class="form-control" value="11:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Fecha de atención <span class="text-danger">*</span></label>
+                                <input type="date" id="input_fecha" name="fecha" class="form-control" value="<?= date('Y-m-d') ?>" onchange="actualizarHorarioYDisponibilidad()" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Hora inicio <span class="text-danger">*</span></label>
+                                <input type="time" id="input_hora_inicio" name="hora_inicio" class="form-control" value="10:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Hora fin <span class="text-danger">*</span></label>
+                                <input type="time" id="input_hora_fin" name="hora_fin" class="form-control" value="11:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 4. Selección de Terapeuta Disponible en Tiempo Real -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-dark">
-                            <i class="bi bi-person-badge text-primary me-1"></i> Terapeuta Asignado <span class="text-danger">*</span>
-                        </label>
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="text-muted" style="font-size: 0.75rem;" id="lblEstadoTerapeutas">Verificando terapeutas libres para este horario...</small>
+                    <!-- 04. Terapeuta Disponible -->
+                    <div class="form-section">
+                        <div class="form-section-head">
+                            <span class="form-section-num">04</span>
+                            <h6 class="form-section-title">Terapeuta Asignado</h6>
                         </div>
+                        <label class="form-label">Terapeuta disponible <span class="text-danger">*</span></label>
                         <select id="select_id_empleado" name="id_empleado" class="form-select" required>
                             <option value="">-- Seleccionar Terapeuta Disponible --</option>
                             <?php foreach ($terapeutas as $t): ?>
@@ -242,26 +249,35 @@
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                        <small class="text-muted d-block mt-2" style="font-size: 0.75rem;" id="lblEstadoTerapeutas">
+                            <i class="bi bi-arrow-repeat me-1"></i>Verificando terapeutas libres para este horario...
+                        </small>
                     </div>
 
-                    <!-- 5. Monto e Indicaciones -->
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold small text-dark">Monto Total (C$) <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text fw-bold">C$</span>
-                                <input type="number" step="0.01" id="input_total" name="total" class="form-control" placeholder="0.00" required>
-                            </div>
+                    <!-- 05. Monto & Indicaciones -->
+                    <div class="form-section">
+                        <div class="form-section-head">
+                            <span class="form-section-num">05</span>
+                            <h6 class="form-section-title">Monto &amp; Indicaciones</h6>
                         </div>
-                        <div class="col-md-8">
-                            <label class="form-label fw-bold small text-dark">Observaciones / Indicaciones Especiales</label>
-                            <textarea name="observaciones" class="form-control" rows="1" placeholder="Ej. Sensibilidad en piel, preferencia de aceite aromático..."></textarea>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Monto total (C$) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">C$</span>
+                                    <input type="number" step="0.01" id="input_total" name="total" class="form-control" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">Observaciones / Indicaciones especiales</label>
+                                <textarea name="observaciones" class="form-control" rows="1" placeholder="Ej. Sensibilidad en piel, preferencia de aceite aromático..."></textarea>
+                            </div>
                         </div>
                     </div>
 
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
                         <i class="bi bi-calendar-check me-1"></i> Agendar Cita
                     </button>

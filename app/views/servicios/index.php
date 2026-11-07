@@ -1,20 +1,19 @@
 <?php $esTerapeuta = (($_SESSION['rol_nombre'] ?? '') === 'Terapeuta'); ?>
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+<!-- Encabezado Editorial -->
+<div class="page-head">
     <div>
-        <h4 class="fw-bold mb-1" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-stars text-warning me-2"></i>
-            <?= $esTerapeuta ? 'Mis Servicios & Especialidades Terapéuticas' : 'Catálogo de Servicios & Terapias' ?>
-        </h4>
-        <p class="text-muted small mb-0">
-            <?= $esTerapeuta 
-                ? 'Selecciona los tratamientos que estás capacitado para ofrecer a los clientes. El sistema te asignará citas basándose en tu menú personal.' 
-                : 'Gestión de tratamientos de bienestar, duraciones, precios por cabina y categorías.' ?>
-        </p>
+        <span class="kicker">Catálogo</span>
+        <h1 class="display-title">
+            <?= $esTerapeuta ? 'Mis Servicios <em>& Especialidades</em>' : 'Servicios <em>& Terapias</em>' ?>
+        </h1>
+        <?php if ($esTerapeuta): ?>
+            <p class="page-lede">Selecciona los tratamientos que estás capacitado para ofrecer. El sistema te asignará citas basándose en tu menú personal.</p>
+        <?php endif; ?>
     </div>
     <?php if (!$esTerapeuta): ?>
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCategoria">
-            <i class="bi bi-folder-plus text-warning"></i>
+    <div class="page-head-actions">
+        <button class="btn btn-quiet btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+            <i class="bi bi-folder-plus"></i>
             <span>Nueva Categoría</span>
         </button>
         <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalServicio" onclick="prepararNuevoServicio()">
@@ -25,56 +24,29 @@
     <?php endif; ?>
 </div>
 
-<!-- Tarjetas Resumen -->
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">
-                    <?= $esTerapeuta ? 'Especialidades Mías' : 'Servicios en Menú' ?>
-                </small>
-                <h3 class="fw-bold mb-0 text-dark" style="font-family: var(--font-serif);">
-                    <?= $esTerapeuta ? count($misEspecialidades ?? []) : count($servicios ?? []) ?>
-                </h3>
-            </div>
-            <div class="stat-icon" style="background: rgba(30, 61, 52, 0.1); color: var(--spa-primary);">
-                <i class="bi bi-flower1"></i>
-            </div>
-        </div>
+<!-- Métricas Libro Mayor -->
+<div class="metrics">
+    <div class="metric">
+        <span class="metric-label"><?= $esTerapeuta ? 'Especialidades Mías' : 'Servicios en Menú' ?></span>
+        <span class="metric-value"><?= $esTerapeuta ? count($misEspecialidades ?? []) : count($servicios ?? []) ?></span>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Categorías Activas</small>
-                <h3 class="fw-bold mb-0 text-success" style="font-family: var(--font-serif);"><?= count($categorias ?? []) ?></h3>
-            </div>
-            <div class="stat-icon" style="background: rgba(197, 160, 89, 0.15); color: #997838;">
-                <i class="bi bi-tags-fill"></i>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Categorías Activas</span>
+        <span class="metric-value"><?= count($categorias ?? []) ?></span>
     </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="spa-card p-3 d-flex align-items-center justify-content-between">
-            <div>
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.72rem; letter-spacing: 0.8px;">Servicios Activos Spa</small>
-                <h3 class="fw-bold mb-0 text-primary" style="font-family: var(--font-serif);">
-                    <?= count(array_filter($servicios ?? [], fn($s) => $s['estado'] === 'activo')) ?>
-                </h3>
-            </div>
-            <div class="stat-icon" style="background: #eef6f3; color: #3b735c;">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-        </div>
+    <div class="metric">
+        <span class="metric-label">Servicios Activos Spa</span>
+        <span class="metric-value"><?= count(array_filter($servicios ?? [], fn($s) => $s['estado'] === 'activo')) ?></span>
+        <span class="metric-note"><strong>Disponibles en cabinas</strong></span>
     </div>
 </div>
 
 <!-- Tabla de Servicios -->
 <div class="spa-card p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0" style="color: var(--spa-primary); font-family: var(--font-serif);">
-            <i class="bi bi-card-checklist text-warning me-2"></i> 
+    <div class="panel-head">
+        <h2 class="panel-title">
             <?= $esTerapeuta ? 'Menú de Terapias Habilitadas' : 'Tratamientos Registrados' ?>
-        </h5>
+        </h2>
         <div class="input-group input-group-sm" style="max-width: 280px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
             <input type="text" id="busquedaServicio" class="form-control border-start-0" placeholder="Buscar tratamiento..." onkeyup="filtrarTablaServicios()">
@@ -173,19 +145,22 @@
 <!-- Modal Alta / Edición Servicio -->
 <div class="modal fade" id="modalServicio" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" id="modalServicioLabel" style="font-family: var(--font-serif);">
-                    <i class="bi bi-plus-circle text-warning me-2"></i> Registrar Nuevo Servicio
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Catálogo</span>
+                    <h5 class="modal-title" id="modalServicioLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Registrar Nuevo Servicio
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formServicio" onsubmit="guardarServicio(event)">
-                <div class="modal-body p-4">
+                <div class="modal-body">
                     <input type="hidden" id="servicio_id" name="id">
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Categoría <span class="text-danger">*</span></label>
+                        <label class="form-label">Categoría <span class="text-danger">*</span></label>
                         <select id="id_categoria" name="id_categoria" class="form-select" required>
                             <option value="">-- Seleccionar Categoría --</option>
                             <?php foreach ($categorias as $cat): ?>
@@ -195,36 +170,36 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Nombre del Servicio <span class="text-danger">*</span></label>
+                        <label class="form-label">Nombre del servicio <span class="text-danger">*</span></label>
                         <input type="text" id="nombre_servicio" name="nombre" class="form-control" placeholder="Ej. Masaje Descontracturante" required>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-6">
-                            <label class="form-label fw-bold small text-dark">Costo (C$ Córdobas) <span class="text-danger">*</span></label>
+                            <label class="form-label">Costo (C$) <span class="text-danger">*</span></label>
                             <input type="number" step="0.01" id="costo" name="costo" class="form-control" placeholder="0.00" required>
                         </div>
                         <div class="col-6">
-                            <label class="form-label fw-bold small text-dark">Duración (Minutos) <span class="text-danger">*</span></label>
+                            <label class="form-label">Duración (min) <span class="text-danger">*</span></label>
                             <input type="number" id="duracion_minutos" name="duracion_minutos" class="form-control" placeholder="60" required>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Descripción</label>
+                        <label class="form-label">Descripción</label>
                         <textarea id="descripcion_servicio" name="descripcion" class="form-control" rows="3" placeholder="Detalles de la experiencia o protocolo..."></textarea>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Estado</label>
+                    <div class="mb-0">
+                        <label class="form-label">Estado</label>
                         <select id="estado_servicio" name="estado" class="form-select">
                             <option value="activo">Activo</option>
                             <option value="inactivo">Inactivo</option>
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
                         <i class="bi bi-save me-1"></i> Guardar en Catálogo
                     </button>
@@ -237,26 +212,29 @@
 <!-- Modal Nueva Categoría -->
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background: var(--spa-primary);">
-                <h5 class="modal-title fw-bold" style="font-family: var(--font-serif);">
-                    <i class="bi bi-folder-plus text-warning me-2"></i> Crear Nueva Categoría
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Catálogo</span>
+                    <h5 class="modal-title">
+                        <i class="bi bi-folder-plus me-2"></i>Crear Nueva Categoría
+                    </h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formCategoria" onsubmit="guardarCategoria(event)">
-                <div class="modal-body p-4">
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Nombre de la Categoría <span class="text-danger">*</span></label>
+                        <label class="form-label">Nombre de la categoría <span class="text-danger">*</span></label>
                         <input type="text" name="nombre" class="form-control" placeholder="Ej. Hidroterapia & Saunas" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-dark">Descripción Breve</label>
+                    <div class="mb-0">
+                        <label class="form-label">Descripción breve</label>
                         <textarea name="descripcion" class="form-control" rows="2" placeholder="Área terapéutica..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-spa-primary btn-sm px-4">
                         <i class="bi bi-check2-circle me-1"></i> Crear Categoría
                     </button>

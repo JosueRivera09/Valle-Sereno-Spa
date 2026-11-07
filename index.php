@@ -4,11 +4,26 @@
  * Spa Valle Sereno - Arquitectura MVC & N-Capas
  */
 
-// Iniciar sesión global con cookies endurecidas (httponly + samesite)
+// Detección dinámica de HTTPS
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+    || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+// Cabeceras HTTP de Seguridad Defensivas
+header('X-Frame-Options: SAMEORIGIN');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
+if ($isHttps) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
+// Iniciar sesión global con cookies endurecidas (httponly + samesite + secure dinámico)
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
+        'secure'   => $isHttps,
         'httponly' => true,
         'samesite' => 'Lax'
     ]);

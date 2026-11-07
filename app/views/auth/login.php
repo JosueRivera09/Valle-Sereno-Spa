@@ -5,6 +5,41 @@ unset($_SESSION['error_flash']);
 $logoutSuccess = isset($_GET['logout']) && $_GET['logout'] === 'success';
 $sessionExpired = isset($_GET['expired']) && $_GET['expired'] === '1';
 $csrfToken = AuthHelper::csrfToken();
+
+// Iconografía del carrusel según el servicio más vendido (por palabras clave)
+$iconoParaServicio = function (string $nombre): string {
+    $n = mb_strtolower($nombre, 'UTF-8');
+    $mapa = [
+        'piedra'    => 'bi-fire',
+        'volc'      => 'bi-fire',
+        'aroma'     => 'bi-droplet-half',
+        'lavanda'   => 'bi-droplet-half',
+        'hidro'     => 'bi-water',
+        'circuito'  => 'bi-water',
+        'baño'      => 'bi-water',
+        'tina'      => 'bi-water',
+        'termal'    => 'bi-water',
+        'facial'    => 'bi-stars',
+        'colágeno'  => 'bi-gem',
+        'colageno'  => 'bi-gem',
+        'velo'      => 'bi-gem',
+        'oro'       => 'bi-gem',
+        'cuencos'   => 'bi-music-note-beamed',
+        'tibetan'   => 'bi-music-note-beamed',
+        'reflex'    => 'bi-activity',
+        'drenaje'   => 'bi-activity',
+        'ayurv'     => 'bi-flower1',
+        'ritual'    => 'bi-gem',
+        'día de spa' => 'bi-gem',
+        'paquete'   => 'bi-gem',
+    ];
+    foreach ($mapa as $clave => $icono) {
+        if (mb_strpos($n, $clave) !== false) {
+            return $icono;
+        }
+    }
+    return 'bi-flower2';
+};
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -21,7 +56,7 @@ $csrfToken = AuthHelper::csrfToken();
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Estilo Armónico Personalizado Valle Sereno -->
-    <link rel="stylesheet" href="public/css/spa-theme.css">
+    <link rel="stylesheet" href="public/css/spa-theme.css?v=2.5">
 </head>
 <body class="login-body">
 
@@ -44,79 +79,53 @@ $csrfToken = AuthHelper::csrfToken();
                         </p>
                     </div>
 
-                    <!-- Carrusel Armónico de Servicios de Spa -->
+                    <!-- Carrusel Armónico de Servicios Más Vendidos -->
+                    <?php if (!empty($serviciosDestacados)): ?>
                     <div class="spa-services-carousel">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="mb-2">
                             <small class="text-uppercase text-light" style="font-size:0.72rem; letter-spacing:1px; color:#d2dec3 !important;">
-                                <i class="bi bi-stars text-warning me-1"></i> Experiencias Destacadas
+                                <i class="bi bi-stars text-warning me-1"></i> Experiencias Más Solicitadas
                             </small>
-                            <span class="badge rounded-pill bg-dark-subtle text-light border border-secondary" style="font-size:0.68rem;">Catálogo Spa</span>
                         </div>
 
                         <div id="spaServicesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
                             <div class="carousel-inner">
-                                <!-- Servicio 1 -->
-                                <div class="carousel-item active">
+                                <?php foreach ($serviciosDestacados as $i => $serv): ?>
+                                <?php
+                                    $desc = trim((string)($serv['descripcion'] ?? ''));
+                                    if ($desc === '') {
+                                        $desc = 'Tratamiento exclusivo de nuestro catálogo de bienestar.';
+                                    }
+                                    if (mb_strlen($desc, 'UTF-8') > 118) {
+                                        $desc = mb_substr($desc, 0, 115, 'UTF-8') . '…';
+                                    }
+                                ?>
+                                <!-- Servicio <?= $i + 1 ?>: <?= htmlspecialchars($serv['nombre'], ENT_QUOTES, 'UTF-8') ?> -->
+                                <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
                                     <div class="service-card-slide">
                                         <div class="service-icon-box">
-                                            <i class="bi bi-fire"></i>
+                                            <i class="bi <?= $iconoParaServicio($serv['nombre']) ?>"></i>
                                         </div>
                                         <div>
-                                            <h6 class="service-info-title">Piedras Volcánicas Calientes</h6>
-                                            <p class="service-info-desc">Termoterapia profunda con aceites esenciales para disolver tensión muscular.</p>
+                                            <h6 class="service-info-title"><?= htmlspecialchars($serv['nombre'], ENT_QUOTES, 'UTF-8') ?></h6>
+                                            <p class="service-info-desc"><?= htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') ?></p>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Servicio 2 -->
-                                <div class="carousel-item">
-                                    <div class="service-card-slide">
-                                        <div class="service-icon-box">
-                                            <i class="bi bi-droplet-half"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="service-info-title">Aromaterapia & Lavanda</h6>
-                                            <p class="service-info-desc">Inmersión olfativa y masajes relajantes que restauran el equilibrio nervioso.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Servicio 3 -->
-                                <div class="carousel-item">
-                                    <div class="service-card-slide">
-                                        <div class="service-icon-box">
-                                            <i class="bi bi-water"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="service-info-title">Circuito de Hidroterapia</h6>
-                                            <p class="service-info-desc">Pozas termales, jacuzzi de esencias minerales y duchas de contraste suizo.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Servicio 4 -->
-                                <div class="carousel-item">
-                                    <div class="service-card-slide">
-                                        <div class="service-icon-box">
-                                            <i class="bi bi-sparkles"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="service-info-title">Facial Iluminador de Oro & Rosa</h6>
-                                            <p class="service-info-desc">Nutrición botánica antioxidante para devolver vitalidad y luminosidad celular.</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
 
+                            <?php if (count($serviciosDestacados) > 1): ?>
                             <!-- Indicadores del Carrusel -->
                             <div class="carousel-indicators spa-carousel-indicators">
-                                <button type="button" data-bs-target="#spaServicesCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Servicio 1"></button>
-                                <button type="button" data-bs-target="#spaServicesCarousel" data-bs-slide-to="1" aria-label="Servicio 2"></button>
-                                <button type="button" data-bs-target="#spaServicesCarousel" data-bs-slide-to="2" aria-label="Servicio 3"></button>
-                                <button type="button" data-bs-target="#spaServicesCarousel" data-bs-slide-to="3" aria-label="Servicio 4"></button>
+                                <?php foreach ($serviciosDestacados as $i => $serv): ?>
+                                <button type="button" data-bs-target="#spaServicesCarousel" data-bs-slide-to="<?= $i ?>"<?= $i === 0 ? ' class="active" aria-current="true"' : '' ?> aria-label="Servicio <?= $i + 1 ?>"></button>
+                                <?php endforeach; ?>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                 </div>
 
@@ -154,20 +163,23 @@ $csrfToken = AuthHelper::csrfToken();
                     <!-- Formulario con validación limpia y sin autocompletado de prueba -->
                     <form id="loginForm" method="POST" action="index.php?c=auth&a=authenticate" autocomplete="off" novalidate>
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                        <!-- Campo Usuario o Correo -->
+                        <!-- Campo Correo institucional -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Usuario o Correo Institucional</label>
+                            <label for="email" class="form-label">Correo Institucional</label>
                             <div class="input-icon-wrapper">
-                                <input type="text" 
+                                <input type="email" 
                                        class="form-control form-control-spa" 
                                        id="email" 
                                        name="email" 
-                                       placeholder="Ingrese su usuario o correo" 
+                                       placeholder="correo@vallesereno.com" 
                                        required 
-                                       autocomplete="off"
+                                       autocomplete="username"
                                        spellcheck="false">
-                                <i class="bi bi-person-circle prefix-icon"></i>
+                                <i class="bi bi-envelope prefix-icon"></i>
                             </div>
+                            <small class="text-muted d-block mt-1" style="font-size: 0.74rem;">
+                                Personal interno: también puede ingresar con su usuario asignado (ej. nombre.apellido).
+                            </small>
                             <div class="invalid-feedback d-block mt-1" id="emailError" style="display:none !important; font-size: 0.8rem;"></div>
                         </div>
 
@@ -184,9 +196,9 @@ $csrfToken = AuthHelper::csrfToken();
                                        class="form-control form-control-spa" 
                                        id="password" 
                                        name="password" 
-                                       placeholder="Ingrese su contraseña" 
+                                       placeholder="Tu contraseña" 
                                        required 
-                                       autocomplete="new-password">
+                                       autocomplete="current-password">
                                 <i class="bi bi-lock prefix-icon"></i>
                                 <button type="button" class="toggle-password-btn" id="togglePasswordBtn" title="Mostrar/Ocultar contraseña" tabindex="-1">
                                     <i class="bi bi-eye" id="togglePasswordIcon"></i>
@@ -344,17 +356,8 @@ $csrfToken = AuthHelper::csrfToken();
                         userInput.disabled = true;
                         btnSubmit.disabled = true;
                         btnSubmitText.innerHTML = '<i class="bi bi-lock-fill me-1"></i> Acceso Bloqueado';
-                    } else if (data.inexistente) {
-                        showAlert(data.message, 'danger');
-                        userInput.classList.add('is-invalid');
-                        emailError.textContent = 'Ingrese un usuario o correo corporativo válido.';
-                        emailError.style.setProperty('display', 'block', 'important');
-                        passInput.value = '';
-                        userInput.focus();
-                        btnSubmit.disabled = false;
-                        btnSubmitText.textContent = 'Ingresar al Sistema';
                     } else {
-                        showAlert(data.message || 'Error en las credenciales proporcionadas.', 'danger');
+                        showAlert(data.message || 'Correo o contraseña incorrectos.', 'danger');
                         passInput.value = '';
                         passInput.classList.add('is-invalid');
                         passInput.focus();

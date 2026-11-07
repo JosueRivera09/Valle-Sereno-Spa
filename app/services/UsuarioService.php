@@ -42,25 +42,35 @@ class UsuarioService {
      */
     public function crear(array $data): array {
         $usuario = trim($data['usuario'] ?? '');
+        $email = strtolower(trim($data['email'] ?? ''));
         $password = $data['password'] ?? '';
         $idRol = (int)($data['id_rol'] ?? 0);
         $idEmpleado = !empty($data['id_empleado']) ? (int)$data['id_empleado'] : null;
         $estado = ($data['estado'] ?? 'activo') === 'inactivo' ? 'inactivo' : 'activo';
 
-        if (empty($usuario) || empty($password) || $idRol <= 0) {
-            return ['success' => false, 'message' => 'Por favor complete todos los campos obligatorios.'];
+        if (empty($usuario) || empty($email) || empty($password) || $idRol <= 0) {
+            return ['success' => false, 'message' => 'Complete usuario, correo, contraseña y rol.'];
         }
 
         if (strlen($usuario) < 3 || strlen($usuario) > 50) {
             return ['success' => false, 'message' => 'El nombre de usuario debe tener entre 3 y 50 caracteres.'];
         }
 
-        if (strlen($password) < 6) {
-            return ['success' => false, 'message' => 'La contraseña debe tener al menos 6 caracteres.'];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'El correo electrónico no tiene un formato válido.'];
+        }
+
+        $errorPassword = $this->validarPassword($password);
+        if ($errorPassword !== null) {
+            return ['success' => false, 'message' => $errorPassword];
         }
 
         if ($this->usuarioModel->existsUsuario($usuario)) {
             return ['success' => false, 'message' => "El usuario '{$usuario}' ya se encuentra registrado."];
+        }
+
+        if ($this->usuarioModel->existsEmail($email)) {
+            return ['success' => false, 'message' => "El correo '{$email}' ya pertenece a otra cuenta."];
         }
 
         // Hashing seguro con BCRYPT
@@ -70,6 +80,7 @@ class UsuarioService {
             'id_rol'        => $idRol,
             'id_empleado'   => $idEmpleado,
             'usuario'       => $usuario,
+            'email'         => $email,
             'password_hash' => $passwordHash,
             'estado'        => $estado
         ]);
@@ -91,16 +102,25 @@ class UsuarioService {
         }
 
         $usuario = trim($data['usuario'] ?? '');
+        $email = strtolower(trim($data['email'] ?? ''));
         $idRol = (int)($data['id_rol'] ?? 0);
         $idEmpleado = !empty($data['id_empleado']) ? (int)$data['id_empleado'] : null;
         $estado = ($data['estado'] ?? 'activo') === 'inactivo' ? 'inactivo' : 'activo';
 
-        if (empty($usuario) || $idRol <= 0) {
-            return ['success' => false, 'message' => 'El nombre de usuario y rol son obligatorios.'];
+        if (empty($usuario) || empty($email) || $idRol <= 0) {
+            return ['success' => false, 'message' => 'El nombre de usuario, el correo y el rol son obligatorios.'];
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'El correo electrónico no tiene un formato válido.'];
         }
 
         if ($this->usuarioModel->existsUsuario($usuario, $id)) {
             return ['success' => false, 'message' => "El nombre de usuario '{$usuario}' ya pertenece a otra cuenta."];
+        }
+
+        if ($this->usuarioModel->existsEmail($email, $id)) {
+            return ['success' => false, 'message' => "El correo '{$email}' ya pertenece a otra cuenta."];
         }
 
         // Evitar que el administrador principal se inactive a sí mismo
@@ -112,6 +132,7 @@ class UsuarioService {
             'id_rol'      => $idRol,
             'id_empleado' => $idEmpleado,
             'usuario'     => $usuario,
+            'email'       => $email,
             'estado'      => $estado
         ]);
 
@@ -127,8 +148,9 @@ class UsuarioService {
             return ['success' => false, 'message' => 'El usuario no existe.'];
         }
 
-        if (strlen($nuevaPassword) < 6) {
-            return ['success' => false, 'message' => 'La nueva contraseña debe tener al menos 6 caracteres.'];
+        $errorPassword = $this->validarPassword($nuevaPassword);
+        if ($errorPassword !== null) {
+            return ['success' => false, 'message' => $errorPassword];
         }
 
         $passwordHash = password_hash($nuevaPassword, PASSWORD_BCRYPT);
@@ -175,5 +197,19 @@ class UsuarioService {
             'success' => true,
             'message' => "La cuenta de {$user['usuario']} ha sido desbloqueada satisfactoriamente con 0 intentos fallidos."
         ];
+    }
+
+    /**
+     * Política mínima de contraseñas: 8+ caracteres con al menos una letra y un número.
+     * @return string|null Mensaje de error, o null si la contraseña es válida.
+     */
+    private function validarPassword(string $password): ?string {
+        if (strlen($password) < 8) {
+            return 'La contraseña debe tener al menos 8 caracteres.';
+        }
+        if (!preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+            return 'La contraseña debe incluir al menos una letra y un número.';
+        }
+        return null;
     }
 }

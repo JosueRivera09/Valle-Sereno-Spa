@@ -67,15 +67,16 @@ ON DUPLICATE KEY UPDATE nombre_completo=VALUES(nombre_completo), telefono=VALUES
 
 -- ----------------------------------------------------------------------------
 -- 4. USUARIOS DEL SISTEMA
+-- Acceso por CORREO institucional (o por el usuario corto como alias).
 -- Contraseña universal para todos: Admin123*
 -- Hash bcrypt verificado: password_verify('Admin123*', hash) => true
 -- ----------------------------------------------------------------------------
-INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado, ultimo_acceso) VALUES
-(4, 3, 4, 'andrea.terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-28 16:30:00'),
-(5, 3, 5, 'david.terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 08:15:00'),
-(6, 3, 6, 'lucia.terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 09:00:00'),
-(7, 2, 7, 'mariana.recepcion', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 11:20:00')
-ON DUPLICATE KEY UPDATE usuario=VALUES(usuario), estado=VALUES(estado), password_hash=VALUES(password_hash);
+INSERT INTO usuarios (id, id_rol, id_empleado, usuario, email, password_hash, estado, ultimo_acceso) VALUES
+(4, 3, 4, 'andrea.terapeuta', 'andrea.gomez@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-28 16:30:00'),
+(5, 3, 5, 'david.terapeuta', 'david.ruiz@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 08:15:00'),
+(6, 3, 6, 'lucia.terapeuta', 'lucia.mendez@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 09:00:00'),
+(7, 2, 7, 'mariana.recepcion', 'mariana.paz@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo', '2026-09-29 11:20:00')
+ON DUPLICATE KEY UPDATE usuario=VALUES(usuario), email=VALUES(email), estado=VALUES(estado), password_hash=VALUES(password_hash);
 
 -- ----------------------------------------------------------------------------
 -- 5. DISPONIBILIDAD HORARIA DEL PERSONAL

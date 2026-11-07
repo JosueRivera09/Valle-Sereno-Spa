@@ -78,7 +78,7 @@
             <div class="small text-muted fw-semibold">Centro de Relajación & Terapias</div>
             <div class="small text-muted" style="font-size: 0.75rem;">
                 RUC: J031000029384<br>
-                Km 14.5 Carretera a Masaya, Managua, Nicaragua<br>
+                Rivas, Nicaragua<br>
                 Tel: +505 2255-8899 | info@vallesereno.com
             </div>
         </div>

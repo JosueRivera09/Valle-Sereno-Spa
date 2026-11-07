@@ -25,12 +25,14 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id_rol INT NOT NULL,
     id_empleado INT NULL,
     usuario VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NULL,
     password_hash VARCHAR(255) NOT NULL,
     estado ENUM('activo', 'inactivo', 'bloqueado') NOT NULL DEFAULT 'activo',
     intentos_fallidos INT NOT NULL DEFAULT 0,
     bloqueado_hasta DATETIME NULL,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ultimo_acceso DATETIME NULL,
+    UNIQUE KEY uq_usuarios_email (email),
     CONSTRAINT fk_usuarios_roles FOREIGN KEY (id_rol) 
         REFERENCES roles(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT fk_usuarios_empleados FOREIGN KEY (id_empleado) 
@@ -182,33 +184,34 @@ INSERT INTO empleados (id, nombre_completo, telefono, correo, cargo, especialida
 (2, 'Camila Morales', '3009876543', 'recepcion@vallesereno.com', 'Jefa de Recepcion', 'Atencion al cliente y reservas', 'activo'),
 (3, 'Mateo Delgado', '3015554321', 'terapeuta@vallesereno.com', 'Terapeuta Principal', 'Masajes Holísticos, Aromaterapia', 'activo');
 
--- Inserción de Usuarios iniciales (Contraseña universal: Admin123*)
+-- Inserción de Usuarios iniciales (Contraseña universal: Admin123* | acceso por correo o usuario)
 -- Hash generado con password_hash('Admin123*', PASSWORD_BCRYPT) y verificado con password_verify
-INSERT INTO usuarios (id, id_rol, id_empleado, usuario, password_hash, estado) VALUES
-(1, 1, 1, 'admin', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo'),
-(2, 2, 2, 'recepcion', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo'),
-(3, 3, 3, 'terapeuta', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo');
+INSERT INTO usuarios (id, id_rol, id_empleado, usuario, email, password_hash, estado) VALUES
+(1, 1, 1, 'admin', 'admin@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo'),
+(2, 2, 2, 'recepcion', 'recepcion@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo'),
+(3, 3, 3, 'terapeuta', 'terapeuta@vallesereno.com', '$2y$10$EpT5h7RfH.292Xbws33taOKxGe8/jAN9.OSP.FbvfsikNWhU4PyUG', 'activo');
 
 /*
 ================================================================================
 CREDENCIALES DE ACCESO AL SISTEMA - SPA VALLE SERENO
+Ingreso por CORREO institucional (el usuario corto funciona como alias).
 Contraseña universal para todas las cuentas de prueba: Admin123*
 ================================================================================
 1. ADMINISTRADOR
-   - Usuario: admin
-   - Correo: admin@vallesereno.com
+   - Correo (recomendado): admin@vallesereno.com
+   - Usuario (alias): admin
    - Contraseña: Admin123*
    - Rol: Administrador (Control total, reportes, usuarios)
 
 2. RECEPCIONISTA
-   - Usuario: recepcion
-   - Correo: recepcion@vallesereno.com
+   - Correo (recomendado): recepcion@vallesereno.com
+   - Usuario (alias): recepcion
    - Contraseña: Admin123*
    - Rol: Recepcionista (Citas, clientes, agendamiento, caja)
 
 3. TERAPEUTA
-   - Usuario: terapeuta
-   - Correo: terapeuta@vallesereno.com
+   - Correo (recomendado): terapeuta@vallesereno.com
+   - Usuario (alias): terapeuta
    - Contraseña: Admin123*
    - Rol: Terapeuta (Agenda asignada, terapias, atención)
 ================================================================================

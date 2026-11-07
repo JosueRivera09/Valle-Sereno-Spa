@@ -5,7 +5,8 @@
  */
 
 class AuthHelper {
-    private const SESSION_TIMEOUT = 1800; // 30 minutos de inactividad
+    private const SESSION_TIMEOUT = 1800;            // 30 minutos de inactividad (sesión normal)
+    private const SESSION_TIMEOUT_REMEMBER = 2592000; // 30 días cuando se marcó "Recordar este dispositivo"
 
     /**
      * Iniciar sesión segura si no está iniciada
@@ -26,9 +27,10 @@ class AuthHelper {
             return false;
         }
 
-        // Control de expiración por inactividad (30 min)
+        // Control de expiración por inactividad (30 min, o 30 días si marcó "Recordar dispositivo")
         $now = time();
-        if (isset($_SESSION['last_activity']) && ($now - $_SESSION['last_activity']) > self::SESSION_TIMEOUT) {
+        $timeout = !empty($_SESSION['remember']) ? self::SESSION_TIMEOUT_REMEMBER : self::SESSION_TIMEOUT;
+        if (isset($_SESSION['last_activity']) && ($now - $_SESSION['last_activity']) > $timeout) {
             self::destroySession();
             return false;
         }
