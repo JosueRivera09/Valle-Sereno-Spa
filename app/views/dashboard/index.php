@@ -68,7 +68,7 @@ $tagClass = match (true) {
             <p class="hero-sub">La agenda del día, los cobros y el equipo en una sola vista operativa.</p>
         </div>
         <div class="hero-actions">
-            <a href="index.php?c=citas&a=index" class="btn btn-gold btn-sm px-3 d-inline-flex align-items-center gap-2">
+            <a href="index.php?c=citas&a=index&crear=1" class="btn btn-gold btn-sm px-3 d-inline-flex align-items-center gap-2">
                 <i class="bi bi-calendar-plus"></i>
                 <span>Nueva Cita</span>
             </a>
@@ -197,7 +197,7 @@ $tagClass = match (true) {
                     <h2 class="panel-title">Accesos Directos</h2>
                 </div>
                 <div class="quick-links">
-                    <a href="index.php?c=citas&a=index" class="quick-link">
+                    <a href="index.php?c=citas&a=index&crear=1" class="quick-link">
                         <div>
                             <b>Agendar Nueva Cita</b>
                             <span>Cabina, horario y terapeuta</span>

@@ -30,6 +30,9 @@ class EmpleadoService {
 
         try {
             $id = $this->empleadoModel->create($data);
+            if ($id > 0 && isset($data['servicios_ids']) && is_array($data['servicios_ids'])) {
+                $this->empleadoModel->syncServicios($id, $data['servicios_ids']);
+            }
             return ['success' => true, 'message' => 'Empleado registrado correctamente.', 'id' => $id];
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
@@ -47,6 +50,9 @@ class EmpleadoService {
 
         try {
             $ok = $this->empleadoModel->update($id, $data);
+            if ($ok && isset($data['servicios_ids']) && is_array($data['servicios_ids'])) {
+                $this->empleadoModel->syncServicios($id, $data['servicios_ids']);
+            }
             return $ok
                 ? ['success' => true, 'message' => 'Empleado actualizado correctamente.']
                 : ['success' => false, 'message' => 'No se pudo actualizar el empleado.'];
@@ -56,6 +62,14 @@ class EmpleadoService {
             }
             return ['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()];
         }
+    }
+
+    public function obtenerRoles(): array {
+        return $this->empleadoModel->getRoles();
+    }
+
+    public function obtenerServicios(): array {
+        return $this->empleadoModel->getServicios();
     }
 
     public function obtenerDisponibilidad(int $idEmpleado): array {

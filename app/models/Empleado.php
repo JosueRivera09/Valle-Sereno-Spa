@@ -75,4 +75,46 @@ class Empleado {
         $stmt = $this->db->prepare("UPDATE empleados SET estado = 'inactivo' WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
+
+    /**
+     * Obtener el catálogo de roles registrados en la base de datos
+     */
+    public function getRoles(): array {
+        $stmt = $this->db->query("SELECT id, nombre, descripcion FROM roles ORDER BY id ASC");
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Obtener catálogo de servicios/terapias activas para selección de especialidades
+     */
+    public function getServicios(): array {
+        $sql = "
+            SELECT s.id, s.id_categoria, s.nombre, s.costo, s.duracion_minutos,
+                   COALESCE(c.nombre, 'General') AS categoria_nombre
+            FROM servicios s
+            LEFT JOIN categorias c ON s.id_categoria = c.id
+            WHERE s.estado = 'activo'
+            ORDER BY c.nombre ASC, s.nombre ASC
+        ";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Sincronizar los servicios asignados al empleado en la tabla relacional empleado_servicios
+     */
+    public function syncServicios(int $idEmpleado, array $serviciosIds): void {
+        $stmtDel = $this->db->prepare("DELETE FROM empleado_servicios WHERE id_empleado = :id");
+        $stmtDel->execute(['id' => $idEmpleado]);
+
+        if (!empty($serviciosIds)) {
+            $stmtIns = $this->db->prepare("INSERT INTO empleado_servicios (id_empleado, id_servicio) VALUES (:emp, :srv)");
+            foreach ($serviciosIds as $srvId) {
+                $srvId = (int)$srvId;
+                if ($srvId > 0) {
+                    $stmtIns->execute(['emp' => $idEmpleado, 'srv' => $srvId]);
+                }
+            }
+        }
+    }
 }

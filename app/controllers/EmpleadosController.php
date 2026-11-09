@@ -14,6 +14,8 @@ class EmpleadosController {
 
     public function index(): void {
         $empleados = $this->service->listarEmpleados();
+        $roles = $this->service->obtenerRoles();
+        $servicios = $this->service->obtenerServicios();
         $pageTitle = "Personal Terapéutico - Valle Sereno Spa";
         $activePage = 'empleados';
         $contentView = __DIR__ . '/../views/empleados/index.php';
@@ -23,13 +25,18 @@ class EmpleadosController {
     public function guardar(): void {
         header('Content-Type: application/json');
         AuthHelper::requireCsrf();
+        $serviciosIds = isset($_POST['servicios_ids']) && is_array($_POST['servicios_ids']) 
+            ? array_map('intval', $_POST['servicios_ids']) 
+            : [];
+
         $data = [
             'nombre_completo' => $_POST['nombre_completo'] ?? '',
             'telefono'        => $_POST['telefono'] ?? '',
             'correo'          => $_POST['correo'] ?? '',
             'cargo'           => $_POST['cargo'] ?? '',
             'especialidades'  => $_POST['especialidades'] ?? null,
-            'estado'          => $_POST['estado'] ?? 'activo'
+            'estado'          => $_POST['estado'] ?? 'activo',
+            'servicios_ids'   => $serviciosIds
         ];
 
         // Lista blanca de estado (además de escapar en la vista, evita persistir HTML)

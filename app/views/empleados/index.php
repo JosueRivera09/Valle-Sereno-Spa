@@ -131,54 +131,139 @@ $totalInactivos = count($empleados) - $totalActivos;
     <?php endif; ?>
 </div>
 
+<!-- Estilos para selector de especialidades -->
+<style>
+.badge-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #d4ded9;
+    background: #ffffff;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: #2c4238;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease-in-out;
+}
+.badge-choice:hover {
+    border-color: #9cb5a8;
+    background: #f4f7f5;
+}
+.badge-choice:has(input:checked) {
+    background: #233d34;
+    color: #ffffff;
+    border-color: #233d34;
+}
+.badge-choice input {
+    margin: 0;
+    accent-color: #c5a059;
+}
+</style>
+
 <!-- Modal Empleado -->
 <div class="modal fade" id="modalEmpleado" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-editorial">
-            <form id="formEmpleado">
-                <div class="modal-header">
-                    <div>
-                        <span class="modal-kicker">Equipo</span>
-                        <h5 class="modal-title" id="tituloModalEmpleado">Registrar Empleado</h5>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <form id="formEmpleado" class="modal-content modal-editorial">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-kicker">Equipo</span>
+                    <h5 class="modal-title" id="tituloModalEmpleado">Registrar Empleado</h5>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="emp_id">
-                    <div class="mb-3">
-                        <label class="form-label">Nombre completo <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nombre_completo" id="emp_nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Correo <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" name="correo" id="emp_correo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Teléfono <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="telefono" id="emp_telefono" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Cargo <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="cargo" id="emp_cargo" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Especialidades</label>
-                        <textarea class="form-control" name="especialidades" id="emp_especialidades" rows="2"></textarea>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label">Estado</label>
-                        <select class="form-select" name="estado" id="emp_estado">
-                            <option value="activo">Activo</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height: calc(85vh - 130px); overflow-y: auto;">
+                <input type="hidden" name="id" id="emp_id">
+                <div class="mb-3">
+                    <label class="form-label">Nombre completo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="nombre_completo" id="emp_nombre" required>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-spa-primary btn-sm px-4">Guardar</button>
+                <div class="mb-3">
+                    <label class="form-label">Correo <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control" name="correo" id="emp_correo" required>
                 </div>
-            </form>
-        </div>
+                <div class="mb-3">
+                    <label class="form-label">Teléfono <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="telefono" id="emp_telefono" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cargo / Rol en el Sistema <span class="text-danger">*</span></label>
+                    <select class="form-select" name="cargo" id="emp_cargo" required>
+                        <option value="">-- Seleccionar Rol / Cargo --</option>
+                        <?php if (!empty($roles)): ?>
+                            <?php foreach ($roles as $rol): ?>
+                                <option value="<?= htmlspecialchars($rol['nombre']) ?>">
+                                    <?= htmlspecialchars($rol['nombre']) ?><?php if (!empty($rol['descripcion'])): ?> — <?= htmlspecialchars($rol['descripcion']) ?><?php endif; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                        <i class="bi bi-shield-check me-1"></i>Roles leídos de la base de datos (determina funciones y acceso en el sistema).
+                    </small>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label mb-0">Especialidades &amp; Terapias</label>
+                        <span class="badge bg-light text-muted border" style="font-size: 0.7rem;">Desde Catálogo BD</span>
+                    </div>
+
+                    <!-- Selector visual de Servicios / Especialidades desde la base de datos -->
+                    <div class="border rounded p-2 bg-light mb-2" style="max-height: 180px; overflow-y: auto;">
+                        <?php if (empty($servicios)): ?>
+                            <small class="text-muted d-block text-center py-2">No hay servicios registrados en la base de datos.</small>
+                        <?php else: ?>
+                            <?php
+                            $serviciosPorCat = [];
+                            foreach ($servicios as $s) {
+                                $cat = $s['categoria_nombre'] ?? 'General';
+                                $serviciosPorCat[$cat][] = $s;
+                            }
+                            ?>
+                            <?php foreach ($serviciosPorCat as $catNombre => $items): ?>
+                                <div class="mb-2">
+                                    <div class="fw-bold text-muted text-uppercase mb-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                        <i class="bi bi-tag-fill me-1" style="color: #c5a059;"></i><?= htmlspecialchars($catNombre) ?>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <?php foreach ($items as $srv): ?>
+                                            <label class="badge-choice">
+                                                <input type="checkbox" 
+                                                       class="chk-especialidad" 
+                                                       name="servicios_ids[]"
+                                                       value="<?= $srv['id'] ?>" 
+                                                       data-nombre="<?= htmlspecialchars($srv['nombre']) ?>"
+                                                       onchange="actualizarEspecialidadesTexto()">
+                                                <span><?= htmlspecialchars($srv['nombre']) ?></span>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Campo de texto sincronizado -->
+                    <textarea class="form-control form-control-sm" name="especialidades" id="emp_especialidades" rows="2" placeholder="Las especialidades seleccionadas se mostrarán aquí..." readonly></textarea>
+                    <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                        <i class="bi bi-info-circle me-1"></i>Marca los tratamientos de la base de datos que este colaborador está capacitado para brindar.
+                    </small>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label">Estado</label>
+                    <select class="form-select" name="estado" id="emp_estado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-spa-primary btn-sm px-4">Guardar</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -259,9 +344,18 @@ $totalInactivos = count($empleados) - $totalActivos;
 <script>
 const diasNombres = <?= json_encode($dias) ?>;
 
+function actualizarEspecialidadesTexto() {
+    const checked = Array.from(document.querySelectorAll('.chk-especialidad:checked'));
+    const nombres = checked.map(c => c.getAttribute('data-nombre') || c.value);
+    document.getElementById('emp_especialidades').value = nombres.join(', ');
+}
+
 function limpiarFormEmpleado() {
     document.getElementById('formEmpleado').reset();
     document.getElementById('emp_id').value = '';
+    document.getElementById('emp_cargo').value = '';
+    document.getElementById('emp_especialidades').value = '';
+    document.querySelectorAll('.chk-especialidad').forEach(c => c.checked = false);
     document.getElementById('tituloModalEmpleado').textContent = 'Registrar Empleado';
 }
 
@@ -270,8 +364,32 @@ function editarEmpleado(emp) {
     document.getElementById('emp_nombre').value = emp.nombre_completo;
     document.getElementById('emp_correo').value = emp.correo;
     document.getElementById('emp_telefono').value = emp.telefono;
-    document.getElementById('emp_cargo').value = emp.cargo;
-    document.getElementById('emp_especialidades').value = emp.especialidades || '';
+
+    // Seleccionar Cargo / Rol
+    const selectCargo = document.getElementById('emp_cargo');
+    let foundCargo = false;
+    for (let opt of selectCargo.options) {
+        if (opt.value.trim().toLowerCase() === (emp.cargo || '').trim().toLowerCase()) {
+            opt.selected = true;
+            foundCargo = true;
+            break;
+        }
+    }
+    if (!foundCargo && emp.cargo) {
+        const customOpt = new Option(emp.cargo, emp.cargo, true, true);
+        selectCargo.add(customOpt);
+    }
+
+    // Especialidades: sincronizar checkboxes con emp.especialidades
+    const espTexto = emp.especialidades || '';
+    document.getElementById('emp_especialidades').value = espTexto;
+    const tags = espTexto.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+
+    document.querySelectorAll('.chk-especialidad').forEach(chk => {
+        const srvNombre = (chk.getAttribute('data-nombre') || '').trim().toLowerCase();
+        chk.checked = tags.includes(srvNombre);
+    });
+
     document.getElementById('emp_estado').value = emp.estado;
     document.getElementById('tituloModalEmpleado').textContent = 'Editar Empleado';
     bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEmpleado')).show();

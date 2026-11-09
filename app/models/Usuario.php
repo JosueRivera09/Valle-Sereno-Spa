@@ -59,14 +59,15 @@ class Usuario {
         $stmt = $this->db->prepare("
             UPDATE usuarios 
             SET intentos_fallidos = intentos_fallidos + 1,
-                estado = CASE WHEN intentos_fallidos + 1 >= :max THEN 'bloqueado' ELSE estado END,
-                bloqueado_hasta = CASE WHEN intentos_fallidos + 1 >= :max THEN :lock_until ELSE bloqueado_hasta END
+                estado = CASE WHEN intentos_fallidos + 1 >= :max_attempts1 THEN 'bloqueado' ELSE estado END,
+                bloqueado_hasta = CASE WHEN intentos_fallidos + 1 >= :max_attempts2 THEN :lock_until ELSE bloqueado_hasta END
             WHERE id = :id
         ");
         $stmt->execute([
-            'id'         => $id,
-            'max'        => $maxAttempts,
-            'lock_until' => $lockUntil
+            'id'            => $id,
+            'max_attempts1' => $maxAttempts,
+            'max_attempts2' => $maxAttempts,
+            'lock_until'    => $lockUntil
         ]);
 
         $stmtCount = $this->db->prepare("SELECT intentos_fallidos, estado FROM usuarios WHERE id = :id");

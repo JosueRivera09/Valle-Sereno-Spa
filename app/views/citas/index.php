@@ -128,10 +128,24 @@
     </div>
 </div>
 
+<?php
+$horaActual = (int)date('H');
+if ($horaActual >= 18) {
+    $defFecha = date('Y-m-d', strtotime('+1 day'));
+    $defHoraIni = '09:00';
+    $defHoraFin = '10:00';
+} else {
+    $defFecha = date('Y-m-d');
+    $proxHora = max(8, $horaActual + 1);
+    $defHoraIni = sprintf('%02d:00', $proxHora);
+    $defHoraFin = sprintf('%02d:00', min(20, $proxHora + 1));
+}
+?>
 <!-- Modal Nueva Cita -->
 <div class="modal fade" id="modalNuevaCita" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content modal-editorial">
+        <form action="index.php?c=citas&a=guardar" method="POST" id="formNuevaCita" class="modal-content modal-editorial">
+            <input type="hidden" name="csrf_token" value="<?= AuthHelper::csrfToken() ?>">
             <div class="modal-header">
                 <div>
                     <span class="modal-kicker">Agenda</span>
@@ -142,9 +156,7 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="index.php?c=citas&a=guardar" method="POST" id="formNuevaCita">
-                <input type="hidden" name="csrf_token" value="<?= AuthHelper::csrfToken() ?>">
-                <div class="modal-body">
+            <div class="modal-body" style="overflow-y: auto; max-height: calc(85vh - 140px);">
 
                     <!-- 01. Paciente / Cliente -->
                     <div class="form-section">
@@ -221,15 +233,15 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Fecha de atención <span class="text-danger">*</span></label>
-                                <input type="date" id="input_fecha" name="fecha" class="form-control" value="<?= date('Y-m-d') ?>" onchange="actualizarHorarioYDisponibilidad()" required>
+                                <input type="date" id="input_fecha" name="fecha" class="form-control" value="<?= $defFecha ?>" onchange="actualizarHorarioYDisponibilidad()" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Hora inicio <span class="text-danger">*</span></label>
-                                <input type="time" id="input_hora_inicio" name="hora_inicio" class="form-control" value="10:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                                <input type="time" id="input_hora_inicio" name="hora_inicio" class="form-control" value="<?= $defHoraIni ?>" onchange="actualizarHorarioYDisponibilidad()" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Hora fin <span class="text-danger">*</span></label>
-                                <input type="time" id="input_hora_fin" name="hora_fin" class="form-control" value="11:00" onchange="actualizarHorarioYDisponibilidad()" required>
+                                <input type="time" id="input_hora_fin" name="hora_fin" class="form-control" value="<?= $defHoraFin ?>" onchange="actualizarHorarioYDisponibilidad()" required>
                             </div>
                         </div>
                     </div>
@@ -282,8 +294,7 @@
                         <i class="bi bi-calendar-check me-1"></i> Agendar Cita
                     </button>
                 </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -299,6 +310,7 @@ function toggleFormNuevoCliente() {
         secExistente.classList.add('d-none');
         select.removeAttribute('required');
         btnText.innerText = '← Seleccionar de la lista de clientes';
+        document.getElementById('express_nombre')?.focus();
     } else {
         secNuevo.classList.add('d-none');
         secExistente.classList.remove('d-none');
@@ -338,24 +350,50 @@ function guardarClienteExpress() {
             opt.selected = true;
             select.add(opt);
 
+            // Limpiar campos express
+            document.getElementById('express_nombre').value = '';
+            document.getElementById('express_telefono').value = '';
+            document.getElementById('express_fecha_nac').value = '';
+            document.getElementById('express_correo').value = '';
+
             toggleFormNuevoCliente();
             alert('¡Cliente registrado correctamente!');
         } else {
-            alert('Error: ' + res.mensaje);
+            alert('Error: ' + (res.mensaje || 'No se pudo registrar al cliente.'));
         }
     })
     .catch(() => alert('Ocurrió un error de conexión al registrar el cliente.'));
 }
 
-// Validación de coherencia horaria antes de enviar el formulario de nueva cita
-document.getElementById('formNuevaCita').addEventListener('submit', function(e) {
-    const ini = document.getElementById('input_hora_inicio').value;
-    const fin = document.getElementById('input_hora_fin').value;
-    if (ini && fin && fin <= ini) {
-        e.preventDefault();
-        alert('La hora de fin debe ser posterior a la hora de inicio.');
-    }
-});
+// Validación integral antes de enviar el formulario de nueva cita
+const formCita = document.getElementById('formNuevaCita');
+if (formCita) {
+    formCita.addEventListener('submit', function(e) {
+        const secNuevo = document.getElementById('seccionClienteNuevo');
+        const selectCliente = document.getElementById('select_id_cliente');
+
+        if (secNuevo && !secNuevo.classList.contains('d-none') && !selectCliente.value) {
+            e.preventDefault();
+            alert('Por favor confirma primero el registro del nuevo paciente haciendo clic en "Confirmar Nuevo Cliente", o vuelve a la lista de pacientes.');
+            return;
+        }
+
+        const ini = document.getElementById('input_hora_inicio').value;
+        const fin = document.getElementById('input_hora_fin').value;
+        if (ini && fin && fin <= ini) {
+            e.preventDefault();
+            alert('La hora de fin debe ser posterior a la hora de inicio.');
+            return;
+        }
+
+        const selectTerapeuta = document.getElementById('select_id_empleado');
+        if (!selectTerapeuta || !selectTerapeuta.value) {
+            e.preventDefault();
+            alert('Debes seleccionar un terapeuta disponible para continuar.');
+            return;
+        }
+    });
+}
 
 function seleccionarServicio(select) {
     const opt = select.options[select.selectedIndex];
@@ -364,7 +402,6 @@ function seleccionarServicio(select) {
     const inputTotal = document.getElementById('input_total');
 
     if (costo > 0) {
-        // El servidor calculará el total real desde el catálogo; el campo queda como referencia
         inputTotal.value = costo.toFixed(2);
         inputTotal.readOnly = true;
     } else {
@@ -376,7 +413,7 @@ function seleccionarServicio(select) {
     if (horaInicioStr) {
         const parts = horaInicioStr.split(':');
         const dateObj = new Date();
-        dateObj.setHours(parseInt(parts[0]), parseInt(parts[1]) + duracion, 0);
+        dateObj.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10) + duracion, 0);
         
         const h = String(dateObj.getHours()).padStart(2, '0');
         const m = String(dateObj.getMinutes()).padStart(2, '0');
@@ -387,26 +424,28 @@ function seleccionarServicio(select) {
 }
 
 function actualizarHorarioYDisponibilidad() {
-    const fecha = document.getElementById('input_fecha').value;
-    const horaInicio = document.getElementById('input_hora_inicio').value;
+    const fecha = document.getElementById('input_fecha')?.value;
+    const horaInicio = document.getElementById('input_hora_inicio')?.value;
     const selectServicio = document.getElementById('select_servicio');
     const idServicio = selectServicio?.value || '';
     const selectTerapeutas = document.getElementById('select_id_empleado');
     const lblState = document.getElementById('lblEstadoTerapeutas');
 
+    if (!selectTerapeutas || !lblState) return;
+
     // Recalcular hora fin si cambió la hora de inicio y hay un servicio con duración definida
-    if (idServicio) {
+    if (idServicio && selectServicio.selectedIndex >= 0) {
         const duracion = parseInt(selectServicio.options[selectServicio.selectedIndex].getAttribute('data-duracion') || 0);
         if (duracion > 0 && horaInicio) {
             const parts = horaInicio.split(':');
             const dateObj = new Date();
-            dateObj.setHours(parseInt(parts[0]), parseInt(parts[1]) + duracion, 0);
+            dateObj.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10) + duracion, 0);
             document.getElementById('input_hora_fin').value =
                 `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
         }
     }
 
-    const horaFin = document.getElementById('input_hora_fin').value;
+    const horaFin = document.getElementById('input_hora_fin')?.value;
 
     if (!fecha || !horaInicio || !horaFin) return;
 
@@ -415,23 +454,27 @@ function actualizarHorarioYDisponibilidad() {
         return;
     }
 
-    lblState.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat"></i> Verificando terapeutas libres...</span>';
+    lblState.innerHTML = '<span class="text-warning"><i class="bi bi-arrow-repeat spin"></i> Verificando disponibilidad...</span>';
 
     fetch(`index.php?c=citas&a=consultarDisponibilidad&fecha=${fecha}&hora_inicio=${horaInicio}&hora_fin=${horaFin}&id_servicio=${idServicio}`)
     .then(r => r.json())
     .then(res => {
         if (res.success) {
+            const prevSelected = selectTerapeutas.value;
             selectTerapeutas.innerHTML = '<option value="">-- Seleccionar Terapeuta Disponible --</option>';
-            if (res.data.length > 0) {
+            if (res.data && res.data.length > 0) {
                 res.data.forEach(t => {
                     const opt = document.createElement('option');
                     opt.value = t.id;
                     opt.text = `${t.nombre_completo} (${t.cargo})`;
+                    if (String(t.id) === String(prevSelected)) {
+                        opt.selected = true;
+                    }
                     selectTerapeutas.add(opt);
                 });
                 lblState.innerHTML = `<span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i> ${res.data.length} terapeuta(s) disponible(s) en este horario.</span>`;
             } else {
-                lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No hay terapeutas disponibles en este horario (cruce o fuera de turno).</span>';
+                lblState.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> No hay terapeutas con turno libre en este horario.</span>';
             }
         }
     })
@@ -463,4 +506,51 @@ function cambiarEstadoCita(id, nuevoEstado) {
         alert('Ocurrió un error de conexión al actualizar la cita.');
     });
 }
+
+// Inicialización de eventos al cargar el DOM
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEl = document.getElementById('modalNuevaCita');
+
+    // Evitar que la tecla Enter en el formulario express envíe la cita completa antes de confirmar cliente
+    document.querySelectorAll('#seccionClienteNuevo input').forEach(inp => {
+        inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                guardarClienteExpress();
+            }
+        });
+    });
+
+    // Ejecutar verificación de disponibilidad automáticamente al desplegar el modal
+    if (modalEl) {
+        modalEl.addEventListener('shown.bs.modal', function() {
+            actualizarHorarioYDisponibilidad();
+        });
+    }
+
+    // Abrir modal automáticamente si proviene de la redirección de "Nueva Cita" (?crear=1)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('crear') === '1' || params.get('nueva') === '1') {
+        if (modalEl) {
+            const abrirModal = () => {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+
+                    // Limpiar el parámetro de la URL para que no vuelva a abrirse si el usuario recarga la página
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('crear');
+                    url.searchParams.delete('nueva');
+                    window.history.replaceState({}, document.title, url.toString());
+                }
+            };
+
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                abrirModal();
+            } else {
+                setTimeout(abrirModal, 250);
+            }
+        }
+    }
+});
 </script>
