@@ -1,21 +1,22 @@
-<!-- Encabezado Editorial -->
-<div class="page-head">
-    <div>
-        <span class="kicker">Caja</span>
-        <h1 class="display-title">Caja <em>& Registro de Pagos</em></h1>
+<!-- Encabezado de Página SaaS -->
+<div class="saas-page-header">
+    <div class="saas-header-info">
+        <span class="saas-breadcrumb"><i class="bi bi-wallet2 me-1"></i>Finanzas & Tesorería</span>
+        <h1 class="saas-title">Caja Diaria & Conciliación de Pagos</h1>
+        <p class="saas-subtitle">Apertura de turno, liquidación en vivo de citas, emisión de comprobantes y arqueo.</p>
     </div>
-    <div class="page-head-actions">
+    <div class="saas-header-actions">
         <?php if (!empty($estadoCaja['abierta'])): ?>
-            <button class="btn btn-quiet btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCerrarCaja">
+            <button class="btn-saas-secondary" data-bs-toggle="modal" data-bs-target="#modalCerrarCaja">
                 <i class="bi bi-lock-fill"></i>
-                <span>Arqueo & Cierre de Caja</span>
+                <span>Arqueo & Cierre</span>
             </button>
-            <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCobro" onclick="prepararNuevoCobro()">
+            <button class="btn-saas-primary" data-bs-toggle="modal" data-bs-target="#modalCobro" onclick="prepararNuevoCobro()">
                 <i class="bi bi-cash-stack"></i>
                 <span>Registrar Cobro</span>
             </button>
         <?php else: ?>
-            <button class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAbrirCaja">
+            <button class="btn-saas-primary" style="background: #dc2626; border-color: #dc2626;" data-bs-toggle="modal" data-bs-target="#modalAbrirCaja">
                 <i class="bi bi-unlock-fill"></i>
                 <span>Abrir Turno de Caja</span>
             </button>
@@ -23,39 +24,49 @@
     </div>
 </div>
 
-<!-- Banner Estado de Caja -->
+<!-- Banner Estado de Caja SaaS -->
 <?php if (empty($estadoCaja['abierta'])): ?>
-    <div class="alert alert-danger border-0 shadow-sm mb-4 d-flex align-items-center justify-content-between">
-        <div>
-            <h6 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>LA CAJA SE ENCUENTRA CERRADA</h6>
-            <small class="mb-0">Debes realizar la <strong>Apertura de Caja</strong> ingresando el fondo inicial de efectivo para comenzar a registrar cobros.</small>
+    <div class="py-2 px-3 mb-3 rounded-3 border d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2" style="background: #fef2f2; border-color: #fecaca !important; color: #991b1b;">
+        <div class="d-flex align-items-center gap-2">
+            <div class="saas-stat-icon is-red" style="background: #fee2e2; color: #dc2626; width: 34px; height: 34px;">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0" style="font-size: 0.88rem;">Turno de Caja Cerrado</h6>
+                <small style="color: #7f1d1d; font-size: 0.78rem;">Realiza la apertura de turno ingresando el fondo inicial de efectivo para habilitar el cobro de citas.</small>
+            </div>
         </div>
-        <button class="btn btn-danger btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalAbrirCaja">
+        <button class="btn-saas-primary btn-sm px-3" style="background: #dc2626; border-color: #dc2626;" data-bs-toggle="modal" data-bs-target="#modalAbrirCaja">
             <i class="bi bi-key-fill me-1"></i> Abrir Caja Ahora
         </button>
     </div>
 <?php else: ?>
-    <div class="alert alert-success border-0 shadow-sm mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background: #eef8f3; color: #1b3b2b;">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-success rounded-pill px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Caja Abierta</span>
-                <span class="small text-muted">Apertura: <?= date('d/m/Y h:i A', strtotime($estadoCaja['caja']['fecha_apertura'])) ?> por <strong><?= htmlspecialchars($estadoCaja['caja']['nombre_completo']) ?></strong></span>
+    <div class="py-2 px-3 mb-3 rounded-3 border d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 shadow-xs" style="background: #f0fdf4; border-color: #bbf7d0 !important; color: #166534;">
+        <div class="d-flex align-items-center gap-2">
+            <div class="saas-stat-icon" style="background: #dcfce7; color: #15803d; width: 34px; height: 34px;">
+                <i class="bi bi-shop"></i>
             </div>
-            <div class="small text-dark">
-                <strong>Fondo Inicial:</strong> C$<?= number_format($estadoCaja['monto_inicial'], 2) ?> &bull; 
-                <strong>Cobrado Efectivo:</strong> C$<?= number_format($estadoCaja['efectivo_cobrado'], 2) ?> &bull; 
-                <strong>Efectivo Esperado en Caja:</strong> <span class="fw-bold text-success fs-6">C$<?= number_format($estadoCaja['monto_esperado_efectivo'], 2) ?></span>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="saas-badge saas-badge-success py-0 px-2"><span class="saas-badge-dot"></span>Caja Operativa</span>
+                    <small class="text-muted" style="font-size: 0.76rem;">Apertura: <strong><?= date('d/m/Y h:i A', strtotime($estadoCaja['caja']['fecha_apertura'])) ?></strong> por <strong><?= htmlspecialchars($estadoCaja['caja']['nombre_completo']) ?></strong></small>
+                </div>
+                <div style="color: #14532d; font-size: 0.8rem;">
+                    Fondo Inicial: <strong>C$ <?= number_format($estadoCaja['monto_inicial'], 2) ?></strong> &bull; 
+                    Efectivo Cobrado: <strong>C$ <?= number_format($estadoCaja['efectivo_cobrado'], 2) ?></strong> &bull; 
+                    Efectivo Esperado: <span class="fw-bold text-dark">C$ <?= number_format($estadoCaja['monto_esperado_efectivo'], 2) ?></span>
+                </div>
             </div>
         </div>
         <div>
-            <button class="btn btn-outline-success btn-sm px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalCerrarCaja">
+            <button class="btn btn-sm btn-outline-success px-3 py-1 font-semibold" style="font-size: 0.78rem;" data-bs-toggle="modal" data-bs-target="#modalCerrarCaja">
                 <i class="bi bi-calculator me-1"></i> Arqueo de Turno
             </button>
         </div>
     </div>
 <?php endif; ?>
 
-<!-- Métricas Libro Mayor de Caja del Día -->
+<!-- Grid de KPIs / Estadísticas SaaS -->
 <?php
     $totalEfectivo = 0;
     $totalTarjeta = 0;
@@ -67,51 +78,79 @@
     }
     $totalGeneralHoy = $totalEfectivo + $totalTarjeta + $totalTransf;
 ?>
-<div class="metrics">
-    <div class="metric">
-        <span class="metric-label">Recaudación Hoy</span>
-        <span class="metric-value">C$<?= number_format($totalGeneralHoy, 2) ?></span>
+<div class="saas-stats-grid">
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Recaudación de Hoy</span>
+            <div class="saas-stat-icon">
+                <i class="bi bi-cash-coin"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value">C$ <?= number_format($totalGeneralHoy, 2) ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted">Total liquidado en el turno</span>
+        </div>
     </div>
-    <div class="metric">
-        <span class="metric-label">Efectivo en Caja</span>
-        <span class="metric-value">C$<?= number_format($totalEfectivo, 2) ?></span>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Efectivo en Caja</span>
+            <div class="saas-stat-icon is-gold">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value">C$ <?= number_format($totalEfectivo, 2) ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted"><?= $totalGeneralHoy > 0 ? round(($totalEfectivo / $totalGeneralHoy) * 100) : 0 ?>% de recaudación</span>
+        </div>
     </div>
-    <div class="metric">
-        <span class="metric-label">Tarjetas</span>
-        <span class="metric-value">C$<?= number_format($totalTarjeta, 2) ?></span>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Cobros con Tarjeta</span>
+            <div class="saas-stat-icon is-blue">
+                <i class="bi bi-credit-card"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value">C$ <?= number_format($totalTarjeta, 2) ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted">POS y terminales</span>
+        </div>
     </div>
-    <div class="metric metric--gold">
-        <span class="metric-label">Transferencias</span>
-        <span class="metric-value">C$<?= number_format($totalTransf, 2) ?></span>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Transferencias</span>
+            <div class="saas-stat-icon is-purple">
+                <i class="bi bi-bank"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value">C$ <?= number_format($totalTransf, 2) ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted">Banca móvil / ACH</span>
+        </div>
     </div>
 </div>
 
 <?php if (!empty($estadoCaja['abierta'])): ?>
     <!-- Panel Operativo: Registrar Cobro Directo en Caja -->
-    <div class="panel panel--feature mb-4 shadow-sm">
-        <div class="panel-head">
-            <div>
-                <h2 class="panel-title d-flex align-items-center gap-2">
-                    <i class="bi bi-cash-stack text-warning"></i>
-                    <span>Registrar Cobro en Caja</span>
-                </h2>
-                <small class="text-muted" style="font-size: 0.78rem;">
-                    Seleccione la cita con saldo pendiente e ingrese el pago para emitir el comprobante de inmediato.
-                </small>
-            </div>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i>Caja Lista
+    <div class="saas-card">
+        <div class="saas-card-head">
+            <h2 class="saas-card-title">
+                <i class="bi bi-cash-stack text-primary"></i>
+                <span>Registrar Cobro Inmediato</span>
+            </h2>
+            <span class="saas-badge saas-badge-success">
+                <span class="saas-badge-dot"></span>Caja Operativa
             </span>
         </div>
-
-        <form id="formCobroDirecto" onsubmit="procesarCobroDirecto(event)">
-            <div class="row g-3 align-items-end">
-                <div class="col-lg-5 col-md-6">
-                    <label class="form-label fw-bold small text-dark mb-1">
-                        Cita por Cobrar <span class="text-danger">*</span>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="bi bi-calendar-check text-muted"></i></span>
+        <div class="saas-card-body">
+            <form id="formCobroDirecto" onsubmit="procesarCobroDirecto(event)">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-5 col-md-6">
+                        <label class="form-label fw-bold small text-dark mb-1">
+                            Cita por Cobrar <span class="text-danger">*</span>
+                        </label>
                         <select id="directo_id_cita" name="id_cita" class="form-select" onchange="actualizarMontoPorCitaDirecto(this)" required>
                             <option value="">-- Seleccionar Cita Pendiente (<?= count($citasPendientes) ?>) --</option>
                             <?php foreach ($citasPendientes as $cp): ?>
@@ -121,117 +160,123 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                </div>
 
-                <div class="col-lg-3 col-md-3 col-sm-6">
-                    <label class="form-label fw-bold small text-dark mb-1">
-                        Método de Pago <span class="text-danger">*</span>
-                    </label>
-                    <select id="directo_tipo_pago" name="tipo_pago" class="form-select" required>
-                        <option value="Efectivo">Efectivo (Caja Chica)</option>
-                        <option value="Tarjeta">Tarjeta Débito / Crédito (POS)</option>
-                        <option value="Transferencia">Transferencia Bancaria</option>
-                    </select>
-                </div>
+                    <div class="col-lg-3 col-md-3 col-sm-6">
+                        <label class="form-label fw-bold small text-dark mb-1">
+                            Método de Pago <span class="text-danger">*</span>
+                        </label>
+                        <select id="directo_tipo_pago" name="tipo_pago" class="form-select" required>
+                            <option value="Efectivo">Efectivo (Caja)</option>
+                            <option value="Tarjeta">Tarjeta Débito / Crédito (POS)</option>
+                            <option value="Transferencia">Transferencia Bancaria</option>
+                        </select>
+                    </div>
 
-                <div class="col-lg-2 col-md-3 col-sm-6">
-                    <label class="form-label fw-bold small text-dark mb-1">
-                        Monto (C$) <span class="text-danger">*</span>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">C$</span>
-                        <input type="number" step="0.01" id="directo_monto" name="monto" class="form-control fw-bold text-dark" placeholder="0.00" required>
+                    <div class="col-lg-2 col-md-3 col-sm-6">
+                        <label class="form-label fw-bold small text-dark mb-1">
+                            Monto (C$) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">C$</span>
+                            <input type="number" step="0.01" id="directo_monto" name="monto" class="form-control fw-bold text-dark" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 col-md-12">
+                        <button type="submit" class="btn-saas-primary w-100 justify-content-center py-2" id="btnSubmitCobroDirecto">
+                            <i class="bi bi-check2-circle fs-6"></i>
+                            <span>Cobrar Ahora</span>
+                        </button>
                     </div>
                 </div>
-
-                <div class="col-lg-2 col-md-12">
-                    <button type="submit" class="btn btn-spa-primary btn-sm px-3 py-2 w-100 d-inline-flex align-items-center justify-content-center gap-2" id="btnSubmitCobroDirecto">
-                        <i class="bi bi-check2-circle fs-6"></i>
-                        <span>Cobrar Ahora</span>
-                    </button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 <?php endif; ?>
 
 <!-- Tabla de Pagos Realizados -->
-<div class="spa-card p-4">
-    <div class="panel-head">
-        <h2 class="panel-title">Historial de Transacciones &amp; Recibos</h2>
-        <div class="input-group input-group-sm" style="max-width: 280px;">
-            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" id="busquedaPago" class="form-control border-start-0" placeholder="Buscar por cliente..." onkeyup="filtrarTablaPagos()">
+<div class="saas-card">
+    <div class="saas-card-head">
+        <h2 class="saas-card-title">
+            <i class="bi bi-receipt-cutoff text-gold"></i>
+            <span>Historial de Transacciones &amp; Recibos</span>
+        </h2>
+        <div class="saas-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="busquedaPago" class="saas-search-input" placeholder="Buscar por cliente, recibo..." onkeyup="filtrarTablaPagos()">
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="tablaPagos">
-            <thead class="table-light">
-                <tr style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #556b61;">
-                    <th>RECIBO ID</th>
-                    <th>FECHA & HORA</th>
-                    <th>CLIENTE</th>
-                    <th>CITA ASOCIADA</th>
-                    <th>MÉTODO DE PAGO</th>
-                    <th>MONTO COBRADO</th>
-                    <th>ESTADO</th>
-                    <th class="text-end">TICKET</th>
-                </tr>
-            </thead>
-            <tbody style="font-size: 0.88rem;">
-                <?php if (empty($pagos)): ?>
+    <div class="saas-card-body p-0">
+        <div class="table-responsive">
+            <table class="saas-table" id="tablaPagos">
+                <thead>
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">
-                            <i class="bi bi-inbox fs-3 d-block mb-1 text-muted"></i>
-                            No hay transacciones ni cobros liquidados aún.
-                        </td>
+                        <th>RECIBO ID</th>
+                        <th>FECHA & HORA</th>
+                        <th>PACIENTE / CLIENTE</th>
+                        <th>CITA ASOCIADA</th>
+                        <th>MÉTODO DE PAGO</th>
+                        <th>MONTO COBRADO</th>
+                        <th>ESTADO</th>
+                        <th class="text-end">COMPROBANTE</th>
                     </tr>
-                <?php else: ?>
-                    <?php foreach ($pagos as $p): ?>
+                </thead>
+                <tbody>
+                    <?php if (empty($pagos)): ?>
                         <tr>
-                            <td class="fw-bold text-dark">#REC-<?= str_pad($p['id'], 5, '0', STR_PAD_LEFT) ?></td>
-                            <td>
-                                <span class="text-secondary">
-                                    <i class="bi bi-calendar3 me-1"></i><?= date('d/m/Y H:i', strtotime($p['fecha_pago'])) ?>
-                                </span>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
+                                No hay transacciones ni cobros liquidados aún.
                             </td>
-                            <td>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($p['cliente_nombre']) ?></div>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark border">
-                                    Cita #<?= $p['id_cita'] ?> (<?= date('d/m/Y', strtotime($p['cita_fecha'])) ?>)
-                                </span>
-                            </td>
-                            <td>
-                                <?php
-                                    $iconMethod = match($p['tipo_pago']) {
-                                        'Efectivo' => 'bi-cash-coin text-success',
-                                        'Tarjeta' => 'bi-credit-card text-primary',
-                                        'Transferencia' => 'bi-arrow-left-right text-warning',
-                                        default => 'bi-wallet'
-                                    };
-                                ?>
-                                <span class="fw-medium text-dark">
-                                    <i class="bi <?= $iconMethod ?> me-1"></i><?= htmlspecialchars($p['tipo_pago']) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="fw-bold text-dark fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                    C$<?= number_format($p['monto'], 2) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
-                                    <i class="bi bi-check-circle-fill me-1"></i>Liquidado
-                                </span>
-                            </td>
-                            <td class="text-end">
-                                <button class="btn btn-outline-primary btn-sm py-0 px-2" title="Imprimir Ticket de Recibo" onclick="imprimirTicket(<?= $p['id'] ?>)">
-                                    <i class="bi bi-printer me-1"></i> Recibo PDF
-                                </button>
-                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($pagos as $p): ?>
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark">#REC-<?= str_pad($p['id'], 5, '0', STR_PAD_LEFT) ?></span>
+                                </td>
+                                <td>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-calendar3 me-1"></i><?= date('d/m/Y H:i', strtotime($p['fecha_pago'])) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark"><?= htmlspecialchars($p['cliente_nombre']) ?></div>
+                                </td>
+                                <td>
+                                    <span class="saas-badge saas-badge-neutral">
+                                        Cita #<?= $p['id_cita'] ?> (<?= date('d/m/Y', strtotime($p['cita_fecha'])) ?>)
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php
+                                        $iconMethod = match($p['tipo_pago']) {
+                                            'Efectivo' => 'bi-cash-coin text-success',
+                                            'Tarjeta' => 'bi-credit-card text-primary',
+                                            'Transferencia' => 'bi-arrow-left-right text-warning',
+                                            default => 'bi-wallet'
+                                        };
+                                    ?>
+                                    <span class="fw-medium text-dark small">
+                                        <i class="bi <?= $iconMethod ?> me-1"></i><?= htmlspecialchars($p['tipo_pago']) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark fs-6">
+                                        C$ <?= number_format($p['monto'], 2) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="saas-badge saas-badge-success">
+                                        <span class="saas-badge-dot"></span>Liquidado
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Imprimir Ticket de Recibo" onclick="imprimirTicket(<?= $p['id'] ?>)">
+                                        <i class="bi bi-printer me-1"></i> Recibo
+                                    </button>
+                                </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

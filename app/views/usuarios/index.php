@@ -4,49 +4,129 @@ $usuarios = $usuarios ?? [];
 $roles = $catalogos['roles'] ?? [];
 $empleados = $catalogos['empleados'] ?? [];
 $currentUserId = $_SESSION['usuario_id'] ?? 0;
+
+$totalUsuarios = count($usuarios);
+$totalActivos = count(array_filter($usuarios, fn($u) => ($u['estado'] ?? '') === 'activo'));
+$totalBloqueados = count(array_filter($usuarios, fn($u) => ($u['estado'] ?? '') === 'bloqueado'));
+$totalAdmins = count(array_filter($usuarios, fn($u) => ($u['rol_nombre'] ?? '') === 'Administrador'));
 ?>
 
-<!-- Encabezado Editorial -->
-<div class="page-head">
+<!-- SaaS Page Header -->
+<div class="saas-page-header">
     <div>
-        <span class="kicker">Sistema</span>
-        <h1 class="display-title">Gestión <em>de Usuarios</em></h1>
+        <div class="saas-breadcrumb">
+            <i class="bi bi-shield-lock-fill"></i>
+            <span>Administración del Sistema</span>
+            <span class="sep">/</span>
+            <span>Control de Accesos</span>
+        </div>
+        <h1 class="saas-title">Gestión de Usuarios &amp; Permisos</h1>
+        <p class="saas-subtitle">Administración de credenciales, roles de seguridad, monitoreo de intentos fallidos y vinculación con personal.</p>
     </div>
-    <div class="page-head-actions">
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirModalCrear()">
+    <div class="saas-header-actions">
+        <button class="saas-btn saas-btn-primary" data-bs-toggle="modal" data-bs-target="#modalUsuario" onclick="abrirModalCrear()">
             <i class="bi bi-person-plus-fill"></i>
             <span>Nuevo Usuario</span>
         </button>
     </div>
 </div>
 
-<!-- Buscador & Filtro por Rol -->
-<div class="spa-card p-3 mb-4">
-    <div class="row g-3 align-items-center justify-content-between">
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                <input type="text" id="filtroUsuarios" class="form-control bg-light border-start-0 ps-0" placeholder="Buscar usuario por nombre, login, rol o correo..." onkeyup="filtrarGaleriaUsuarios()">
+<!-- SaaS KPI Stats Grid -->
+<div class="saas-stats-grid mb-4">
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Cuentas Registradas</span>
+            <div class="saas-stat-icon icon-teal">
+                <i class="bi bi-people-fill"></i>
             </div>
         </div>
-        <div class="col-md-6 text-md-end">
-            <div class="btn-group btn-group-sm" role="group" aria-label="Filtro por rol">
-                <button type="button" class="btn btn-outline-secondary active" onclick="filtrarRolUsuario('todos', this)">Todos (<?= count($usuarios) ?>)</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="filtrarRolUsuario('Administrador', this)">Admin</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="filtrarRolUsuario('Recepcionista', this)">Recepción</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="filtrarRolUsuario('Terapeuta', this)">Terapeutas</button>
+        <div class="saas-stat-value"><?= $totalUsuarios ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral"><i class="bi bi-person-badge"></i> Directorio</span>
+            Credenciales en base de datos
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Usuarios Activos</span>
+            <div class="saas-stat-icon icon-emerald">
+                <i class="bi bi-shield-check"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalActivos ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-positive"><i class="bi bi-check-circle"></i> Habilitados</span>
+            Con acceso al sistema
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Administradores</span>
+            <div class="saas-stat-icon icon-gold">
+                <i class="bi bi-key-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalAdmins ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral"><i class="bi bi-award"></i> Nivel Total</span>
+            Control global
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Cuentas Bloqueadas</span>
+            <div class="saas-stat-icon icon-indigo">
+                <i class="bi bi-shield-exclamation"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalBloqueados ?></div>
+        <div class="saas-stat-change">
+            <?php if ($totalBloqueados > 0): ?>
+                <span class="saas-badge saas-badge-danger"><i class="bi bi-lock-fill"></i> Requiere atención</span>
+            <?php else: ?>
+                <span class="badge-positive"><i class="bi bi-check2"></i> Sin bloqueos</span>
+            <?php endif; ?>
+            Seguridad activa
+        </div>
+    </div>
+</div>
+
+<!-- Buscador & Filtro por Rol -->
+<div class="saas-card mb-3">
+    <div class="py-2 px-3">
+        <div class="row g-2 align-items-center justify-content-between">
+            <div class="col-md-6">
+                <div class="saas-search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="filtroUsuarios" placeholder="Buscar usuario por nombre, login, rol o correo..." onkeyup="filtrarGaleriaUsuarios()">
+                </div>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end">
+                <div class="saas-filter-tabs" role="group" aria-label="Filtro por rol">
+                    <button type="button" class="saas-filter-tab active" onclick="filtrarRolUsuario('todos', this)">Todos (<?= $totalUsuarios ?>)</button>
+                    <button type="button" class="saas-filter-tab" onclick="filtrarRolUsuario('Administrador', this)">Admin</button>
+                    <button type="button" class="saas-filter-tab" onclick="filtrarRolUsuario('Recepcionista', this)">Recepción</button>
+                    <button type="button" class="saas-filter-tab" onclick="filtrarRolUsuario('Terapeuta', this)">Terapeutas</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Galería Grid de Usuarios -->
-<div class="row g-3 mb-4" id="galeriaUsuarios">
+<div class="row g-3 mb-3" id="galeriaUsuarios">
     <?php if (empty($usuarios)): ?>
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="bi bi-person-x fs-1 d-block mb-2 text-muted"></i>
-            No hay cuentas de usuario registradas en la base de datos.<br>
-            <small>Haz clic en "Nuevo Usuario" para agregar uno.</small>
+        <div class="col-12">
+            <div class="saas-card text-center py-5">
+                <div class="saas-stat-icon icon-teal mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
+                    <i class="bi bi-person-x"></i>
+                </div>
+                <h5 class="fw-bold mb-1">No hay cuentas de usuario registradas</h5>
+                <p class="text-muted small mb-3">Haz clic en "Nuevo Usuario" para agregar una credencial de acceso.</p>
+            </div>
         </div>
     <?php else: ?>
         <?php foreach ($usuarios as $u): 
@@ -57,51 +137,44 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
                 'Terapeuta'     => 'bi-heart-pulse-fill',
                 default         => 'bi-person-badge'
             };
-            $rolColorClass = match($u['rol_nombre']) {
-                'Administrador' => 'bg-danger-subtle text-danger border border-danger-subtle',
-                'Recepcionista' => 'bg-info-subtle text-info border border-info-subtle',
-                'Terapeuta'     => 'bg-success-subtle text-success border border-success-subtle',
-                default         => 'bg-secondary-subtle text-secondary'
+            $rolBadgeClass = match($u['rol_nombre']) {
+                'Administrador' => 'saas-badge-gold',
+                'Recepcionista' => 'saas-badge-info',
+                'Terapeuta'     => 'saas-badge-success',
+                default         => 'saas-badge-neutral'
             };
-            $cardBorderColor = $u['estado'] === 'bloqueado' ? 'border-danger' : ($u['estado'] === 'activo' ? 'border-success' : 'border-secondary');
         ?>
             <div class="col-sm-6 col-lg-4 col-xl-3 tarjeta-usuario-item" data-rol="<?= htmlspecialchars($u['rol_nombre']) ?>">
-                <div class="spa-card p-4 h-100 position-relative d-flex flex-column justify-content-between border-top border-4 <?= $cardBorderColor ?> shadow-sm hover-shadow transition-all">
+                <div class="saas-card p-3 h-100 position-relative d-flex flex-column justify-content-between" style="transition: all .2s ease;">
                     
                     <div>
                         <!-- Header Tarjeta -->
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
-                                     style="width: 48px; height: 48px; font-size: 1rem; background: <?= $u['estado'] === 'bloqueado' ? '#dc3545' : 'linear-gradient(135deg, var(--spa-primary), #2c5341)' ?>;">
+                                     style="width: 46px; height: 46px; font-size: 0.95rem; flex-shrink: 0; background: <?= $u['estado'] === 'bloqueado' ? '#dc2626' : 'linear-gradient(135deg, #1e3d34, #2c5341)' ?>;">
                                     <?= htmlspecialchars($initials) ?>
                                 </div>
-                                <div>
-                                    <h6 class="fw-bold text-dark mb-0 fs-6"><?= htmlspecialchars($u['usuario']) ?></h6>
-                                    <small class="text-muted" style="font-size: 0.73rem;">ID: #<?= $u['id'] ?></small>
+                                <div style="min-width: 0;">
+                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="<?= htmlspecialchars($u['usuario']) ?>"><?= htmlspecialchars($u['usuario']) ?></h6>
+                                    <small class="text-muted font-monospace" style="font-size: 0.72rem;">ID #<?= $u['id'] ?></small>
                                 </div>
                             </div>
                             <?php if ($u['estado'] === 'activo'): ?>
-                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.7rem;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activo
-                                </span>
+                                <span class="saas-badge saas-badge-success">Activo</span>
                             <?php elseif ($u['estado'] === 'bloqueado'): ?>
-                                <span class="badge rounded-pill bg-danger text-white px-2 py-1 shadow-sm" style="font-size: 0.7rem;" title="Bloqueado por superar 3 intentos fallidos">
-                                    <i class="bi bi-shield-x me-1"></i>Bloqueado
-                                </span>
+                                <span class="saas-badge saas-badge-danger" title="Bloqueado por superar 3 intentos fallidos">Bloqueado</span>
                             <?php else: ?>
-                                <span class="badge rounded-pill bg-secondary-subtle text-secondary px-2 py-1" style="font-size: 0.7rem;">
-                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Inactivo
-                                </span>
+                                <span class="saas-badge saas-badge-neutral">Inactivo</span>
                             <?php endif; ?>
                         </div>
 
                         <!-- Detalles del Usuario & Empleado -->
-                        <div class="p-3 rounded-3 mb-3" style="background: #f8faf9; font-size: 0.8rem;">
-                            <div class="fw-bold text-dark mb-1">
+                        <div class="p-2 px-3 rounded-2 mb-3" style="background: #f8fafc; border: 1px solid #f1f5f9; font-size: 0.8rem;">
+                            <div class="fw-bold text-dark mb-1 text-truncate" title="<?= htmlspecialchars($u['nombre_completo']) ?>">
                                 <i class="bi bi-person text-success me-2"></i><?= htmlspecialchars($u['nombre_completo']) ?>
                             </div>
-                            <div class="text-muted mb-1">
+                            <div class="text-muted mb-1 text-truncate">
                                 <i class="bi bi-briefcase text-primary me-2"></i><?= htmlspecialchars($u['cargo']) ?>
                             </div>
                             <div class="text-muted text-truncate" title="<?= htmlspecialchars($u['email']) ?>">
@@ -111,12 +184,12 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 
                         <!-- Rol & Fallos -->
                         <div class="d-flex align-items-center justify-content-between mb-3" style="font-size: 0.78rem;">
-                            <span class="badge <?= $rolColorClass ?> px-2 py-1">
+                            <span class="saas-badge <?= $rolBadgeClass ?>">
                                 <i class="bi <?= $rolIcon ?> me-1"></i><?= htmlspecialchars($u['rol_nombre']) ?>
                             </span>
                             <div>
                                 <?php if ((int)($u['intentos_fallidos'] ?? 0) > 0): ?>
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">
+                                    <span class="saas-badge saas-badge-danger">
                                         <i class="bi bi-exclamation-triangle-fill me-1"></i><?= (int)$u['intentos_fallidos'] ?> fallo(s)
                                     </span>
                                 <?php else: ?>
@@ -129,20 +202,20 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
                     <!-- Footer Acciones -->
                     <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
                         <?php if ($u['estado'] === 'bloqueado'): ?>
-                            <button class="btn btn-danger btn-sm w-100 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 shadow-sm" onclick="desbloquearUsuario(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
+                            <button class="saas-btn saas-btn-primary w-100 py-1 bg-danger border-danger" style="font-size: 0.78rem;" onclick="desbloquearUsuario(<?= (int)$u['id'] ?>, '<?= htmlspecialchars($u['usuario'], ENT_QUOTES) ?>')">
                                 <i class="bi bi-unlock-fill"></i> Desbloquear Cuenta
                             </button>
                         <?php else: ?>
-                            <button class="btn btn-outline-secondary btn-sm flex-fill" title="Editar Usuario" onclick="abrirModalEditar(<?= $u['id'] ?>)">
-                                <i class="bi bi-pencil-square me-1"></i>Editar
+                            <button class="saas-btn saas-btn-outline flex-fill py-1" style="font-size: 0.78rem;" title="Editar Usuario" onclick="abrirModalEditar(<?= (int)$u['id'] ?>)">
+                                <i class="bi bi-pencil-square"></i> Editar
                             </button>
-                            <button class="btn btn-outline-warning btn-sm flex-fill text-dark" title="Cambiar Contraseña" onclick="abrirModalPassword(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>')">
-                                <i class="bi bi-key me-1"></i>Clave
+                            <button class="saas-btn saas-btn-outline flex-fill py-1" style="font-size: 0.78rem;" title="Cambiar Contraseña" onclick="abrirModalPassword(<?= (int)$u['id'] ?>, '<?= htmlspecialchars($u['usuario'], ENT_QUOTES) ?>')">
+                                <i class="bi bi-key text-warning"></i> Clave
                             </button>
                             <?php if ($u['id'] != $currentUserId): ?>
-                                <button class="btn <?= $u['estado'] === 'activo' ? 'btn-outline-danger' : 'btn-outline-success' ?> btn-sm px-2" 
+                                <button class="saas-btn saas-btn-outline px-2 py-1 <?= $u['estado'] === 'activo' ? 'text-danger' : 'text-success' ?>" 
                                         title="<?= $u['estado'] === 'activo' ? 'Desactivar cuenta' : 'Activar cuenta' ?>" 
-                                        onclick="toggleEstadoUsuario(<?= $u['id'] ?>, '<?= htmlspecialchars($u['usuario']) ?>', '<?= $u['estado'] ?>')">
+                                        onclick="toggleEstadoUsuario(<?= (int)$u['id'] ?>, '<?= htmlspecialchars($u['usuario'], ENT_QUOTES) ?>', '<?= $u['estado'] ?>')">
                                     <i class="bi <?= $u['estado'] === 'activo' ? 'bi-person-slash' : 'bi-person-check' ?>"></i>
                                 </button>
                             <?php endif; ?>
@@ -242,7 +315,7 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-spa-primary btn-sm px-4" id="btnGuardarUsuario">
+                    <button type="submit" class="saas-btn saas-btn-primary px-4" id="btnGuardarUsuario">
                         <i class="bi bi-check2-circle me-1"></i> Guardar
                     </button>
                 </div>
@@ -282,41 +355,12 @@ $currentUserId = $_SESSION['usuario_id'] ?? 0;
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-spa-primary btn-sm px-4" id="btnGuardarPass">Actualizar</button>
+                    <button type="submit" class="saas-btn saas-btn-primary px-4" id="btnGuardarPass">Actualizar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<style>
-.badge-rol {
-    display: inline-block;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 50rem;
-}
-.badge-admin {
-    background: rgba(197, 160, 89, 0.2);
-    color: #8b6b25;
-    border: 1px solid rgba(197, 160, 89, 0.35);
-}
-.badge-recepcion {
-    background: #eef6f3;
-    color: #2c594c;
-    border: 1px solid #c2ded4;
-}
-.badge-terapeuta {
-    background: #eef2ff;
-    color: #4338ca;
-    border: 1px solid #c7d2fe;
-}
-.badge-default {
-    background: #f3f4f6;
-    color: #4b5563;
-}
-</style>
 
 <script>
 // CSRF_TOKEN y el parche global de fetch (X-CSRF-TOKEN / X-Requested-With)
@@ -345,7 +389,7 @@ function filtrarGaleriaUsuarios() {
 
 function filtrarRolUsuario(rol, btn) {
     filtroRolActual = rol;
-    document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.saas-filter-tabs .saas-filter-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     filtrarGaleriaUsuarios();
 }

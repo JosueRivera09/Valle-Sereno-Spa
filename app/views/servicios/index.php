@@ -1,22 +1,30 @@
-<?php $esTerapeuta = (($_SESSION['rol_nombre'] ?? '') === 'Terapeuta'); ?>
-<!-- Encabezado Editorial -->
-<div class="page-head">
-    <div>
-        <span class="kicker">Catálogo</span>
-        <h1 class="display-title">
-            <?= $esTerapeuta ? 'Mis Servicios <em>& Especialidades</em>' : 'Servicios <em>& Terapias</em>' ?>
+<?php 
+$esTerapeuta = (($_SESSION['rol_nombre'] ?? '') === 'Terapeuta'); 
+$totalSrv = count($servicios ?? []);
+$srvActivos = count(array_filter($servicios ?? [], fn($s) => $s['estado'] === 'activo'));
+$totalCat = count($categorias ?? []);
+?>
+
+<!-- Encabezado de Página SaaS -->
+<div class="saas-page-header">
+    <div class="saas-header-info">
+        <span class="saas-breadcrumb"><i class="bi bi-sparkles me-1"></i>Catálogo & Terapias</span>
+        <h1 class="saas-title">
+            <?= $esTerapeuta ? 'Mis Especialidades & Terapias Habilitadas' : 'Catálogo de Servicios & Terapias' ?>
         </h1>
-        <?php if ($esTerapeuta): ?>
-            <p class="page-lede">Selecciona los tratamientos que estás capacitado para ofrecer. El sistema te asignará citas basándose en tu menú personal.</p>
-        <?php endif; ?>
+        <p class="saas-subtitle">
+            <?= $esTerapeuta 
+                ? 'Activa los tratamientos que estás capacitado para brindar; el sistema te asignará citas basándose en este menú.' 
+                : 'Definición de tratamientos, tiempos de sesión, precios de catálogo y estructura de categorías.' ?>
+        </p>
     </div>
     <?php if (!$esTerapeuta): ?>
-    <div class="page-head-actions">
-        <button class="btn btn-quiet btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+    <div class="saas-header-actions">
+        <button class="btn-saas-secondary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
             <i class="bi bi-folder-plus"></i>
             <span>Nueva Categoría</span>
         </button>
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalServicio" onclick="prepararNuevoServicio()">
+        <button class="btn-saas-primary" data-bs-toggle="modal" data-bs-target="#modalServicio" onclick="prepararNuevoServicio()">
             <i class="bi bi-plus-circle"></i>
             <span>Nuevo Servicio</span>
         </button>
@@ -24,110 +32,144 @@
     <?php endif; ?>
 </div>
 
-<!-- Métricas Libro Mayor -->
-<div class="metrics">
-    <div class="metric">
-        <span class="metric-label"><?= $esTerapeuta ? 'Especialidades Mías' : 'Servicios en Menú' ?></span>
-        <span class="metric-value"><?= $esTerapeuta ? count($misEspecialidades ?? []) : count($servicios ?? []) ?></span>
-    </div>
-    <div class="metric">
-        <span class="metric-label">Categorías Activas</span>
-        <span class="metric-value"><?= count($categorias ?? []) ?></span>
-    </div>
-    <div class="metric">
-        <span class="metric-label">Servicios Activos Spa</span>
-        <span class="metric-value"><?= count(array_filter($servicios ?? [], fn($s) => $s['estado'] === 'activo')) ?></span>
-        <span class="metric-note"><strong>Disponibles en cabinas</strong></span>
-    </div>
-</div>
-
-<!-- Tabla de Servicios -->
-<div class="spa-card p-4">
-    <div class="panel-head">
-        <h2 class="panel-title">
-            <?= $esTerapeuta ? 'Menú de Terapias Habilitadas' : 'Tratamientos Registrados' ?>
-        </h2>
-        <div class="input-group input-group-sm" style="max-width: 280px;">
-            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" id="busquedaServicio" class="form-control border-start-0" placeholder="Buscar tratamiento..." onkeyup="filtrarTablaServicios()">
+<!-- Grid de KPIs / Estadísticas SaaS -->
+<div class="saas-stats-grid">
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label"><?= $esTerapeuta ? 'Mis Especialidades' : 'Total en Catálogo' ?></span>
+            <div class="saas-stat-icon">
+                <i class="bi bi-card-checklist"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $esTerapeuta ? count($misEspecialidades ?? []) : $totalSrv ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted"><?= $esTerapeuta ? 'Habilitadas para tu perfil' : 'Tratamientos registrados' ?></span>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="tablaServicios">
-            <thead class="table-light">
-                <tr style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #556b61;">
-                    <th>TRATAMIENTO / SERVICIO</th>
-                    <th>CATEGORÍA</th>
-                    <th>DURACIÓN</th>
-                    <th>COSTO</th>
-                    <?php if ($esTerapeuta): ?>
-                        <th class="text-center">MI ESPECIALIDAD</th>
-                    <?php else: ?>
-                        <th>ESTADO</th>
-                        <th class="text-end">ACCIONES</th>
-                    <?php endif; ?>
-                </tr>
-            </thead>
-            <tbody style="font-size: 0.88rem;">
-                <?php if (empty($servicios)): ?>
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Categorías del Menú</span>
+            <div class="saas-stat-icon is-gold">
+                <i class="bi bi-tags-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalCat ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted">Líneas de tratamiento</span>
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Servicios Activos</span>
+            <div class="saas-stat-icon is-blue">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $srvActivos ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-success py-0 px-2">Disponibles en cabina</span>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjeta Contenedor con Tabla de Servicios -->
+<div class="saas-card">
+    <div class="saas-card-head">
+        <h2 class="saas-card-title">
+            <i class="bi bi-menu-button-wide text-primary"></i>
+            <span><?= $esTerapeuta ? 'Menú de Terapias Habilitadas' : 'Catálogo de Tratamientos' ?></span>
+        </h2>
+        <div class="saas-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="busquedaServicio" class="saas-search-input" placeholder="Buscar por tratamiento o categoría..." onkeyup="filtrarTablaServicios()">
+        </div>
+    </div>
+
+    <div class="saas-card-body p-0">
+        <div class="table-responsive">
+            <table class="saas-table" id="tablaServicios">
+                <thead>
                     <tr>
-                        <td colspan="<?= $esTerapeuta ? '5' : '6' ?>" class="text-center py-4 text-muted">
-                            <i class="bi bi-card-heading fs-3 d-block mb-1 text-muted"></i>
-                            No hay servicios o terapias registradas en el catálogo.
-                        </td>
+                        <th>TRATAMIENTO / SERVICIO</th>
+                        <th>CATEGORÍA</th>
+                        <th>DURACIÓN</th>
+                        <th>PRECIO BASE</th>
+                        <?php if ($esTerapeuta): ?>
+                            <th class="text-center">MI DISPONIBILIDAD</th>
+                        <?php else: ?>
+                            <th>ESTADO</th>
+                            <th class="text-end">ACCIONES</th>
+                        <?php endif; ?>
                     </tr>
-                <?php else: ?>
-                    <?php foreach ($servicios as $s): ?>
-                        <?php $ofreceEstaTerapia = in_array($s['id'], $misEspecialidades ?? []); ?>
+                </thead>
+                <tbody>
+                    <?php if (empty($servicios)): ?>
                         <tr>
-                            <td>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($s['nombre']) ?></div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem; max-width: 320px;">
-                                    <?= htmlspecialchars($s['descripcion'] ?? 'Sin descripción disponible') ?>
-                                </small>
+                            <td colspan="<?= $esTerapeuta ? '5' : '6' ?>" class="text-center py-5 text-muted">
+                                <i class="bi bi-card-heading fs-1 text-muted d-block mb-2"></i>
+                                No hay servicios o terapias registradas en el catálogo.
                             </td>
-                            <td>
-                                <span class="badge bg-secondary-subtle text-dark border px-2 py-1">
-                                    <i class="bi bi-tag me-1"></i><?= htmlspecialchars($s['categoria_nombre'] ?? 'Sin categoría') ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="fw-medium text-dark">
-                                    <i class="bi bi-clock text-warning me-1"></i><?= (int)$s['duracion_minutos'] ?> min
-                                </span>
-                            </td>
-                            <td>
-                                <span class="fw-bold text-dark fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                    C$<?= number_format($s['costo'], 2) ?>
-                                </span>
-                            </td>
-                            <?php if ($esTerapeuta): ?>
-                                <td class="text-center">
-                                    <div class="form-check form-switch d-inline-block">
-                                        <input class="form-check-input" type="checkbox" role="switch" style="cursor: pointer; width: 2.3em; height: 1.2em;"
-                                               <?= $ofreceEstaTerapia ? 'checked' : '' ?>
-                                               onchange="toggleMiEspecialidad(<?= $s['id'] ?>, this)">
-                                    </div>
-                                    <small class="d-block text-muted style-lbl-esp" style="font-size: 0.72rem;">
-                                        <?= $ofreceEstaTerapia ? '<span class="text-success fw-semibold">Presto esta terapia</span>' : '<span class="text-muted">No ofertado</span>' ?>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($servicios as $s): ?>
+                            <?php $ofreceEstaTerapia = in_array($s['id'], $misEspecialidades ?? []); ?>
+                            <tr class="fila-servicio">
+                                <td>
+                                    <div class="fw-bold text-dark fs-6"><?= htmlspecialchars($s['nombre']) ?></div>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 380px;">
+                                        <?= htmlspecialchars($s['descripcion'] ?? 'Sin descripción disponible') ?>
                                     </small>
                                 </td>
-                            <?php else: ?>
                                 <td>
-                                    <?php if ($s['estado'] === 'activo'): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">Disponible</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-1">Inactivo</span>
-                                    <?php endif; ?>
+                                    <span class="saas-badge saas-badge-neutral">
+                                        <i class="bi bi-tag me-1" style="color: #c5a059;"></i>
+                                        <?= htmlspecialchars($s['categoria_nombre'] ?? 'General') ?>
+                                    </span>
                                 </td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-secondary" title="Editar Servicio" onclick='editarServicio(<?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-outline-<?= $s['estado'] === 'activo' ? 'warning' : 'success' ?>" 
-                                                title="<?= $s['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>" 
+                                <td>
+                                    <span class="text-dark fw-medium small">
+                                        <i class="bi bi-clock text-warning me-1"></i><?= (int)$s['duracion_minutos'] ?> min
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark fs-6">
+                                        C$ <?= number_format($s['costo'], 2) ?>
+                                    </span>
+                                </td>
+                                <?php if ($esTerapeuta): ?>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-inline-block">
+                                            <input class="form-check-input" type="checkbox" role="switch" style="cursor: pointer; width: 2.2em; height: 1.15em;"
+                                                   <?= $ofreceEstaTerapia ? 'checked' : '' ?>
+                                                   onchange="toggleMiEspecialidad(<?= $s['id'] ?>, this)">
+                                        </div>
+                                        <small class="d-block text-muted style-lbl-esp" style="font-size: 0.72rem;">
+                                            <?= $ofreceEstaTerapia ? '<span class="text-success fw-semibold">Habilitado</span>' : '<span class="text-muted">No ofertado</span>' ?>
+                                        </small>
+                                    </td>
+                                <?php else: ?>
+                                    <td>
+                                        <?php if ($s['estado'] === 'activo'): ?>
+                                            <span class="saas-badge saas-badge-success">
+                                                <span class="saas-badge-dot"></span>
+                                                Disponible
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="saas-badge saas-badge-neutral">
+                                                <span class="saas-badge-dot"></span>
+                                                Inactivo
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Editar Servicio" onclick='editarServicio(<?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-<?= $s['estado'] === 'activo' ? 'warning' : 'success' ?> py-1 px-2" 
+                                                    title="<?= $s['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>"  
                                                 onclick="cambiarEstadoServicio(<?= $s['id'] ?>, '<?= $s['estado'] === 'activo' ? 'inactivo' : 'activo' ?>')">
                                             <i class="bi bi-toggle-<?= $s['estado'] === 'activo' ? 'on' : 'off' ?>"></i>
                                         </button>

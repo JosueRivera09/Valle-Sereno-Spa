@@ -2,111 +2,183 @@
 $dias = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
 
 // Contadores de Resumen
-$totalActivos = count(array_filter($empleados, fn($e) => $e['estado'] === 'activo'));
-$totalInactivos = count($empleados) - $totalActivos;
+$totalEmpleados = count($empleados);
+$totalActivos = count(array_filter($empleados, fn($e) => ($e['estado'] ?? '') === 'activo'));
+$totalInactivos = $totalEmpleados - $totalActivos;
+$totalConEspecialidad = count(array_filter($empleados, fn($e) => !empty(trim($e['especialidades'] ?? ''))));
 ?>
 
-<!-- Encabezado Editorial -->
-<div class="page-head">
+<!-- SaaS Page Header -->
+<div class="saas-page-header">
     <div>
-        <span class="kicker">Equipo</span>
-        <h1 class="display-title">Personal Terapéutico <em>& Especialistas</em></h1>
+        <div class="saas-breadcrumb">
+            <i class="bi bi-people-fill"></i>
+            <span>Equipo &amp; Especialistas</span>
+            <span class="sep">/</span>
+            <span>Directorio de Colaboradores</span>
+        </div>
+        <h1 class="saas-title">Personal Terapéutico</h1>
+        <p class="saas-subtitle">Gestión de especialistas, credenciales de rol, catálogo de terapias asignadas y turnos de atención.</p>
     </div>
-    <div class="page-head-actions">
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
-            <i class="bi bi-person-plus-fill fs-6"></i>
+    <div class="saas-header-actions">
+        <button class="saas-btn saas-btn-primary" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
+            <i class="bi bi-person-plus-fill"></i>
             <span>Nuevo Colaborador</span>
         </button>
     </div>
 </div>
 
-<!-- Métricas Libro Mayor -->
-<div class="metrics">
-    <div class="metric">
-        <span class="metric-label">Equipo de Trabajo</span>
-        <span class="metric-value"><?= count($empleados) ?></span>
-        <span class="metric-note">Especialistas registrados</span>
-    </div>
-    <div class="metric">
-        <span class="metric-label">Activos en Cabina</span>
-        <span class="metric-value"><?= $totalActivos ?></span>
-        <span class="metric-note"><strong>Disponibles para agenda</strong></span>
-    </div>
-    <div class="metric">
-        <span class="metric-label">Inactivos</span>
-        <span class="metric-value"><?= $totalInactivos ?></span>
-    </div>
-</div>
-
-<!-- Buscador & Filtro Rápido -->
-<div class="spa-card p-3 mb-4">
-    <div class="row g-3 align-items-center">
-        <div class="col-md-8">
-            <div class="input-group">
-                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" id="busquedaTerapeuta" class="form-control border-start-0" placeholder="Buscar especialista por nombre, cargo o especialidad..." onkeyup="filtrarTerapeutas()">
+<!-- SaaS KPI Stats -->
+<div class="saas-stats-grid mb-4">
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Total Especialistas</span>
+            <div class="saas-stat-icon icon-teal">
+                <i class="bi bi-people-fill"></i>
             </div>
         </div>
-        <div class="col-md-4 text-md-end">
-            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Mostrando <?= count($empleados) ?> colaboradores registrados</small>
+        <div class="saas-stat-value"><?= $totalEmpleados ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral"><i class="bi bi-person-badge"></i> Plantilla</span>
+            Registrados en nómina
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Activos en Cabina</span>
+            <div class="saas-stat-icon icon-emerald">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalActivos ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-positive"><i class="bi bi-shield-check"></i> Habilitados</span>
+            Disponibles para agenda
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Con Especialidades</span>
+            <div class="saas-stat-icon icon-gold">
+                <i class="bi bi-stars"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalConEspecialidad ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral"><i class="bi bi-tag-fill"></i> Terapias</span>
+            Servicios asignados
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Inactivos / Pausa</span>
+            <div class="saas-stat-icon icon-indigo">
+                <i class="bi bi-pause-circle-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalInactivos ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral">Sin asignación</span>
+            Bloqueados en agenda
         </div>
     </div>
 </div>
 
-<!-- Galería Grid de Tarjetas de Terapeutas -->
-<div class="row g-3 mb-4" id="contenedorTerapeutas">
+<!-- Barra de Búsqueda y Filtros -->
+<div class="saas-card mb-3">
+    <div class="py-2 px-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6 col-lg-7">
+                <div class="saas-search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="busquedaTerapeuta" placeholder="Buscar especialista por nombre, cargo, teléfono o especialidad..." onkeyup="filtrarTerapeutas()">
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-5 text-md-end d-flex align-items-center justify-content-md-end gap-2">
+                <span class="text-muted small">
+                    <i class="bi bi-person-check me-1 text-primary"></i>
+                    <strong id="contadorTerapeutasVisible"><?= $totalEmpleados ?></strong> colaboradores listados
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Galería Grid de Colaboradores -->
+<div class="row g-3 mb-3" id="contenedorTerapeutas">
     <?php if (empty($empleados)): ?>
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="bi bi-person-x fs-1 d-block mb-2 text-muted"></i>
-            No hay personal terapéutico registrado en la base de datos.<br>
-            <small>Haz clic en "Nuevo Colaborador" para agregar uno.</small>
+        <div class="col-12">
+            <div class="saas-card text-center py-5">
+                <div class="saas-stat-icon icon-teal mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
+                    <i class="bi bi-person-x"></i>
+                </div>
+                <h5 class="fw-bold mb-1">No hay colaboradores registrados</h5>
+                <p class="text-muted small mb-3">Registra a tu primer especialista o terapeuta para asignarle tratamientos y turnos de cabina.</p>
+                <button class="saas-btn saas-btn-primary mx-auto" data-bs-toggle="modal" data-bs-target="#modalEmpleado" onclick="limpiarFormEmpleado()">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Nuevo Colaborador</span>
+                </button>
+            </div>
         </div>
     <?php else: ?>
         <?php foreach ($empleados as $emp): 
             $initials = strtoupper(substr($emp['nombre_completo'], 0, 1) . (strpos($emp['nombre_completo'], ' ') !== false ? substr($emp['nombre_completo'], strpos($emp['nombre_completo'], ' ') + 1, 1) : ''));
             $tagsEspecialidades = array_filter(array_map('trim', explode(',', $emp['especialidades'] ?? '')));
+            $isActivo = ($emp['estado'] ?? '') === 'activo';
         ?>
             <div class="col-sm-6 col-lg-4 col-xl-3 tarjeta-terapeuta-item">
-                <div class="spa-card p-4 h-100 position-relative d-flex flex-column justify-content-between border-top border-4 border-success shadow-sm hover-shadow transition-all">
+                <div class="saas-card h-100 p-3 d-flex flex-column justify-content-between position-relative" style="transition: all .2s ease;">
                     
                     <div>
-                        <!-- Top Avatar & Estado -->
-                        <div class="d-flex align-items-center justify-content-between mb-3">
+                        <!-- Header Colaborador con Avatar e Iniciales -->
+                        <div class="d-flex align-items-start justify-content-between mb-3">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
-                                     style="width: 52px; height: 52px; font-size: 1.1rem; background: linear-gradient(135deg, var(--spa-primary), #2c5341);">
+                                     style="width: 48px; height: 48px; font-size: 1rem; background: linear-gradient(135deg, #1e3d34, #2c5341); flex-shrink: 0;">
                                     <?= htmlspecialchars($initials) ?>
                                 </div>
-                                <div>
-                                    <h6 class="fw-bold text-dark mb-0 fs-6"><?= htmlspecialchars($emp['nombre_completo']) ?></h6>
-                                    <small class="badge bg-light text-primary border" style="font-size: 0.72rem;"><?= htmlspecialchars($emp['cargo']) ?></small>
+                                <div style="min-width: 0;">
+                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="<?= htmlspecialchars($emp['nombre_completo']) ?>">
+                                        <?= htmlspecialchars($emp['nombre_completo']) ?>
+                                    </h6>
+                                    <span class="saas-badge bg-light text-primary border mt-1" style="font-size: 0.72rem;">
+                                        <i class="bi bi-shield-check me-1"></i><?= htmlspecialchars($emp['cargo']) ?>
+                                    </span>
                                 </div>
                             </div>
-                            <span class="badge rounded-pill <?= $emp['estado'] === 'activo' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary' ?> px-2 py-1" style="font-size: 0.7rem;">
-                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i><?= htmlspecialchars(ucfirst($emp['estado'])) ?>
+                            <span class="saas-badge <?= $isActivo ? 'saas-badge-success' : 'saas-badge-neutral' ?>" style="font-size: 0.68rem;">
+                                <?= $isActivo ? 'Activo' : 'Inactivo' ?>
                             </span>
                         </div>
 
-                        <!-- Información de Contacto -->
-                        <div class="p-2 px-3 rounded-3 mb-3" style="background: #f8faf9; font-size: 0.8rem;">
-                            <div class="text-dark mb-1">
-                                <i class="bi bi-telephone text-success me-2"></i><?= htmlspecialchars($emp['telefono']) ?>
+                        <!-- Info de Contacto -->
+                        <div class="p-2 px-3 rounded-2 mb-3" style="background: #f8fafc; border: 1px solid #f1f5f9; font-size: 0.8rem;">
+                            <div class="text-dark mb-1 d-flex align-items-center gap-2">
+                                <i class="bi bi-telephone text-success"></i>
+                                <span class="fw-semibold"><?= htmlspecialchars($emp['telefono']) ?></span>
                             </div>
-                            <div class="text-muted text-truncate" title="<?= htmlspecialchars($emp['correo']) ?>">
-                                <i class="bi bi-envelope text-primary me-2"></i><?= htmlspecialchars($emp['correo']) ?>
+                            <div class="text-muted text-truncate d-flex align-items-center gap-2" title="<?= htmlspecialchars($emp['correo']) ?>">
+                                <i class="bi bi-envelope text-primary"></i>
+                                <span><?= htmlspecialchars($emp['correo']) ?></span>
                             </div>
                         </div>
 
-                        <!-- Tags de Especialidades -->
+                        <!-- Especialidades Asignadas -->
                         <div class="mb-3">
-                            <small class="text-muted fw-semibold d-block mb-1" style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;">Especialidades Ofertadas:</small>
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="text-muted fw-bold" style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;">Especialidades</span>
+                                <span class="badge bg-light text-muted border" style="font-size: 0.65rem;"><?= count($tagsEspecialidades) ?></span>
+                            </div>
                             <?php if (empty($tagsEspecialidades)): ?>
-                                <small class="text-muted italic">Sin especialidades especificadas</small>
+                                <small class="text-muted fst-italic" style="font-size: 0.75rem;">Sin especialidades registradas</small>
                             <?php else: ?>
-                                <div class="d-flex flex-wrap gap-1">
+                                <div class="d-flex flex-wrap gap-1" style="max-height: 80px; overflow-y: auto;">
                                     <?php foreach ($tagsEspecialidades as $tag): ?>
-                                        <span class="badge bg-white text-dark border px-2 py-1 font-normal" style="font-size: 0.75rem; font-weight: 500;">
-                                            <i class="bi bi-sparkles text-warning me-1"></i><?= htmlspecialchars($tag) ?>
+                                        <span class="saas-badge saas-badge-gold" style="font-size: 0.72rem; padding: 2px 7px;">
+                                            <i class="bi bi-sparkles me-1"></i><?= htmlspecialchars($tag) ?>
                                         </span>
                                     <?php endforeach; ?>
                                 </div>
@@ -114,13 +186,13 @@ $totalInactivos = count($empleados) - $totalActivos;
                         </div>
                     </div>
 
-                    <!-- Footer Acciones -->
+                    <!-- Botones de Acción -->
                     <div class="pt-3 border-top d-flex gap-2 justify-content-between align-items-center">
-                        <button class="btn btn-outline-success btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1" onclick="abrirHorarios(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['nombre_completo'], ENT_QUOTES) ?>')">
-                            <i class="bi bi-calendar-week"></i>
-                            <span>Turnos & Horarios</span>
+                        <button class="saas-btn saas-btn-outline w-100 py-1" style="font-size: 0.78rem;" onclick="abrirHorarios(<?= (int)$emp['id'] ?>, '<?= htmlspecialchars($emp['nombre_completo'], ENT_QUOTES) ?>')">
+                            <i class="bi bi-calendar-week text-primary"></i>
+                            <span>Turnos &amp; Horarios</span>
                         </button>
-                        <button class="btn btn-outline-secondary btn-sm px-2" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
+                        <button class="saas-btn saas-btn-outline px-2 py-1" title="Editar Perfil" onclick='editarEmpleado(<?= json_encode($emp, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
                             <i class="bi bi-pencil-square"></i>
                         </button>
                     </div>
@@ -139,23 +211,23 @@ $totalInactivos = count($empleados) - $totalActivos;
     gap: 6px;
     padding: 5px 10px;
     border-radius: 20px;
-    border: 1px solid #d4ded9;
+    border: 1px solid #e2e8f0;
     background: #ffffff;
     font-size: 0.76rem;
     font-weight: 500;
-    color: #2c4238;
+    color: #1e293b;
     cursor: pointer;
     user-select: none;
     transition: all 0.15s ease-in-out;
 }
 .badge-choice:hover {
-    border-color: #9cb5a8;
-    background: #f4f7f5;
+    border-color: #cbd5e1;
+    background: #f8fafc;
 }
 .badge-choice:has(input:checked) {
-    background: #233d34;
+    background: #1e3d34;
     color: #ffffff;
-    border-color: #233d34;
+    border-color: #1e3d34;
 }
 .badge-choice input {
     margin: 0;
@@ -261,7 +333,7 @@ $totalInactivos = count($empleados) - $totalActivos;
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-spa-primary btn-sm px-4">Guardar</button>
+                <button type="submit" class="saas-btn saas-btn-primary px-4">Guardar</button>
             </div>
         </form>
     </div>
@@ -306,28 +378,28 @@ $totalInactivos = count($empleados) - $totalActivos;
                             <input type="time" class="form-control form-control-sm" name="hora_fin" id="horario_fin" required>
                         </div>
                         <div class="col-md-3">
-                            <button type="submit" class="btn btn-spa-primary btn-sm w-100">
-                                <i class="bi bi-plus-lg me-1"></i> Agregar
+                            <button type="submit" class="saas-btn saas-btn-primary w-100 py-1" style="font-size: 0.82rem;">
+                                <i class="bi bi-plus-lg me-1"></i> Agregar Turno
                             </button>
                         </div>
                     </form>
                 </div>
 
                 <!-- Tabla de horarios -->
-                <div class="form-section">
+                <div class="form-section mt-4">
                     <div class="form-section-head">
                         <span class="form-section-num">02</span>
                         <h6 class="form-section-title">Turnos registrados</h6>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
-                            <thead class="table-light">
+                        <table class="saas-table align-middle mb-0">
+                            <thead>
                                 <tr>
                                     <th>Día</th>
                                     <th>Inicio</th>
                                     <th>Fin</th>
                                     <th>Estado</th>
-                                    <th></th>
+                                    <th class="text-end">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaHorarios">
@@ -423,12 +495,12 @@ async function cargarHorarios(idEmpleado) {
     }
     tbody.innerHTML = data.data.map(h => `
         <tr>
-            <td>${esc(diasNombres[h.dia_semana] || h.dia_semana)}</td>
+            <td class="fw-semibold">${esc(diasNombres[h.dia_semana] || h.dia_semana)}</td>
             <td>${esc(h.hora_inicio.substring(0,5))}</td>
             <td>${esc(h.hora_fin.substring(0,5))}</td>
-            <td><span class="badge ${h.estado === 'activo' ? 'bg-success' : 'bg-secondary'}">${esc(h.estado)}</span></td>
+            <td><span class="saas-badge ${h.estado === 'activo' ? 'saas-badge-success' : 'saas-badge-neutral'}">${esc(h.estado)}</span></td>
             <td class="text-end">
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarHorario(${parseInt(h.id, 10)})">
+                <button class="saas-btn saas-btn-outline px-2 py-1 text-danger" title="Eliminar Turno" onclick="eliminarHorario(${parseInt(h.id, 10)})">
                     <i class="bi bi-trash"></i>
                 </button>
             </td>
@@ -462,10 +534,16 @@ async function eliminarHorario(id) {
 function filtrarTerapeutas() {
     const input = document.getElementById('busquedaTerapeuta').value.toLowerCase();
     const cards = document.querySelectorAll('#contenedorTerapeutas .tarjeta-terapeuta-item');
+    let visibleCount = 0;
 
     cards.forEach(c => {
         const text = c.innerText.toLowerCase();
-        c.style.display = text.includes(input) ? '' : 'none';
+        const matches = text.includes(input);
+        c.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
     });
+
+    const counter = document.getElementById('contadorTerapeutasVisible');
+    if (counter) counter.textContent = visibleCount;
 }
 </script>

@@ -58,7 +58,7 @@ $userEmail = $user['email'] ?: $user['usuario'];
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Estilos -->
-    <link href="public/css/spa-theme.css?v=2.5" rel="stylesheet">
+    <link href="public/css/spa-theme.css?v=3.2" rel="stylesheet">
 </head>
 
 <body class="app-body">

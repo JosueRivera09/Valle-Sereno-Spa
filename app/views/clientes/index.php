@@ -1,122 +1,199 @@
-<!-- Encabezado Editorial -->
-<div class="page-head">
-    <div>
-        <span class="kicker">Comunidad</span>
-        <h1 class="display-title">Directorio de Clientes <em>& Expedientes</em></h1>
+<?php
+$totalClientes = count($clientes ?? []);
+$clientesActivos = count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'activo'));
+$clientesInactivos = count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'inactivo'));
+?>
+
+<!-- Encabezado de Página SaaS -->
+<div class="saas-page-header">
+    <div class="saas-header-info">
+        <span class="saas-breadcrumb"><i class="bi bi-people me-1"></i>Comunidad & Pacientes</span>
+        <h1 class="saas-title">Directorio de Clientes & Expedientes</h1>
+        <p class="saas-subtitle">Gestión integral de expedientes clínicos, datos de contacto e historial de atenciones.</p>
     </div>
-    <div class="page-head-actions">
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="prepararNuevoCliente()">
+    <div class="saas-header-actions">
+        <button class="btn-saas-primary" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="prepararNuevoCliente()">
             <i class="bi bi-person-plus-fill"></i>
-            <span>Nuevo Cliente</span>
+            <span>Nuevo Paciente</span>
         </button>
     </div>
 </div>
 
-<!-- Métricas Libro Mayor -->
-<div class="metrics">
-    <div class="metric">
-        <span class="metric-label">Total Registrados</span>
-        <span class="metric-value"><?= count($clientes ?? []) ?></span>
-    </div>
-    <div class="metric">
-        <span class="metric-label">Clientes Activos</span>
-        <span class="metric-value"><?= count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'activo')) ?></span>
-        <span class="metric-note"><strong>Comunidad fidelizada</strong></span>
-    </div>
-    <div class="metric">
-        <span class="metric-label">Inactivos</span>
-        <span class="metric-value"><?= count(array_filter($clientes ?? [], fn($c) => $c['estado'] === 'inactivo')) ?></span>
-    </div>
-</div>
-
-<!-- Tabla de Clientes -->
-<div class="spa-card p-4">
-    <div class="panel-head">
-        <h2 class="panel-title">Listado General</h2>
-        <div class="input-group input-group-sm" style="max-width: 280px;">
-            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" id="busquedaCliente" class="form-control border-start-0" placeholder="Buscar cliente..." onkeyup="filtrarTablaClientes()">
+<!-- Grid de KPIs / Estadísticas SaaS -->
+<div class="saas-stats-grid">
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Total en Directorio</span>
+            <div class="saas-stat-icon">
+                <i class="bi bi-people"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalClientes ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted">Pacientes registrados</span>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="tablaClientes">
-            <thead class="table-light">
-                <tr style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #556b61;">
-                    <th>ID</th>
-                    <th>NOMBRE COMPLETO</th>
-                    <th>FECHA NAC.</th>
-                    <th>TELÉFONO</th>
-                    <th>CORREO</th>
-                    <th>ESTADO</th>
-                    <th class="text-end">ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody style="font-size: 0.88rem;">
-                <?php if (empty($clientes)): ?>
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
-                            <i class="bi bi-person-exclamation fs-3 d-block mb-1 text-muted"></i>
-                            No hay clientes registrados en el sistema.
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($clientes as $c): ?>
-                        <tr>
-                            <td class="fw-bold text-muted">#<?= $c['id'] ?></td>
-                            <td>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($c['nombre_completo']) ?></div>
-                                <small class="text-muted" style="font-size: 0.72rem;">Registrado: <?= date('d/m/Y', strtotime($c['creado_en'])) ?></small>
-                            </td>
-                            <td>
-                                <span class="text-secondary">
-                                    <i class="bi bi-cake2 me-1"></i><?= date('d/m/Y', strtotime($c['fecha_nacimiento'])) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <a href="tel:<?= htmlspecialchars($c['telefono']) ?>" class="text-decoration-none text-dark fw-medium">
-                                    <i class="bi bi-telephone text-success me-1"></i><?= htmlspecialchars($c['telefono']) ?>
-                                </a>
-                            </td>
-                            <td>
-                                <?php if (!empty($c['correo'])): ?>
-                                    <a href="mailto:<?= htmlspecialchars($c['correo']) ?>" class="text-decoration-none text-muted">
-                                        <i class="bi bi-envelope me-1"></i><?= htmlspecialchars($c['correo']) ?>
-                                    </a>
-                                <?php else: ?>
-                                    <span class="text-muted italic">Sin correo</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if ($c['estado'] === 'activo'): ?>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">Activo</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 py-1">Inactivo</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" title="Ver Historial" onclick="verHistorialCliente(<?= $c['id'] ?>, '<?= htmlspecialchars($c['nombre_completo'], ENT_QUOTES) ?>')">
-                                        <i class="bi bi-clock-history"></i>
-                                    </button>
-                                    <button class="btn btn-outline-secondary" title="Editar Expediente" 
-                                            onclick='editarCliente(<?= json_encode($c, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-outline-<?= $c['estado'] === 'activo' ? 'warning' : 'success' ?>" 
-                                            title="<?= $c['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>" 
-                                            onclick="cambiarEstadoCliente(<?= $c['id'] ?>, '<?= $c['estado'] === 'activo' ? 'inactivo' : 'activo' ?>')">
-                                        <i class="bi bi-toggle-<?= $c['estado'] === 'activo' ? 'on' : 'off' ?>"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Pacientes Activos</span>
+            <div class="saas-stat-icon is-blue">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $clientesActivos ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-success py-0 px-2"><?= $totalClientes > 0 ? round(($clientesActivos / $totalClientes) * 100) : 0 ?>% del total</span>
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Inactivos</span>
+            <div class="saas-stat-icon is-gold">
+                <i class="bi bi-person-dash"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $clientesInactivos ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-neutral py-0 px-2">Sin actividad reciente</span>
+        </div>
     </div>
 </div>
+
+<!-- Tarjeta Contenedor con Tabla de Clientes -->
+<div class="saas-card">
+    <div class="saas-card-head">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h2 class="saas-card-title me-3">
+                <i class="bi bi-person-vcard text-primary"></i>
+                <span>Listado de Pacientes</span>
+            </h2>
+            <div class="saas-filter-tabs">
+                <button type="button" class="saas-tab-btn is-active" onclick="filtrarClientesPorEstado('todos', this)">Todos</button>
+                <button type="button" class="saas-tab-btn" onclick="filtrarClientesPorEstado('activo', this)">Activos</button>
+                <button type="button" class="saas-tab-btn" onclick="filtrarClientesPorEstado('inactivo', this)">Inactivos</button>
+            </div>
+        </div>
+
+        <div class="saas-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="busquedaCliente" class="saas-search-input" placeholder="Buscar por nombre, teléfono, correo..." onkeyup="filtrarTablaClientes()">
+        </div>
+    </div>
+
+    <div class="saas-card-body p-0">
+        <div class="table-responsive">
+            <table class="saas-table" id="tablaClientes">
+                <thead>
+                    <tr>
+                        <th>PACIENTE / EXPEDIENTE</th>
+                        <th>FECHA NACIMIENTO</th>
+                        <th>TELÉFONO</th>
+                        <th>CORREO ELECTRÓNICO</th>
+                        <th>ESTADO</th>
+                        <th class="text-end">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($clientes)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-person-exclamation fs-1 text-muted d-block mb-2"></i>
+                                No hay clientes registrados en el sistema.
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($clientes as $c): ?>
+                            <?php
+                                $initials = strtoupper(mb_substr($c['nombre_completo'], 0, 1, 'UTF-8'));
+                            ?>
+                            <tr class="fila-cliente" data-estado="<?= htmlspecialchars($c['estado']) ?>">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="saas-avatar is-primary"><?= $initials ?></span>
+                                        <div>
+                                            <div class="fw-bold text-dark">
+                                                <span class="text-muted fw-normal me-1">#<?= $c['id'] ?></span>
+                                                <?= htmlspecialchars($c['nombre_completo']) ?>
+                                            </div>
+                                            <small class="text-muted" style="font-size: 0.72rem;">Alta: <?= date('d/m/Y', strtotime($c['creado_en'])) ?></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-secondary small">
+                                        <i class="bi bi-cake2 me-1"></i><?= date('d/m/Y', strtotime($c['fecha_nacimiento'])) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="tel:<?= htmlspecialchars($c['telefono']) ?>" class="text-decoration-none text-dark fw-medium small">
+                                        <i class="bi bi-telephone text-success me-1"></i><?= htmlspecialchars($c['telefono']) ?>
+                                    </a>
+                                </td>
+                                <td>
+                                    <?php if (!empty($c['correo'])): ?>
+                                        <a href="mailto:<?= htmlspecialchars($c['correo']) ?>" class="text-decoration-none text-muted small">
+                                            <i class="bi bi-envelope me-1"></i><?= htmlspecialchars($c['correo']) ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted small fst-italic">Sin correo</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($c['estado'] === 'activo'): ?>
+                                        <span class="saas-badge saas-badge-success">
+                                            <span class="saas-badge-dot"></span>
+                                            Activo
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="saas-badge saas-badge-neutral">
+                                            <span class="saas-badge-dot"></span>
+                                            Inactivo
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Ver Historial" onclick="verHistorialCliente(<?= $c['id'] ?>, '<?= htmlspecialchars($c['nombre_completo'], ENT_QUOTES) ?>')">
+                                            <i class="bi bi-clock-history"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Editar Expediente" 
+                                                onclick='editarCliente(<?= json_encode($c, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG) ?>)'>
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-<?= $c['estado'] === 'activo' ? 'warning' : 'success' ?> py-1 px-2" 
+                                                title="<?= $c['estado'] === 'activo' ? 'Desactivar' : 'Activar' ?>" 
+                                                onclick="cambiarEstadoCliente(<?= $c['id'] ?>, '<?= $c['estado'] === 'activo' ? 'inactivo' : 'activo' ?>')">
+                                            <i class="bi bi-toggle-<?= $c['estado'] === 'activo' ? 'on' : 'off' ?>"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrarClientesPorEstado(estado, btn) {
+    document.querySelectorAll('.saas-tab-btn').forEach(b => b.classList.remove('is-active'));
+    if (btn) btn.classList.add('is-active');
+
+    const rows = document.querySelectorAll('.fila-cliente');
+    rows.forEach(r => {
+        const rEstado = r.getAttribute('data-estado');
+        if (estado === 'todos' || rEstado === estado) {
+            r.style.display = '';
+        } else {
+            r.style.display = 'none';
+        }
+    });
+}
+</script>
 
 <!-- Modal Registro / Edición de Cliente -->
 <div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">

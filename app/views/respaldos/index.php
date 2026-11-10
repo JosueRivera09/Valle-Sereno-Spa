@@ -1,23 +1,29 @@
-<!-- Encabezado Editorial -->
-<div class="page-head">
+<!-- SaaS Page Header -->
+<div class="saas-page-header">
     <div>
-        <span class="kicker">Sistema</span>
-        <h1 class="display-title">Respaldos <em>& Mantenimiento</em></h1>
+        <div class="saas-breadcrumb">
+            <i class="bi bi-hdd-stack-fill"></i>
+            <span>Infraestructura &amp; Base de Datos</span>
+            <span class="sep">/</span>
+            <span>Respaldos &amp; Mantenimiento</span>
+        </div>
+        <h1 class="saas-title">Respaldos &amp; Salud del Sistema</h1>
+        <p class="saas-subtitle">Copias de seguridad SQL, monitoreo de almacenamiento de tablas InnoDB, optimización de índices y restauración segura.</p>
     </div>
-    <div class="page-head-actions">
-        <a href="index.php?c=respaldos&a=descargar" class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2">
+    <div class="saas-header-actions d-flex flex-wrap gap-2">
+        <a href="index.php?c=respaldos&a=descargar" class="saas-btn saas-btn-primary text-decoration-none">
             <i class="bi bi-download"></i>
-            <span>Descargar Respaldo </span>
+            <span>Descargar Respaldo</span>
         </a>
-        <button class="btn btn-quiet btn-sm px-3 d-inline-flex align-items-center gap-2" onclick="guardarRespaldoLocal()">
-            <i class="bi bi-hdd-network"></i>
+        <button class="saas-btn saas-btn-outline" onclick="guardarRespaldoLocal()">
+            <i class="bi bi-hdd-network text-primary"></i>
             <span>Guardar en Servidor</span>
         </button>
-        <button class="btn btn-quiet btn-sm px-3 d-inline-flex align-items-center gap-2" onclick="optimizarTablas()">
-            <i class="bi bi-speedometer2"></i>
+        <button class="saas-btn saas-btn-outline" onclick="optimizarTablas()">
+            <i class="bi bi-speedometer2 text-success"></i>
             <span>Optimizar Tablas</span>
         </button>
-        <button class="btn btn-danger btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalRestaurar">
+        <button class="saas-btn saas-btn-outline text-danger border-danger-subtle" data-bs-toggle="modal" data-bs-target="#modalRestaurar">
             <i class="bi bi-database-up"></i>
             <span>Restaurar Copia</span>
         </button>
@@ -26,62 +32,108 @@
 
 <!-- Alertas de Sesión -->
 <?php if (isset($_SESSION['mensaje'])): ?>
-    <div class="alert alert-<?= htmlspecialchars($_SESSION['mensaje_tipo'] ?? 'info') ?> alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-        <?= htmlspecialchars($_SESSION['mensaje']) ?>
+    <div class="alert alert-<?= htmlspecialchars($_SESSION['mensaje_tipo'] ?? 'info') ?> alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i><?= htmlspecialchars($_SESSION['mensaje']) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     <?php unset($_SESSION['mensaje'], $_SESSION['mensaje_tipo']); ?>
 <?php endif; ?>
 
-<!-- Métricas Libro Mayor de la Base de Datos -->
-<div class="metrics">
-    <div class="metric">
-        <span class="metric-label">Base de Datos</span>
-        <span class="metric-value">spa_db</span>
-        <span class="metric-note"><strong>En línea</strong></span>
+<!-- SaaS KPI Stats Grid -->
+<div class="saas-stats-grid mb-4">
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Motor de Base de Datos</span>
+            <div class="saas-stat-icon icon-emerald">
+                <i class="bi bi-database-fill-check"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value">spa_db</div>
+        <div class="saas-stat-change">
+            <span class="badge-positive"><i class="bi bi-activity"></i> En línea</span>
+            MySQL / MariaDB Activo
+        </div>
     </div>
-    <div class="metric">
-        <span class="metric-label">Tamaño Total Almacenado</span>
-        <span class="metric-value"><?= number_format($tamanoTotalMB, 2) ?> MB</span>
-        <span class="metric-note"><?= count($tablas) ?> tablas activas</span>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Tamaño Almacenado</span>
+            <div class="saas-stat-icon icon-teal">
+                <i class="bi bi-hdd-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= number_format($tamanoTotalMB, 2) ?> <small class="fs-6 fw-normal text-muted">MB</small></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral"><i class="bi bi-table"></i> <?= count($tablas) ?> tablas</span>
+            Espacio físico e índices
+        </div>
     </div>
-    <div class="metric">
-        <span class="metric-label">Registros Totales</span>
-        <span class="metric-value"><?= number_format($totalFilas) ?></span>
-        <span class="metric-note">Filas consolidadas</span>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Registros Totales</span>
+            <div class="saas-stat-icon icon-gold">
+                <i class="bi bi-layers-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= number_format($totalFilas) ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral">Consolidados</span>
+            Filas en todas las entidades
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-header">
+            <span class="saas-stat-label">Copias en Servidor</span>
+            <div class="saas-stat-icon icon-indigo">
+                <i class="bi bi-archive-fill"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= count($respaldos ?? []) ?></div>
+        <div class="saas-stat-change">
+            <span class="badge-neutral"><i class="bi bi-filetype-sql"></i> Archivos .SQL</span>
+            Almacenamiento local
+        </div>
     </div>
 </div>
 
-<div class="row g-4">
+<div class="row g-3 mb-3">
     <!-- Tabla de Estado de Tablas de la BD -->
     <div class="col-lg-7">
-        <div class="panel h-100">
-            <div class="panel-head">
-                <h2 class="panel-title">Estructura y Salud de Tablas (spa_db)</h2>
+        <div class="saas-card h-100">
+            <div class="saas-card-header">
+                <div>
+                    <h5 class="saas-card-title">Estructura y Salud de Tablas (spa_db)</h5>
+                    <p class="saas-card-subtitle">Desglose de motor de almacenamiento, volumen de registros y peso por entidad</p>
+                </div>
+                <span class="saas-badge saas-badge-success">
+                    <i class="bi bi-check-circle me-1"></i>Verificado
+                </span>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr style="font-size: 0.78rem; text-transform: uppercase; color: #556b61;">
-                            <th>NOMBRE TABLA</th>
-                            <th>MOTOR</th>
-                            <th>REGISTROS</th>
-                            <th class="text-end">TAMAÑO (KB)</th>
+                <table class="saas-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre Tabla</th>
+                            <th>Motor</th>
+                            <th>Registros</th>
+                            <th class="text-end">Tamaño (KB)</th>
                         </tr>
                     </thead>
-                    <tbody style="font-size: 0.88rem;">
+                    <tbody>
                         <?php foreach ($tablas as $t): ?>
                             <tr>
-                                <td class="fw-bold text-dark">
-                                    <i class="bi bi-grid-3x3-gap me-2 text-warning"></i><?= htmlspecialchars($t['nombre']) ?>
+                                <td class="fw-bold text-dark font-monospace" style="font-size: 0.85rem;">
+                                    <i class="bi bi-table me-2 text-primary"></i><?= htmlspecialchars($t['nombre']) ?>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-dark border"><?= htmlspecialchars($t['motor']) ?></span>
+                                    <span class="saas-badge saas-badge-neutral"><?= htmlspecialchars($t['motor']) ?></span>
                                 </td>
                                 <td>
                                     <span class="fw-semibold text-secondary"><?= number_format($t['filas']) ?></span>
                                 </td>
-                                <td class="text-end fw-bold text-dark" style="font-family: var(--font-serif);">
+                                <td class="text-end fw-bold font-monospace text-dark">
                                     <?= number_format($t['tamano_kb'], 2) ?> KB
                                 </td>
                             </tr>
@@ -94,35 +146,45 @@
 
     <!-- Lista de Copias Guardadas en Servidor -->
     <div class="col-lg-5">
-        <div class="panel h-100">
-            <div class="panel-head">
-                <h2 class="panel-title">Historial de Copias en Servidor</h2>
+        <div class="saas-card h-100">
+            <div class="saas-card-header">
+                <div>
+                    <h5 class="saas-card-title">Historial de Copias en Servidor</h5>
+                    <p class="saas-card-subtitle">Instantáneas SQL almacenadas localmente</p>
+                </div>
+                <span class="saas-badge saas-badge-gold">
+                    <i class="bi bi-hdd-stack me-1"></i>Snapshots
+                </span>
             </div>
-            <?php if (empty($respaldos)): ?>
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-hdd-none fs-1 d-block mb-2 text-muted"></i>
-                    No hay copias guardadas en el almacenamiento interno aún.<br>
-                    <small>Haz clic en "Guardar en Servidor" para crear una.</small>
-                </div>
-            <?php else: ?>
-                <div class="list-group list-group-flush">
-                    <?php foreach ($respaldos as $r): ?>
-                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-0">
-                            <div>
-                                <div class="fw-bold text-dark small">
-                                    <i class="bi bi-filetype-sql text-primary me-2"></i><?= htmlspecialchars($r['nombre']) ?>
-                                </div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">
-                                    <i class="bi bi-clock me-1"></i><?= $r['fecha'] ?> • <span class="fw-semibold"><?= $r['tamano_kb'] ?> KB</span>
-                                </small>
-                            </div>
-                            <button class="btn btn-outline-danger btn-sm p-1 px-2" title="Eliminar copia" onclick="eliminarRespaldo('<?= htmlspecialchars($r['nombre'], ENT_QUOTES) ?>')">
-                                <i class="bi bi-trash"></i>
-                            </button>
+            <div class="p-3">
+                <?php if (empty($respaldos)): ?>
+                    <div class="text-center py-5 text-muted">
+                        <div class="saas-stat-icon icon-teal mx-auto mb-3" style="width: 48px; height: 48px; font-size: 1.3rem;">
+                            <i class="bi bi-hdd"></i>
                         </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                        <h6 class="fw-bold text-dark mb-1">Sin copias locales registradas</h6>
+                        <small class="d-block mb-3">Haz clic en "Guardar en Servidor" para generar un punto de restauración inmediato.</small>
+                    </div>
+                <?php else: ?>
+                    <div class="d-flex flex-column gap-2">
+                        <?php foreach ($respaldos as $r): ?>
+                            <div class="d-flex justify-content-between align-items-center p-2 px-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                <div style="min-width: 0;">
+                                    <div class="fw-bold text-dark small text-truncate" title="<?= htmlspecialchars($r['nombre']) ?>">
+                                        <i class="bi bi-filetype-sql text-primary me-2"></i><?= htmlspecialchars($r['nombre']) ?>
+                                    </div>
+                                    <small class="text-muted d-block" style="font-size: 0.74rem;">
+                                        <i class="bi bi-clock me-1"></i><?= $r['fecha'] ?> • <span class="fw-semibold font-monospace"><?= $r['tamano_kb'] ?> KB</span>
+                                    </small>
+                                </div>
+                                <button class="saas-btn saas-btn-outline px-2 py-1 text-danger" title="Eliminar copia" onclick="eliminarRespaldo('<?= htmlspecialchars($r['nombre'], ENT_QUOTES) ?>')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>

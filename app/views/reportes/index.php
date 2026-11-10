@@ -1,51 +1,66 @@
-<!-- Encabezado Editorial -->
-<div class="page-head">
+<!-- SaaS Page Header -->
+<div class="saas-page-header">
     <div>
-        <span class="kicker">Analítica</span>
-        <h1 class="display-title">Reportes <em>& Métricas de Rendimiento</em></h1>
+        <div class="saas-breadcrumb">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <span>Analítica Financiera</span>
+            <span class="sep">/</span>
+            <span>Reportes &amp; Rendimiento</span>
+        </div>
+        <h1 class="saas-title">Reportes &amp; Métricas Contables</h1>
+        <p class="saas-subtitle">Informes consolidados de facturación, recaudación por periodo fiscal y ranking de productividad terapéutica.</p>
     </div>
 </div>
 
-<!-- Filtro Personalizado por Rango de Fechas -->
-<div class="panel panel--feature mb-4">
-    <div class="panel-head">
-        <h2 class="panel-title">Filtrar Transacciones por Periodo</h2>
+<!-- SaaS Filter Card por Rango de Fechas -->
+<div class="saas-card mb-3">
+    <div class="py-2 px-3">
+        <form id="formFiltroReporte" class="row g-2 align-items-end" onsubmit="filtrarReportes(event)">
+            <div class="col-sm-5 col-md-4">
+                <label class="form-label fw-semibold small text-dark mb-1">
+                    <i class="bi bi-calendar-event me-1 text-primary"></i>Fecha Inicial <span class="text-danger">*</span>
+                </label>
+                <input type="date" id="fecha_inicio" class="form-control form-control-sm" value="<?= date('Y-m-01') ?>" required>
+            </div>
+            <div class="col-sm-5 col-md-4">
+                <label class="form-label fw-semibold small text-dark mb-1">
+                    <i class="bi bi-calendar-check me-1 text-primary"></i>Fecha Final <span class="text-danger">*</span>
+                </label>
+                <input type="date" id="fecha_fin" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>" required>
+            </div>
+            <div class="col-sm-2 col-md-4">
+                <button type="submit" class="saas-btn saas-btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-funnel-fill"></i>
+                    <span>Generar Informe Fiscal</span>
+                </button>
+            </div>
+        </form>
     </div>
-    <form id="formFiltroReporte" class="row g-3 align-items-end" onsubmit="filtrarReportes(event)">
-        <div class="col-sm-5 col-md-4">
-            <label class="form-label fw-bold small text-dark">Fecha Inicial <span class="text-danger">*</span></label>
-            <input type="date" id="fecha_inicio" class="form-control" value="<?= date('Y-m-01') ?>" required>
-        </div>
-        <div class="col-sm-5 col-md-4">
-            <label class="form-label fw-bold small text-dark">Fecha Final <span class="text-danger">*</span></label>
-            <input type="date" id="fecha_fin" class="form-control" value="<?= date('Y-m-d') ?>" required>
-        </div>
-        <div class="col-sm-2 col-md-4">
-            <button type="submit" class="btn btn-spa-primary btn-sm px-4 py-2 w-100 d-inline-flex align-items-center justify-content-center gap-2">
-                <i class="bi bi-search"></i>
-                <span>Generar Informe</span>
-            </button>
-        </div>
-    </form>
 </div>
 
-<div class="row g-4 mb-4">
+<div class="row g-3 mb-3">
     <!-- Tabla de Ventas Mensuales -->
     <div class="col-lg-7">
-        <div class="spa-card p-4 h-100">
-            <h5 class="fw-bold mb-3" style="color: var(--spa-primary); font-family: var(--font-serif);">
-                <i class="bi bi-calendar2-range text-warning me-2"></i> Recaudación Consolidada por Mes
-            </h5>
+        <div class="saas-card h-100">
+            <div class="saas-card-header">
+                <div>
+                    <h5 class="saas-card-title">Recaudación Consolidada por Mes</h5>
+                    <p class="saas-card-subtitle">Histórico mensual de liquidaciones y volumen de atenciones</p>
+                </div>
+                <span class="saas-badge saas-badge-gold">
+                    <i class="bi bi-calendar2-range me-1"></i>Mensual
+                </span>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr style="font-size: 0.78rem; text-transform: uppercase;">
-                            <th>MES Y AÑO</th>
-                            <th>TRANSACCIONES LIQUIDADAS</th>
-                            <th class="text-end">TOTAL RECAUDADO</th>
+                <table class="saas-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Mes y Año</th>
+                            <th>Transacciones Liquidadas</th>
+                            <th class="text-end">Total Recaudado</th>
                         </tr>
                     </thead>
-                    <tbody style="font-size: 0.88rem;">
+                    <tbody>
                         <?php if (empty($ventasMes)): ?>
                             <tr>
                                 <td colspan="3" class="text-center py-4 text-muted">No se registran datos acumulados de ventas.</td>
@@ -54,14 +69,14 @@
                             <?php foreach ($ventasMes as $v): ?>
                                 <tr>
                                     <td class="fw-bold text-dark">
-                                        <i class="bi bi-calendar-event me-2 text-warning"></i><?= date('F Y', strtotime($v['mes'] . '-01')) ?>
+                                        <i class="bi bi-calendar-event me-2 text-primary"></i><?= date('F Y', strtotime($v['mes'] . '-01')) ?>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark border px-2 py-1">
+                                        <span class="saas-badge saas-badge-neutral">
                                             <?= (int)$v['total_transacciones'] ?> cobros
                                         </span>
                                     </td>
-                                    <td class="text-end fw-bold fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
+                                    <td class="text-end fw-bold text-dark font-monospace" style="font-size: 0.95rem;">
                                         C$<?= number_format($v['total_ventas'], 2) ?>
                                     </td>
                                 </tr>
@@ -75,20 +90,26 @@
 
     <!-- Ranking de Productividad Terapéutica -->
     <div class="col-lg-5">
-        <div class="spa-card p-4 h-100">
-            <h5 class="fw-bold mb-3" style="color: var(--spa-primary); font-family: var(--font-serif);">
-                <i class="bi bi-trophy text-warning me-2"></i> Top Terapeutas por Atenciones
-            </h5>
+        <div class="saas-card h-100">
+            <div class="saas-card-header">
+                <div>
+                    <h5 class="saas-card-title">Top Terapeutas por Atenciones</h5>
+                    <p class="saas-card-subtitle">Rendimiento por sesiones completadas y monto</p>
+                </div>
+                <span class="saas-badge saas-badge-success">
+                    <i class="bi bi-trophy me-1"></i>Líderes
+                </span>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr style="font-size: 0.78rem; text-transform: uppercase;">
-                            <th>TERAPEUTA</th>
-                            <th>CITAS</th>
-                            <th class="text-end">RECAUDACIÓN</th>
+                <table class="saas-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Terapeuta</th>
+                            <th>Citas</th>
+                            <th class="text-end">Recaudación</th>
                         </tr>
                     </thead>
-                    <tbody style="font-size: 0.88rem;">
+                    <tbody>
                         <?php if (empty($rankingTerapeutas)): ?>
                             <tr>
                                 <td colspan="3" class="text-center py-4 text-muted">Sin datos de atenciones asignadas.</td>
@@ -97,17 +118,19 @@
                             <?php foreach ($rankingTerapeutas as $index => $t): ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-bold text-dark">
-                                            <span class="badge rounded-circle <?= $index === 0 ? 'bg-warning text-dark' : 'bg-secondary' ?> me-1"><?= $index + 1 ?></span>
-                                            <?= htmlspecialchars($t['terapeuta']) ?>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge rounded-circle <?= $index === 0 ? 'bg-warning text-dark' : 'bg-light text-muted border' ?>" style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;">
+                                                <?= $index + 1 ?>
+                                            </span>
+                                            <span class="fw-semibold text-dark"><?= htmlspecialchars($t['terapeuta']) ?></span>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <span class="saas-badge saas-badge-success">
                                             <?= (int)$t['total_citas'] ?> ses.
                                         </span>
                                     </td>
-                                    <td class="text-end fw-bold text-dark" style="font-family: var(--font-serif);">
+                                    <td class="text-end fw-bold font-monospace text-dark" style="font-size: 0.9rem;">
                                         C$<?= number_format($t['total_generado'], 2) ?>
                                     </td>
                                 </tr>
@@ -141,41 +164,41 @@
                     <div class="col-md-3">
                         <div class="p-3 bg-light rounded-3 border text-center">
                             <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total Recaudado (C$)</small>
-                            <span class="fs-4 fw-bold text-success" id="lblTotalRecaudado">C$0.00</span>
+                            <span class="fs-4 fw-bold text-success font-monospace" id="lblTotalRecaudado">C$0.00</span>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 bg-light rounded-3 border text-center">
                             <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total en Efectivo</small>
-                            <span class="fs-5 fw-bold text-dark" id="lblTotalEfectivo">C$0.00</span>
+                            <span class="fs-5 fw-bold text-dark font-monospace" id="lblTotalEfectivo">C$0.00</span>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 bg-light rounded-3 border text-center">
                             <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total Tarjeta (POS)</small>
-                            <span class="fs-5 fw-bold text-dark" id="lblTotalTarjeta">C$0.00</span>
+                            <span class="fs-5 fw-bold text-dark font-monospace" id="lblTotalTarjeta">C$0.00</span>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 bg-light rounded-3 border text-center">
                             <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.72rem;">Total Transferencia</small>
-                            <span class="fs-5 fw-bold text-dark" id="lblTotalTransferencia">C$0.00</span>
+                            <span class="fs-5 fw-bold text-dark font-monospace" id="lblTotalTransferencia">C$0.00</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr style="font-size: 0.78rem; text-transform: uppercase; color: #556b61;">
-                                <th>FECHA Y HORA</th>
-                                <th>CLIENTE / PACIENTE</th>
-                                <th>TERAPEUTA</th>
-                                <th>MÉTODO PAGO</th>
-                                <th class="text-end">MONTO (C$)</th>
+                    <table class="saas-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Cliente / Paciente</th>
+                                <th>Terapeuta</th>
+                                <th>Método Pago</th>
+                                <th class="text-end">Monto (C$)</th>
                             </tr>
                         </thead>
-                        <tbody id="bodyFiltroReporte" style="font-size: 0.88rem;">
+                        <tbody id="bodyFiltroReporte">
                             <!-- Dinámico JS -->
                         </tbody>
                     </table>
@@ -189,14 +212,14 @@
                     <button type="button" class="btn btn-quiet btn-sm px-3" data-bs-dismiss="modal">
                         Cerrar
                     </button>
-                    <button type="button" class="btn btn-outline-success btn-sm px-3" onclick="descargarExcel()">
-                        <i class="bi bi-file-earmark-excel me-1"></i> Exportar a Excel
+                    <button type="button" class="saas-btn saas-btn-outline px-3" onclick="descargarExcel()">
+                        <i class="bi bi-file-earmark-excel text-success me-1"></i> Exportar a Excel
                     </button>
-                    <button type="button" class="btn btn-outline-dark btn-sm px-3" onclick="imprimirPdf()">
+                    <button type="button" class="saas-btn saas-btn-outline px-3" onclick="imprimirPdf()">
                         <i class="bi bi-printer me-1"></i> Imprimir
                     </button>
-                    <button type="button" class="btn btn-spa-primary btn-sm px-3" onclick="descargarPdf()">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Descargar
+                    <button type="button" class="saas-btn saas-btn-primary px-3" onclick="descargarPdf()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
                     </button>
                 </div>
             </div>
@@ -241,8 +264,8 @@ function filtrarReportes(e) {
                     <td><span class="fw-semibold text-dark">${esc(item.fecha_pago)}</span></td>
                     <td><div class="fw-bold text-dark">${esc(item.cliente_nombre)}</div></td>
                     <td><small class="text-muted"><i class="bi bi-person me-1"></i>${esc(item.terapeuta_nombre)}</small></td>
-                    <td><span class="badge bg-light text-dark border">${esc(item.tipo_pago)}</span></td>
-                    <td class="text-end fw-bold text-success fs-6" style="font-family: var(--font-serif);">C$${parseFloat(item.monto).toFixed(2)}</td>
+                    <td><span class="saas-badge saas-badge-neutral">${esc(item.tipo_pago)}</span></td>
+                    <td class="text-end fw-bold text-success font-monospace fs-6">C$${parseFloat(item.monto).toFixed(2)}</td>
                 </tr>
             `).join('');
         } else {

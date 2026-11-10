@@ -59,240 +59,368 @@ $tagClass = match (true) {
 };
 ?>
 
-<!-- Banda de Bienvenida con Métricas Integradas -->
-<section class="hero-band">
-    <div class="hero-top">
-        <div>
-            <span class="kicker hero-kicker"><?= htmlspecialchars($fechaLegible, ENT_QUOTES, 'UTF-8') ?></span>
-            <h1 class="hero-title"><?= htmlspecialchars($saludo, ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($nombreSaludo, ENT_QUOTES, 'UTF-8') ?></h1>
-            <p class="hero-sub">La agenda del día, los cobros y el equipo en una sola vista operativa.</p>
-        </div>
-        <div class="hero-actions">
-            <a href="index.php?c=citas&a=index&crear=1" class="btn btn-gold btn-sm px-3 d-inline-flex align-items-center gap-2">
-                <i class="bi bi-calendar-plus"></i>
-                <span>Nueva Cita</span>
-            </a>
-            <a href="index.php?c=pagos&a=index" class="btn btn-outline-light btn-sm px-3 d-inline-flex align-items-center gap-2">
-                <i class="bi bi-receipt"></i>
-                <span>Caja y Cobro</span>
-            </a>
-        </div>
+<!-- Encabezado de Página SaaS -->
+<div class="saas-page-header">
+    <div class="saas-header-info">
+        <span class="saas-breadcrumb"><i class="bi bi-calendar-event me-1"></i><?= htmlspecialchars($fechaLegible, ENT_QUOTES, 'UTF-8') ?></span>
+        <h1 class="saas-title"><?= htmlspecialchars($saludo, ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($nombreSaludo, ENT_QUOTES, 'UTF-8') ?></h1>
+        <p class="saas-subtitle">Panel de operaciones, flujo de agenda y conciliación diaria en tiempo real.</p>
     </div>
-
-    <div class="hero-ledger">
-        <div class="metric-h">
-            <span class="metric-h-label">Citas de Hoy</span>
-            <span class="metric-h-value"><?= (int)$metricas['citas_hoy'] ?></span>
-            <span class="metric-h-note">
-                <?= (int)$metricas['citas_confirmadas'] ?> confirmadas<?php if ((int)$metricas['citas_pendientes'] > 0): ?> · <?= (int)$metricas['citas_pendientes'] ?> pendientes<?php endif; ?>
-            </span>
-        </div>
-        <div class="metric-h">
-            <span class="metric-h-label">Terapeutas en Turno</span>
-            <span class="metric-h-value"><?= (int)$metricas['terapeutas_activos'] ?></span>
-            <span class="metric-h-note">Personal activo</span>
-        </div>
-        <div class="metric-h">
-            <span class="metric-h-label">Clientes Registrados</span>
-            <span class="metric-h-value"><?= (int)$metricas['clientes_registrados'] ?></span>
-            <span class="metric-h-note">Base fidelizada</span>
-        </div>
-        <div class="metric-h">
-            <span class="metric-h-label">Ingresos de Hoy</span>
-            <span class="metric-h-value">C$ <?= number_format((float)$metricas['ingresos_hoy'], 2) ?></span>
-            <span class="metric-h-note"><?= (int)$metricas['transacciones_hoy'] ?> cobros liquidados</span>
-        </div>
+    <div class="saas-header-actions">
+        <a href="index.php?c=citas&a=index&crear=1" class="btn-saas-primary">
+            <i class="bi bi-calendar-plus"></i>
+            <span>Nueva Cita</span>
+        </a>
+        <a href="index.php?c=pagos&a=index" class="btn-saas-secondary">
+            <i class="bi bi-receipt"></i>
+            <span>Caja y Cobros</span>
+        </a>
     </div>
-</section>
+</div>
 
-<!-- Agenda del Día (Elemento Protagonista) + Columna Lateral -->
-<div class="row g-4 mb-4">
-    <!-- Agenda Timeline del Día -->
-    <div class="col-lg-8">
-        <div class="panel panel--feature h-100">
-            <div class="panel-head">
-                <h2 class="panel-title">Agenda del día</h2>
-                <a href="index.php?c=citas&a=index" class="panel-link">Ver agenda completa <i class="bi bi-arrow-right"></i></a>
+<!-- Grid de KPIs / Estadísticas SaaS -->
+<div class="saas-stats-grid">
+    <!-- Citas de Hoy -->
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Citas de Hoy</span>
+            <div class="saas-stat-icon">
+                <i class="bi bi-calendar-check"></i>
             </div>
-
-            <?php if (empty($citasHoy)): ?>
-                <p class="text-muted mb-0 py-3 text-center"><i class="bi bi-calendar-x me-1"></i>No hay citas programadas para el día de hoy.</p>
-            <?php else: ?>
-                <div class="agenda-list">
-                    <?php foreach ($citasHoy as $cita): ?>
-                        <?php
-                        $estadoCita = $cita['estado'] ?? '';
-                        $estadoSlug = match ($estadoCita) {
-                            'Confirmada' => 'confirmada',
-                            'Pendiente'  => 'pendiente',
-                            'Completada' => 'completada',
-                            'Cancelada'  => 'cancelada',
-                            default      => 'pendiente',
-                        };
-                        $horaCita = '';
-                        if (!empty($cita['hora_inicio'])) {
-                            $ts = strtotime($cita['hora_inicio']);
-                            $horaCita = $ts ? date('g:i', $ts) : $cita['hora_inicio'];
-                        }
-                        $meridiano = '';
-                        if (!empty($cita['hora_inicio'])) {
-                            $ts = strtotime($cita['hora_inicio']);
-                            $meridiano = $ts ? date('A', $ts) : '';
-                        }
-                        ?>
-                        <article class="agenda-row">
-                            <div class="agenda-hour">
-                                <?= htmlspecialchars($horaCita, ENT_QUOTES, 'UTF-8') ?>
-                                <small><?= htmlspecialchars($meridiano, ENT_QUOTES, 'UTF-8') ?></small>
-                            </div>
-                            <div class="agenda-card" data-estado="<?= htmlspecialchars($estadoCita, ENT_QUOTES, 'UTF-8') ?>">
-                                <div class="agenda-name"><?= htmlspecialchars($cita['cliente_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
-                                <div class="agenda-meta">
-                                    <?= htmlspecialchars($cita['servicio_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?> · Con <?= htmlspecialchars($cita['terapeuta_nombre'] ?? '', ENT_QUOTES, 'UTF-8') ?>
-                                    <?php if (!empty($cita['cliente_telefono'])): ?>
-                                        · <i class="bi bi-telephone"></i> <?= htmlspecialchars($cita['cliente_telefono'], ENT_QUOTES, 'UTF-8') ?>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="agenda-foot">
-                                    <span class="tag tag--<?= htmlspecialchars($estadoSlug, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($estadoCita, ENT_QUOTES, 'UTF-8') ?></span>
-                                    <span class="agenda-price">C$<?= number_format((float)($cita['total'] ?? 0), 2) ?></span>
-                                </div>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
-                </div>
+        </div>
+        <div class="saas-stat-value"><?= (int)$metricas['citas_hoy'] ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-success py-0 px-2"><?= (int)$metricas['citas_confirmadas'] ?> confirmadas</span>
+            <?php if ((int)$metricas['citas_pendientes'] > 0): ?>
+                <span class="saas-badge saas-badge-warning py-0 px-2"><?= (int)$metricas['citas_pendientes'] ?> pendientes</span>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Columna Lateral: Recaudación y Accesos Rápidos -->
-    <div class="col-lg-4">
-        <div class="d-flex flex-column gap-4 h-100">
-            <!-- Arqueo Rápido de Caja -->
-            <div class="panel">
-                <div class="panel-head">
-                    <h2 class="panel-title">Recaudación por Medio de Pago</h2>
-                </div>
-                <?php if (empty($resumenPagos)): ?>
-                    <p class="text-muted small mb-0">Sin transacciones registradas.</p>
+    <!-- Facturación del Día -->
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Ingresos de Hoy</span>
+            <div class="saas-stat-icon is-gold">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value">C$ <?= number_format((float)$metricas['ingresos_hoy'], 2) ?></div>
+        <div class="saas-stat-meta">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <span><?= (int)$metricas['transacciones_hoy'] ?> cobros liquidados</span>
+        </div>
+    </div>
+
+    <!-- Terapeutas Activos -->
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Terapeutas en Turno</span>
+            <div class="saas-stat-icon is-blue">
+                <i class="bi bi-person-badge"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= (int)$metricas['terapeutas_activos'] ?></div>
+        <div class="saas-stat-meta">
+            <i class="bi bi-clock-history text-primary"></i>
+            <span>Personal con turno activo</span>
+        </div>
+    </div>
+
+    <!-- Clientes Registrados -->
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Pacientes en Sistema</span>
+            <div class="saas-stat-icon is-purple">
+                <i class="bi bi-people"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= (int)$metricas['clientes_registrados'] ?></div>
+        <div class="saas-stat-meta">
+            <i class="bi bi-shield-check text-purple"></i>
+            <span>Base de clientes fidelizada</span>
+        </div>
+    </div>
+</div>
+
+<!-- Layout Principal de 2 Columnas -->
+<div class="row g-3 mb-3">
+    <!-- Columna Izquierda: Agenda del Día -->
+    <div class="col-lg-8">
+        <div class="saas-card h-100 mb-0">
+            <div class="saas-card-head">
+                <h2 class="saas-card-title">
+                    <i class="bi bi-clock text-gold"></i>
+                    <span>Agenda de Pacientes — Hoy</span>
+                </h2>
+                <a href="index.php?c=citas&a=index" class="btn btn-sm btn-outline-secondary px-3 py-1 font-semibold" style="font-size: 0.78rem;">
+                    Ver agenda completa <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="saas-card-body">
+                <?php if (empty($citasHoy)): ?>
+                    <div class="text-center py-3">
+                        <i class="bi bi-calendar-x fs-2 text-muted d-block mb-1"></i>
+                        <h6 class="text-dark fw-bold mb-1">Sin citas programadas para hoy</h6>
+                        <p class="text-muted small mb-2">La agenda se encuentra libre para nuevas atenciones o clientes sin cita previa.</p>
+                        <a href="index.php?c=citas&a=index&crear=1" class="btn-saas-primary btn-sm mx-auto">
+                            <i class="bi bi-calendar-plus"></i> Agendar Primera Cita
+                        </a>
+                    </div>
                 <?php else: ?>
-                    <div class="rank-list">
-                        <?php foreach ($resumenPagos as $p): ?>
-                            <div class="rank-item">
-                                <div class="rank-num"><i class="bi bi-wallet2"></i></div>
-                                <div>
-                                    <div class="rank-name"><?= htmlspecialchars($p['tipo_pago'], ENT_QUOTES, 'UTF-8') ?></div>
-                                    <div class="rank-meta"><?= (int)$p['cantidad'] ?> recibo(s)</div>
+                    <div class="d-flex flex-column gap-2">
+                        <?php foreach ($citasHoy as $cita): ?>
+                            <?php
+                            $estadoCita = $cita['estado'] ?? '';
+                            $badgeClass = match ($estadoCita) {
+                                'Confirmada' => 'saas-badge-success',
+                                'Pendiente'  => 'saas-badge-warning',
+                                'Completada' => 'saas-badge-info',
+                                'Cancelada'  => 'saas-badge-danger',
+                                default      => 'saas-badge-neutral',
+                            };
+                            $horaCita = '';
+                            if (!empty($cita['hora_inicio'])) {
+                                $ts = strtotime($cita['hora_inicio']);
+                                $horaCita = $ts ? date('g:i A', $ts) : $cita['hora_inicio'];
+                            }
+                            ?>
+                            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-2 px-3 rounded-3 border bg-white gap-2 shadow-xs">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="d-flex flex-column align-items-center justify-content-center bg-light rounded-2 px-2 py-1 border text-dark" style="min-width: 82px;">
+                                        <span class="fw-bold" style="font-size: 0.82rem;"><?= htmlspecialchars($horaCita) ?></span>
+                                        <small class="text-muted" style="font-size: 0.65rem;">Horario</small>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.9rem;"><?= htmlspecialchars($cita['cliente_nombre'] ?? 'Paciente') ?></div>
+                                        <div class="text-muted" style="font-size: 0.78rem;">
+                                            <span class="text-dark fw-medium"><?= htmlspecialchars($cita['servicio_nombre'] ?? 'Tratamiento') ?></span>
+                                            &bull; Terapeuta: <span class="text-secondary"><?= htmlspecialchars($cita['terapeuta_nombre'] ?? 'Sin Asignar') ?></span>
+                                            <?php if (!empty($cita['cliente_telefono'])): ?>
+                                                &bull; <i class="bi bi-telephone ms-1"></i> <?= htmlspecialchars($cita['cliente_telefono']) ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="rank-price">C$<?= number_format((float)$p['total'], 2) ?></div>
+                                <div class="d-flex align-items-center gap-2 ms-auto ms-sm-0">
+                                    <div class="text-end">
+                                        <span class="fw-bold text-dark d-block" style="font-size: 0.88rem;">C$<?= number_format((float)($cita['total'] ?? 0), 2) ?></span>
+                                        <span class="saas-badge <?= $badgeClass ?>">
+                                            <span class="saas-badge-dot"></span>
+                                            <?= htmlspecialchars($estadoCita) ?>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
 
-            <!-- Accesos Rápidos -->
-            <div class="panel flex-grow-1">
-                <div class="panel-head">
-                    <h2 class="panel-title">Accesos Directos</h2>
+    <!-- Columna Derecha: Recaudación y Acciones -->
+    <div class="col-lg-4">
+        <div class="d-flex flex-column gap-3 h-100">
+            <!-- Arqueo Rápido de Caja -->
+            <div class="saas-card mb-0">
+                <div class="saas-card-head">
+                    <h2 class="saas-card-title">
+                        <i class="bi bi-wallet2 text-primary"></i>
+                        <span>Medios de Pago</span>
+                    </h2>
+                    <a href="index.php?c=pagos&a=index" class="text-muted small text-decoration-none">Ver Caja &rarr;</a>
                 </div>
-                <div class="quick-links">
-                    <a href="index.php?c=citas&a=index&crear=1" class="quick-link">
-                        <div>
-                            <b>Agendar Nueva Cita</b>
-                            <span>Cabina, horario y terapeuta</span>
+                <div class="saas-card-body">
+                    <?php if (empty($resumenPagos)): ?>
+                        <p class="text-muted small mb-0 text-center py-2">No hay cobros liquidados hoy.</p>
+                    <?php else: ?>
+                        <div class="d-flex flex-column gap-2">
+                            <?php foreach ($resumenPagos as $p): ?>
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-semibold text-dark small">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem; color: #c5a059;"></i>
+                                            <?= htmlspecialchars($p['tipo_pago']) ?>
+                                        </span>
+                                        <span class="fw-bold text-dark small">C$ <?= number_format((float)$p['total'], 2) ?></span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <?php 
+                                            $totalHoy = (float)($metricas['ingresos_hoy'] > 0 ? $metricas['ingresos_hoy'] : 1);
+                                            $pct = round(((float)$p['total'] / $totalHoy) * 100);
+                                        ?>
+                                        <div class="progress-bar bg-success" style="width: <?= $pct ?>%;"></div>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.72rem;"><?= (int)$p['cantidad'] ?> transacción(es) (<?= $pct ?>% del total)</small>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                    <a href="index.php?c=clientes&a=index" class="quick-link">
-                        <div>
-                            <b>Registrar Cliente</b>
-                            <span>Expediente y preferencias</span>
-                        </div>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                    <a href="index.php?c=pagos&a=index" class="quick-link">
-                        <div>
-                            <b>Cobro en Caja</b>
-                            <span>Emitir recibo y conciliar</span>
-                        </div>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                    <?php if (($_SESSION['rol_nombre'] ?? '') === 'Administrador'): ?>
-                        <a href="index.php?c=reportes&a=index" class="quick-link">
-                            <div>
-                                <b>Reportes y Analítica</b>
-                                <span>Ingresos, citas y servicios</span>
-                            </div>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
                     <?php endif; ?>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Sección Gráfica Analítica -->
-<div class="row g-4 mb-4">
-    <!-- Gráfico de Tendencia de Ingresos -->
-    <div class="col-lg-8">
-        <div class="panel h-100">
-            <div class="panel-head">
-                <h2 class="panel-title">Evolución de Facturación Diaria</h2>
-                <span class="panel-link"><i class="bi bi-currency-dollar me-1"></i>Ingresos</span>
-            </div>
-            <div style="height: 250px; position: relative;">
-                <canvas id="chartIngresos"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráfico de Distribución de Servicios / Categorías -->
-    <div class="col-lg-4">
-        <div class="panel h-100">
-            <div class="panel-head">
-                <h2 class="panel-title">Preferencias por Categoría</h2>
-            </div>
-            <div style="height: 250px; position: relative;">
-                <canvas id="chartCategorias"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Catálogo: Servicios más Solicitados -->
-<div class="row g-3">
-    <div class="col-12">
-        <div class="panel">
-            <div class="panel-head">
-                <h2 class="panel-title">Servicios &amp; Terapias más Solicitadas</h2>
-                <a href="index.php?c=servicios&a=index" class="panel-link">Explorar catálogo completo <i class="bi bi-arrow-right"></i></a>
-            </div>
-
-            <?php if (empty($serviciosPopulares)): ?>
-                <p class="text-muted text-center py-3 mb-0">No hay servicios registrados.</p>
-            <?php else: ?>
-                <div class="rank-list">
-                    <?php $pos = 1; ?>
-                    <?php foreach ($serviciosPopulares as $sp): ?>
-                        <div class="rank-item">
-                            <div class="rank-num"><?= str_pad((string)$pos, 2, '0', STR_PAD_LEFT) ?></div>
-                            <div>
-                                <div class="rank-name"><?= htmlspecialchars($sp['nombre'], ENT_QUOTES, 'UTF-8') ?></div>
-                                <div class="rank-meta">
-                                    <?= htmlspecialchars($sp['categoria_nombre'] ?? 'Terapia', ENT_QUOTES, 'UTF-8') ?> · <i class="bi bi-clock"></i> <?= (int)$sp['duracion_minutos'] ?> min · <?= (int)$sp['total_solicitudes'] ?> agendada(s)
+            <!-- Accesos Directos SaaS -->
+            <div class="saas-card flex-grow-1 mb-0">
+                <div class="saas-card-head">
+                    <h2 class="saas-card-title">
+                        <i class="bi bi-grid text-gold"></i>
+                        <span>Accesos Rápidos</span>
+                    </h2>
+                </div>
+                <div class="saas-card-body p-2">
+                    <div class="d-flex flex-column gap-1">
+                        <a href="index.php?c=citas&a=index&crear=1" class="d-flex align-items-center justify-content-between p-2 rounded-3 text-decoration-none text-dark hover-bg-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="saas-stat-icon is-gold" style="width: 32px; height: 32px; font-size: 0.95rem;">
+                                    <i class="bi bi-calendar-plus"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold small">Agendar Nueva Cita</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">Cabina, horario y terapeuta</div>
                                 </div>
                             </div>
-                            <div class="rank-price">
-                                C$<?= number_format((float)$sp['costo'], 2) ?>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </a>
+                        <a href="index.php?c=clientes&a=index" class="d-flex align-items-center justify-content-between p-2 rounded-3 text-decoration-none text-dark hover-bg-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="saas-stat-icon is-blue" style="width: 32px; height: 32px; font-size: 0.95rem;">
+                                    <i class="bi bi-person-plus"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold small">Registrar Paciente</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">Expediente y preferencias</div>
+                                </div>
                             </div>
-                        </div>
-                        <?php $pos++; ?>
-                    <?php endforeach; ?>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </a>
+                        <a href="index.php?c=pagos&a=index" class="d-flex align-items-center justify-content-between p-2 rounded-3 text-decoration-none text-dark hover-bg-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="saas-stat-icon" style="width: 32px; height: 32px; font-size: 0.95rem;">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold small">Caja & Cobros</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">Arqueo y comprobantes</div>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted small"></i>
+                        </a>
+                        <?php if (($_SESSION['rol_nombre'] ?? '') === 'Administrador'): ?>
+                            <a href="index.php?c=reportes&a=index" class="d-flex align-items-center justify-content-between p-2 rounded-3 text-decoration-none text-dark hover-bg-light">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="saas-stat-icon is-purple" style="width: 32px; height: 32px; font-size: 0.95rem;">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small">Reportes Ejecutivos</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Análisis de facturación y PDF</div>
+                                    </div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            <?php endif; ?>
+            </div>
         </div>
+    </div>
+</div>
+
+<!-- Gráficos Analíticos -->
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="saas-card h-100 mb-0">
+            <div class="saas-card-head">
+                <h2 class="saas-card-title">
+                    <i class="bi bi-graph-up text-primary"></i>
+                    <span>Evolución de Recaudación Diaria</span>
+                </h2>
+                <span class="badge bg-light text-muted border font-semibold">Últimos días</span>
+            </div>
+            <div class="saas-card-body">
+                <div style="height: 210px; position: relative;">
+                    <canvas id="chartIngresos"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="saas-card h-100 mb-0">
+            <div class="saas-card-head">
+                <h2 class="saas-card-title">
+                    <i class="bi bi-pie-chart text-gold"></i>
+                    <span>Demanda por Categoría</span>
+                </h2>
+            </div>
+            <div class="saas-card-body">
+                <div style="height: 210px; position: relative;">
+                    <canvas id="chartCategorias"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Catálogo: Servicios Más Solicitados -->
+<div class="saas-card mb-0">
+    <div class="saas-card-head">
+        <h2 class="saas-card-title">
+            <i class="bi bi-trophy text-gold"></i>
+            <span>Tratamientos Más Solicitados</span>
+        </h2>
+        <a href="index.php?c=servicios&a=index" class="btn btn-sm btn-outline-secondary px-3 py-1 font-semibold" style="font-size: 0.78rem;">
+            Catálogo completo <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+    <div class="saas-card-body p-0">
+        <?php if (empty($serviciosPopulares)): ?>
+            <p class="text-muted text-center py-4 mb-0">No hay registros de solicitudes aún.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="saas-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">RANK</th>
+                            <th>TRATAMIENTO / SERVICIO</th>
+                            <th>CATEGORÍA</th>
+                            <th>DURACIÓN</th>
+                            <th>CITAS REALIZADAS</th>
+                            <th class="text-end">PRECIO BASE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $pos = 1; ?>
+                        <?php foreach ($serviciosPopulares as $sp): ?>
+                            <tr>
+                                <td>
+                                    <span class="badge <?= $pos === 1 ? 'bg-warning text-dark' : 'bg-light text-muted border' ?> rounded-circle p-2" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">
+                                        <?= $pos ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark"><?= htmlspecialchars($sp['nombre'], ENT_QUOTES, 'UTF-8') ?></div>
+                                </td>
+                                <td>
+                                    <span class="saas-badge saas-badge-neutral"><?= htmlspecialchars($sp['categoria_nombre'] ?? 'Terapia', ENT_QUOTES, 'UTF-8') ?></span>
+                                </td>
+                                <td>
+                                    <span class="text-muted"><i class="bi bi-clock me-1"></i><?= (int)$sp['duracion_minutos'] ?> min</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark"><?= (int)$sp['total_solicitudes'] ?></span> <span class="text-muted small">citas</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="fw-bold fs-6 text-dark">C$ <?= number_format((float)$sp['costo'], 2) ?></span>
+                                </td>
+                            </tr>
+                            <?php $pos++; ?>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

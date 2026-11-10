@@ -1,19 +1,29 @@
-<!-- Encabezado Editorial -->
-<div class="page-head">
-    <div>
-        <span class="kicker">Operación diaria</span>
-        <h1 class="display-title">
-            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' ? 'Mis Citas <em>& Agenda Asignada</em>' : 'Agenda <em>& Citas</em>' ?>
+<?php
+// Contadores para métricas SaaS
+$totalCitas = count($citas ?? []);
+$citasConfirmadas = count(array_filter($citas ?? [], fn($c) => $c['estado'] === 'Confirmada'));
+$citasPendientes  = count(array_filter($citas ?? [], fn($c) => $c['estado'] === 'Pendiente'));
+$citasCompletadas = count(array_filter($citas ?? [], fn($c) => $c['estado'] === 'Completada'));
+?>
+
+<!-- Encabezado de Página SaaS -->
+<div class="saas-page-header">
+    <div class="saas-header-info">
+        <span class="saas-breadcrumb"><i class="bi bi-calendar3 me-1"></i>Operación Diaria</span>
+        <h1 class="saas-title">
+            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' ? 'Mis Citas & Agenda Asignada' : 'Agenda & Citas Terapéuticas' ?>
         </h1>
-        <?php if (($_SESSION['rol_nombre'] ?? '') === 'Terapeuta'): ?>
-            <p class="page-lede">Tus sesiones de tratamiento programadas y pacientes asignados.</p>
-        <?php endif; ?>
+        <p class="saas-subtitle">
+            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
+                ? 'Control de sesiones programadas, pacientes asignados y registro de estados de atención.' 
+                : 'Programación centralizada de cabinas, terapeutas disponibles y estado de atenciones en tiempo real.' ?>
+        </p>
     </div>
     <?php if (in_array($_SESSION['rol_nombre'] ?? '', ['Administrador', 'Recepcionista'])): ?>
-    <div class="page-head-actions">
-        <button class="btn btn-spa-primary btn-sm px-3 d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalNuevaCita">
-            <i class="bi bi-plus-circle-fill"></i>
-            <span>Agendar Cita</span>
+    <div class="saas-header-actions">
+        <button class="btn-saas-primary" data-bs-toggle="modal" data-bs-target="#modalNuevaCita">
+            <i class="bi bi-calendar-plus"></i>
+            <span>Agendar Nueva Cita</span>
         </button>
     </div>
     <?php endif; ?>
@@ -28,105 +38,220 @@
     <?php unset($_SESSION['mensaje'], $_SESSION['mensaje_tipo']); ?>
 <?php endif; ?>
 
-<!-- Tabla Dinámica de Citas -->
-<div class="spa-card p-4">
-    <div class="table-responsive-none">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #556b61;">
-                    <th>PACIENTE & CITAS</th>
-                    <th>TERAPEUTA</th>
-                    <th>FECHA & HORARIO</th>
-                    <th>TOTAL</th>
-                    <th>ESTADO</th>
-                    <th class="text-end">ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody style="font-size: 0.88rem;">
-                <?php if (empty($citas)): ?>
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
-                            <i class="bi bi-calendar-x fs-3 d-block mb-1 text-muted"></i>
-                            <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
-                                ? 'No tienes citas de tratamiento asignadas por el momento.' 
-                                : 'No hay citas registradas en la base de datos.' ?>
-                        </td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($citas as $c): ?>
-                        <tr>
-                            <td>
-                                <div class="fw-bold text-dark">
-                                    <span class="text-muted fw-normal me-1">#<?= $c['id'] ?></span>
-                                    <?= htmlspecialchars($c['cliente_nombre']) ?>
-                                </div>
-                                <?php if (!empty($c['observaciones'])): ?>
-                                    <small class="text-muted d-block text-truncate" style="max-width: 220px;" title="<?= htmlspecialchars($c['observaciones']) ?>">
-                                        <i class="bi bi-chat-left-text me-1"></i><?= htmlspecialchars($c['observaciones']) ?>
-                                    </small>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <span class="text-dark fw-medium">
-                                    <i class="bi bi-person-badge text-primary me-1"></i><?= htmlspecialchars($c['terapeuta_nombre'] ?? $c['empleado_nombre'] ?? 'Sin Asignar') ?>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="fw-semibold text-dark mb-0">
-                                    <i class="bi bi-calendar3 text-warning me-1"></i><?= date('d/m/Y', strtotime($c['fecha'])) ?>
-                                </div>
-                                <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i><?= date('h:i A', strtotime($c['hora_inicio'])) ?> - <?= date('h:i A', strtotime($c['hora_fin'])) ?>
-                                </small>
-                            </td>
-                            <td>
-                                <span class="fw-bold fs-6" style="font-family: var(--font-serif); color: var(--spa-primary);">
-                                    C$<?= number_format($c['total'], 2) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <?php
-                                    $estadoClass = match($c['estado']) {
-                                        'Confirmada' => 'bg-success-subtle text-success border border-success-subtle',
-                                        'Pendiente'  => 'bg-warning-subtle text-warning border border-warning-subtle',
-                                        'Completada' => 'bg-primary-subtle text-primary border border-primary-subtle',
-                                        'Cancelada'  => 'bg-danger-subtle text-danger border border-danger-subtle',
-                                        default      => 'bg-secondary-subtle text-secondary'
-                                    };
-                                ?>
-                                <span class="badge <?= $estadoClass ?> rounded-pill px-2 py-1">
-                                    <?= htmlspecialchars($c['estado']) ?>
-                                </span>
-                            </td>
-                            <td class="text-end">
-                                <?php if ($c['estado'] !== 'Cancelada' && $c['estado'] !== 'Completada'): ?>
-                                    <div class="btn-group btn-group-sm">
-                                        <?php if ($c['estado'] === 'Pendiente'): ?>
-                                            <button class="btn btn-outline-success py-1 px-2" title="Confirmar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Confirmada')">
-                                                <i class="bi bi-play-fill"></i> <span class="d-none d-lg-inline ms-1">Confirmar</span>
-                                            </button>
-                                        <?php elseif ($c['estado'] === 'Confirmada'): ?>
-                                            <button class="btn btn-outline-primary py-1 px-2" title="Marcar Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
-                                                <i class="bi bi-check2-all"></i> <span class="d-none d-lg-inline ms-1">Completar</span>
-                                            </button>
-                                        <?php endif; ?>
-                                        <?php if (($_SESSION['rol_nombre'] ?? '') !== 'Terapeuta'): ?>
-                                            <button class="btn btn-outline-danger py-1 px-2" title="Cancelar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Cancelada')">
-                                                <i class="bi bi-x-lg"></i> <span class="d-none d-lg-inline ms-1">Cancelar</span>
-                                            </button>
-                                        <?php endif; ?>
-                                    </div>
-                                <?php else: ?>
-                                    <span class="badge bg-light text-muted border"><i class="bi bi-lock me-1"></i>Finalizada</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+<!-- Grid de KPIs / Estadísticas SaaS -->
+<div class="saas-stats-grid">
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Total en Agenda</span>
+            <div class="saas-stat-icon">
+                <i class="bi bi-calendar3"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $totalCitas ?></div>
+        <div class="saas-stat-meta">
+            <span class="text-muted">Citas registradas</span>
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Confirmadas</span>
+            <div class="saas-stat-icon is-blue">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $citasConfirmadas ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-success py-0 px-2">Listas para atención</span>
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Pendientes</span>
+            <div class="saas-stat-icon is-gold">
+                <i class="bi bi-clock-history"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $citasPendientes ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-warning py-0 px-2">Requieren confirmación</span>
+        </div>
+    </div>
+
+    <div class="saas-stat-card">
+        <div class="saas-stat-top">
+            <span class="saas-stat-label">Completadas</span>
+            <div class="saas-stat-icon is-purple">
+                <i class="bi bi-patch-check"></i>
+            </div>
+        </div>
+        <div class="saas-stat-value"><?= $citasCompletadas ?></div>
+        <div class="saas-stat-meta">
+            <span class="saas-badge saas-badge-info py-0 px-2">Servicios finalizados</span>
+        </div>
     </div>
 </div>
+
+<!-- Tarjeta Contenedor con Tabla de Citas -->
+<div class="saas-card">
+    <div class="saas-card-head">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h2 class="saas-card-title me-3">
+                <i class="bi bi-list-task text-primary"></i>
+                <span>Listado de Citas</span>
+            </h2>
+            <!-- Filtros Segmentados por Estado -->
+            <div class="saas-filter-tabs">
+                <button type="button" class="saas-tab-btn is-active" onclick="filtrarCitasPorEstado('todos', this)">Todas</button>
+                <button type="button" class="saas-tab-btn" onclick="filtrarCitasPorEstado('Pendiente', this)">Pendientes</button>
+                <button type="button" class="saas-tab-btn" onclick="filtrarCitasPorEstado('Confirmada', this)">Confirmadas</button>
+                <button type="button" class="saas-tab-btn" onclick="filtrarCitasPorEstado('Completada', this)">Completadas</button>
+                <button type="button" class="saas-tab-btn" onclick="filtrarCitasPorEstado('Cancelada', this)">Canceladas</button>
+            </div>
+        </div>
+
+        <!-- Buscador integrado -->
+        <div class="saas-search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="busquedaCitaInput" class="saas-search-input" placeholder="Buscar por paciente, terapeuta, ID..." onkeyup="filtrarTablaCitas()">
+        </div>
+    </div>
+
+    <div class="saas-card-body p-0">
+        <div class="table-responsive">
+            <table class="saas-table" id="tablaCitas">
+                <thead>
+                    <tr>
+                        <th>PACIENTE & CITAS</th>
+                        <th>TERAPEUTA ASIGNADO</th>
+                        <th>FECHA & HORARIO</th>
+                        <th>MONTO TOTAL</th>
+                        <th>ESTADO</th>
+                        <th class="text-end">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($citas)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x fs-1 text-muted d-block mb-2"></i>
+                                <?= ($_SESSION['rol_nombre'] ?? '') === 'Terapeuta' 
+                                    ? 'No tienes citas de tratamiento asignadas por el momento.' 
+                                    : 'No hay citas registradas en la base de datos.' ?>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($citas as $c): ?>
+                            <?php
+                                $estado = $c['estado'];
+                                $badgeClass = match($estado) {
+                                    'Confirmada' => 'saas-badge-success',
+                                    'Pendiente'  => 'saas-badge-warning',
+                                    'Completada' => 'saas-badge-info',
+                                    'Cancelada'  => 'saas-badge-danger',
+                                    default      => 'saas-badge-neutral'
+                                };
+                                $initialsCli = strtoupper(mb_substr($c['cliente_nombre'] ?? 'P', 0, 1, 'UTF-8'));
+                            ?>
+                            <tr class="fila-cita" data-estado="<?= htmlspecialchars($estado) ?>">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="saas-avatar is-primary"><?= $initialsCli ?></span>
+                                        <div>
+                                            <div class="fw-bold text-dark">
+                                                <span class="text-muted fw-normal me-1">#<?= $c['id'] ?></span>
+                                                <?= htmlspecialchars($c['cliente_nombre']) ?>
+                                            </div>
+                                            <?php if (!empty($c['observaciones'])): ?>
+                                                <small class="text-muted d-block text-truncate" style="max-width: 240px;" title="<?= htmlspecialchars($c['observaciones']) ?>">
+                                                    <i class="bi bi-chat-left-text me-1"></i><?= htmlspecialchars($c['observaciones']) ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <i class="bi bi-person-badge text-primary me-1"></i>
+                                        <span class="text-dark fw-medium"><?= htmlspecialchars($c['terapeuta_nombre'] ?? $c['empleado_nombre'] ?? 'Sin Asignar') ?></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">
+                                        <i class="bi bi-calendar3 me-1 text-muted"></i><?= date('d/m/Y', strtotime($c['fecha'])) ?>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i><?= date('h:i A', strtotime($c['hora_inicio'])) ?> - <?= date('h:i A', strtotime($c['hora_fin'])) ?>
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark fs-6">
+                                        C$ <?= number_format($c['total'], 2) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="saas-badge <?= $badgeClass ?>">
+                                        <span class="saas-badge-dot"></span>
+                                        <?= htmlspecialchars($estado) ?>
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <?php if ($c['estado'] !== 'Cancelada' && $c['estado'] !== 'Completada'): ?>
+                                        <div class="btn-group btn-group-sm">
+                                            <?php if ($c['estado'] === 'Pendiente'): ?>
+                                                <button class="btn btn-sm btn-outline-success py-1 px-2" title="Confirmar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Confirmada')">
+                                                    <i class="bi bi-play-fill"></i> <span class="d-none d-lg-inline ms-1">Confirmar</span>
+                                                </button>
+                                            <?php elseif ($c['estado'] === 'Confirmada'): ?>
+                                                <button class="btn btn-sm btn-outline-primary py-1 px-2" title="Marcar Completada" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Completada')">
+                                                    <i class="bi bi-check2-all"></i> <span class="d-none d-lg-inline ms-1">Completar</span>
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if (($_SESSION['rol_nombre'] ?? '') !== 'Terapeuta'): ?>
+                                                <button class="btn btn-sm btn-outline-danger py-1 px-2" title="Cancelar Cita" onclick="cambiarEstadoCita(<?= $c['id'] ?>, 'Cancelada')">
+                                                    <i class="bi bi-x-lg"></i> <span class="d-none d-lg-inline ms-1">Cancelar</span>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="saas-badge saas-badge-neutral"><i class="bi bi-lock me-1"></i>Finalizada</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filtrarTablaCitas() {
+    const term = (document.getElementById('busquedaCitaInput')?.value || '').toLowerCase();
+    const rows = document.querySelectorAll('.fila-cita');
+    rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(term) ? '' : 'none';
+    });
+}
+
+function filtrarCitasPorEstado(estado, btn) {
+    document.querySelectorAll('.saas-tab-btn').forEach(b => b.classList.remove('is-active'));
+    if (btn) btn.classList.add('is-active');
+
+    const rows = document.querySelectorAll('.fila-cita');
+    rows.forEach(r => {
+        const rEstado = r.getAttribute('data-estado');
+        if (estado === 'todos' || rEstado === estado) {
+            r.style.display = '';
+        } else {
+            r.style.display = 'none';
+        }
+    });
+}
+</script>
 
 <?php
 $horaActual = (int)date('H');

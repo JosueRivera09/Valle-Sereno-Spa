@@ -47,16 +47,16 @@ $iconoParaServicio = function (string $nombre): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?></title>
-    <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+    <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Estilo Armónico Personalizado Valle Sereno -->
-    <link rel="stylesheet" href="public/css/spa-theme.css?v=2.5">
+    <link rel="stylesheet" href="public/css/spa-theme.css?v=3.2">
 </head>
 <body class="login-body">
 
@@ -71,21 +71,22 @@ $iconoParaServicio = function (string $nombre): string {
                 <div class="col-lg-5 login-brand-panel">
                     <div>
                         <span class="brand-badge">
-                            <i class="bi bi-flower1"></i> Santuario & Bienestar
+                            <i class="bi bi-flower1"></i> Plataforma SaaS &amp; Wellness
                         </span>
-                        <h1 class="brand-title">Valle <span>Sereno</span></h1>
+                        <h1 class="brand-title mt-3" style="font-weight: 800; letter-spacing: -0.03em;">Valle <span>Sereno</span></h1>
                         <p class="brand-lead">
-                            Sistema integral de gestión de bienestar, cabinas de relajación, agenda terapéutica y experiencias sensoriales de alta gama.
+                            Sistema empresarial de gestión de bienestar, cabinas de relajación, agenda terapéutica, control de ingresos y expedientes clínicos.
                         </p>
                     </div>
 
                     <!-- Carrusel Armónico de Servicios Más Vendidos -->
                     <?php if (!empty($serviciosDestacados)): ?>
                     <div class="spa-services-carousel">
-                        <div class="mb-2">
-                            <small class="text-uppercase text-light" style="font-size:0.72rem; letter-spacing:1px; color:#d2dec3 !important;">
-                                <i class="bi bi-stars text-warning me-1"></i> Experiencias Más Solicitadas
+                        <div class="mb-2 d-flex align-items-center justify-content-between">
+                            <small class="text-uppercase fw-bold" style="font-size:0.68rem; letter-spacing:1px; color:#d2dec3;">
+                                <i class="bi bi-stars text-warning me-1"></i> Experiencias Destacadas
                             </small>
+                            <span class="badge rounded-pill" style="background: rgba(255,255,255,0.12); font-size: 0.65rem;">Catálogo Activo</span>
                         </div>
 
                         <div id="spaServicesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3500">
@@ -131,12 +132,15 @@ $iconoParaServicio = function (string $nombre): string {
 
                 <!-- Panel Formulario de Login -->
                 <div class="col-lg-7 login-form-panel d-flex flex-column justify-content-center">
-                    <div class="mb-3">
-                        <h2 class="h4 fw-bold mb-1" style="font-family: var(--font-serif); color: var(--spa-primary);">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center gap-2 px-2 py-1 rounded-pill mb-2" style="background: #f0fdf4; border: 1px solid #bbf7d0; font-size: 0.72rem; font-weight: 600; color: #166534;">
+                            <i class="bi bi-shield-lock-fill"></i> Acceso Corporativo Seguro
+                        </div>
+                        <h2 class="h4 fw-bold mb-1" style="color: #0f172a; letter-spacing: -0.02em;">
                             Bienvenido de nuevo
                         </h2>
                         <p class="text-muted small mb-0">
-                            Ingrese sus credenciales para acceder a su espacio de trabajo.
+                            Ingrese sus credenciales institucionales para acceder a su estación de trabajo.
                         </p>
                     </div>
 
@@ -165,20 +169,20 @@ $iconoParaServicio = function (string $nombre): string {
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                         <!-- Campo Correo institucional -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Correo Institucional</label>
+                            <label for="email" class="form-label">Correo o Usuario Institucional</label>
                             <div class="input-icon-wrapper">
                                 <input type="email" 
                                        class="form-control form-control-spa" 
                                        id="email" 
                                        name="email" 
-                                       placeholder="correo@vallesereno.com" 
+                                       placeholder="correo@vallesereno.com o usuario" 
                                        required 
                                        autocomplete="username"
                                        spellcheck="false">
                                 <i class="bi bi-envelope prefix-icon"></i>
                             </div>
                             <small class="text-muted d-block mt-1" style="font-size: 0.74rem;">
-                                Personal interno: también puede ingresar con su usuario asignado (ej. nombre.apellido).
+                                Personal interno: puede ingresar con su correo o alias asignado (ej. nombre.apellido).
                             </small>
                             <div class="invalid-feedback d-block mt-1" id="emailError" style="display:none !important; font-size: 0.8rem;"></div>
                         </div>
@@ -187,7 +191,7 @@ $iconoParaServicio = function (string $nombre): string {
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label for="password" class="form-label mb-0">Contraseña</label>
-                                <a href="javascript:void(0)" onclick="mostrarAlertaSoporte()" class="text-decoration-none small" style="color: var(--spa-secondary); font-weight:500;">
+                                <a href="javascript:void(0)" onclick="mostrarAlertaSoporte()" class="text-decoration-none small" style="color: var(--spa-secondary); font-weight:600;">
                                     ¿Olvidó su contraseña?
                                 </a>
                             </div>
@@ -208,14 +212,14 @@ $iconoParaServicio = function (string $nombre): string {
                         </div>
 
                         <!-- Checkbox Recuérdame -->
-                        <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
                                 <label class="form-check-label text-muted small" for="rememberMe">
                                     Recordar este dispositivo
                                 </label>
                             </div>
-                            <span class="badge bg-light text-secondary border">Seguridad Activa</span>
+                            <span class="saas-badge saas-badge-neutral"><i class="bi bi-lock-fill me-1"></i>BCRYPT + CSRF</span>
                         </div>
 
                         <!-- Botón de Envío -->
@@ -225,7 +229,7 @@ $iconoParaServicio = function (string $nombre): string {
                         </button>
                     </form>
 
-                    <div class="mt-3 pt-2 text-center text-muted small">
+                    <div class="mt-4 pt-2 border-top text-center text-muted small">
                         ¿Necesita asistencia con sus credenciales? 
                         <a href="javascript:void(0)" onclick="mostrarAlertaSoporte()" class="fw-semibold text-decoration-none" style="color: var(--spa-primary);">
                             Contactar Administrador
